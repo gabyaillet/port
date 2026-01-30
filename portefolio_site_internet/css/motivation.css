@@ -1,0 +1,73 @@
+/* --- CONFIGURATION --- */
+.page-motivation {
+    background-color: var(--couleur-fond);
+    overflow-y: auto;
+}
+
+.content-wrapper {
+    max-width: 800px; /* Plus étroit pour simuler une feuille A4 */
+    width: 90%;
+    margin: 0 auto;
+    padding: 80px 0;
+}
+
+/* --- LE PAPIER DE LA LETTRE --- */
+.letter-container {
+    background: white;
+    padding: 60px;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    line-height: 1.8;
+}
+
+.letter-header {
+    margin-bottom: 50px;
+    border-bottom: 2px solid var(--couleur-fond);
+    padding-bottom: 20px;
+}
+
+.sender-info {
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.sender-info strong {
+    color: var(--couleur-accent);
+    font-size: 1.2rem;
+}
+
+.letter-subject {
+    margin: 40px 0;
+    font-size: 1.1rem;
+    color: var(--couleur-texte-sombre);
+}
+
+.letter-content p {
+    margin-bottom: 20px;
+    text-align: justify;
+}
+
+.letter-footer {
+    margin-top: 50px;
+    text-align: right;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: var(--couleur-accent);
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+    .letter-container {
+        padding: 30px;
+    }
+    
+    .letter-content p {
+        text-align: left;
+    }
+
+    .page-header h2 {
+        font-size: 2.5rem;
+    }
+}
