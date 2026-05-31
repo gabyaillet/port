@@ -1,0 +1,138 @@
+/* --- STRUCTURE GLOBALE (SANS SCROLL) --- */
+.page-projet {
+    background-color: var(--couleur-fond);
+    height: 100vh;
+    overflow: hidden; /* Empêche le défilement vertical complet du site */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 60px 4% 40px 4%;
+    box-sizing: border-box;
+}
+
+.slider-header {
+    margin-bottom: 20px;
+}
+
+/* --- ZONE DU SLIDER HORIZONTAL --- */
+.slider-wrapper {
+    width: 100%;
+    overflow: hidden; /* Cache ce qui dépasse sur les côtés */
+    padding: 20px 0;
+}
+
+.slider-track {
+    display: flex;
+    gap: 30px; /* Espace fixe entre les projets */
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); /* Transition ultra-fluide */
+    will-change: transform;
+}
+
+/* --- LES CARTES HORIZONTALES --- */
+.slider-card {
+    flex: 0 0 400px; /* Largeur fixe de chaque carte, elles ne se déforment pas */
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 380px; /* Hauteur harmonisée */
+}
+
+/* Grand numéro en arrière-plan */
+.card-num {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    font-size: 3rem;
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.03);
+}
+
+.card-tag {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--couleur-accent);
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.slider-card h3 {
+    font-size: 1.6rem;
+    color: var(--couleur-texte-sombre);
+    margin: 0 0 15px 0;
+}
+
+.slider-card p {
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0 0 30px 0;
+    flex-grow: 1; /* Le texte occupe tout l'espace libre au centre */
+}
+
+/* Compétences / Badges */
+.card-skills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.card-skills span {
+    background: #f7f9f7;
+    color: #555;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* --- BOUTONS DE NAVIGATION (EN BAS) --- */
+.slider-controls {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.ctrl-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    color: var(--couleur-texte-sombre);
+}
+
+.ctrl-btn:hover {
+    background: var(--couleur-accent);
+    border-color: var(--couleur-accent);
+    color: white;
+    box-shadow: 0 5px 15px rgba(115, 138, 110, 0.3);
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+    .slider-card {
+        flex: 0 0 290px; /* Cartes légèrement plus étroites sur mobile */
+        padding: 30px;
+        height: 350px;
+    }
+    .page-projet {
+        height: auto;
+        overflow-y: auto;
+        padding-top: 80px;
+    }
+}

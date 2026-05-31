@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projets | AILLET Gabriel</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/projet.css">
+</head>
+<body>
+
+    <header class="sidebar">
+        <div class="sidebar-top">
+            <h1 class="logo">AILLET<br>Gabriel</h1>
+        </div>
+        <nav class="sidebar-nav">
+            <ul class="nav-links">
+                <li><a href="index.html">ACCUEIL</a></li>
+                <li><a href="#" class="active">PROJET</a></li>
+                <li><a href="comp.html">COMPÉTENCES</a></li>
+                <li><a href="experience.html">EXPÉRIENCE</a></li>
+                <li><a href="motivation.html">MOTIVATION</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-bottom">
+            <a href="Aillet gabriel.pdf" class="btn-cv" target="_blank">CV</a>
+        </div>
+    </header>
+
+    <main class="main-content page-projet">
+        <div class="slider-header">
+            <p class="subtitle">PORTFOLIO</p>
+            <h2>Mes <span>Projets d'informatique</span></h2>
+        </div>
+
+        <!-- CONTENEUR DU SLIDER HORIZONTAL -->
+        <div class="slider-wrapper">
+            <div class="slider-track" id="sliderTrack">
+                
+                <!-- Projet 1 -->
+                <div class="slider-card">
+                    <div class="card-num">01</div>
+                    <span class="card-tag">Web Design</span>
+                    <h3>Site Web PPP</h3>
+                    <p>conception et développement de ce portfolio numérique de A à Z. Intégration d'une structure CSS et HTML solide réalisée en fonction de mes goûts pour avoir un résultat fin et épuré</p></conception>
+                    <div class="card-skills">
+                        <span>HTML5</span><span>CSS3</span><span>Vanilla JS</span>
+                    </div>
+                </div>
+
+                <!-- Projet 2 -->
+                <div class="slider-card">
+                    <div class="card-num">02</div>
+                    <span class="card-tag">Générateur de particule</span>
+                    <h3>Projet SAE</h3>
+                    <p>Création et manipulation d'un générateur de particules créé en GO dans le but d'apprendre à manipuler le langage. Le générateur était géré depuis une interface dans le cmd</p>
+                    <div class="card-skills">
+                        <span>Go</span>
+                    </div>
+                </div>
+
+                <!-- Projet 3 -->
+                <div class="slider-card">
+                    <div class="card-num">03</div>
+                    <span class="card-tag">Jeu vidéo</span>
+                    <h3>Projet SAE</h3>
+                    <p>Création en équipe de 4 d'un jeu vidéo avec une interface dans le CMD. Cela a été codé en Python car le but final était de pouvoir apprendre l'économie grâce au jeu vidéo</p>
+                    <div class="card-skills">
+                        <span>Python</span>
+                    </div>
+                </div>
+
+                
+
+            </div>
+        </div>
+
+        <!-- COMMANDES DU SLIDER -->
+        <div class="slider-controls">
+            <button class="ctrl-btn" onclick="moveSlider('left')">←</button>
+            <button class="ctrl-btn" onclick="moveSlider('right')">→</button>
+        </div>
+    </main>
+
+    <!-- Petit script ultra-léger pour gérer les mouvements -->
+    <script>
+        const track = document.getElementById('sliderTrack');
+        let position = 0;
+
+        function moveSlider(direction) {
+            const cardWidth = document.querySelector('.slider-card').offsetWidth + 30; // Largeur + gap
+            const maxScroll = track.scrollWidth - track.parentElement.offsetWidth;
+
+            if (direction === 'right') {
+                position = Math.min(position + cardWidth, maxScroll);
+            } else {
+                position = Math.max(position - cardWidth, 0);
+            }
+
+            track.style.transform = `translateX(-${position}px)`;
+        }
+    </script>
+</body>
+</html>
