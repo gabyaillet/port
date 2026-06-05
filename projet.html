@@ -33,72 +33,77 @@
             <h2>Mes <span>Projets d'informatique</span></h2>
         </div>
 
-        <!-- CONTENEUR DU SLIDER HORIZONTAL -->
         <div class="slider-wrapper">
             <div class="slider-track" id="sliderTrack">
                 
-                <!-- Projet 1 -->
                 <div class="slider-card">
                     <div class="card-num">01</div>
                     <span class="card-tag">Web Design</span>
                     <h3>Site Web PPP</h3>
-                    <p>conception et développement de ce portfolio numérique de A à Z. Intégration d'une structure CSS et HTML solide réalisée en fonction de mes goûts pour avoir un résultat fin et épuré</p></conception>
+                    <p>Conception et développement de ce portfolio numérique de A à Z. Intégration d'une structure CSS et HTML solide réalisée en fonction de mes goûts pour avoir un résultat fin et épuré.</p>
                     <div class="card-skills">
                         <span>HTML5</span><span>CSS3</span><span>Vanilla JS</span>
                     </div>
                 </div>
 
-                <!-- Projet 2 -->
                 <div class="slider-card">
                     <div class="card-num">02</div>
                     <span class="card-tag">Générateur de particule</span>
                     <h3>Projet SAE</h3>
-                    <p>Création et manipulation d'un générateur de particules créé en GO dans le but d'apprendre à manipuler le langage. Le générateur était géré depuis une interface dans le cmd</p>
+                    <p>Création et manipulation d'un générateur de particules créé en GO dans le but d'apprendre à manipuler le langage. Le générateur était géré depuis une interface dans le cmd.</p>
                     <div class="card-skills">
                         <span>Go</span>
                     </div>
                 </div>
 
-                <!-- Projet 3 -->
                 <div class="slider-card">
                     <div class="card-num">03</div>
                     <span class="card-tag">Jeu vidéo</span>
                     <h3>Projet SAE</h3>
-                    <p>Création en équipe de 4 d'un jeu vidéo avec une interface dans le CMD. Cela a été codé en Python car le but final était de pouvoir apprendre l'économie grâce au jeu vidéo</p>
+                    <p>Création en équipe de 4 d'un jeu vidéo avec une interface dans le CMD. Cela a été codé en Python car le but final était de pouvoir apprendre l'économie grâce au jeu vidéo.</p>
                     <div class="card-skills">
                         <span>Python</span>
                     </div>
                 </div>
 
-                
-
             </div>
         </div>
 
-        <!-- COMMANDES DU SLIDER -->
         <div class="slider-controls">
             <button class="ctrl-btn" onclick="moveSlider('left')">←</button>
             <button class="ctrl-btn" onclick="moveSlider('right')">→</button>
         </div>
     </main>
 
-    <!-- Petit script ultra-léger pour gérer les mouvements -->
     <script>
         const track = document.getElementById('sliderTrack');
         let position = 0;
 
         function moveSlider(direction) {
-            const cardWidth = document.querySelector('.slider-card').offsetWidth + 30; // Largeur + gap
+            const card = document.querySelector('.slider-card');
+            if (!card) return;
+
+            // Récupère dynamiquement la largeur de la carte + son gap (issu du CSS)
+            const cardWidth = card.getBoundingClientRect().width;
+            const gap = parseFloat(window.getComputedStyle(track).gap) || 0;
+            const step = cardWidth + gap;
+
             const maxScroll = track.scrollWidth - track.parentElement.offsetWidth;
 
             if (direction === 'right') {
-                position = Math.min(position + cardWidth, maxScroll);
+                position = Math.min(position + step, maxScroll);
             } else {
-                position = Math.max(position - cardWidth, 0);
+                position = Math.max(position - step, 0);
             }
 
             track.style.transform = `translateX(-${position}px)`;
         }
+
+        // Réinitialise la position si l'utilisateur change l'orientation ou la taille de l'écran
+        window.addEventListener('resize', () => {
+            position = 0;
+            track.style.transform = `translateX(0px)`;
+        });
     </script>
 </body>
 </html>

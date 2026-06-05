@@ -1,13 +1,20 @@
 /* --- STRUCTURE GLOBALE (SANS SCROLL) --- */
 .page-projet {
-    background-color: var(--couleur-fond);
+    background-color: var(--couleur-fond, #f4f4f4);
     height: 100vh;
-    overflow: hidden; /* Empêche le défilement vertical complet du site */
+    overflow: hidden; /* Empêche le défilement vertical complet du site sur grand écran */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     padding: 60px 4% 40px 4%;
     box-sizing: border-box;
+}
+
+/* Ajustement pour laisser la place à la sidebar (si elle est en position fixe sur index.css) */
+@media (min-width: 993px) {
+    .page-projet {
+        margin-left: 260px; /* À ajuster selon la largeur réelle de votre .sidebar */
+    }
 }
 
 .slider-header {
@@ -30,7 +37,7 @@
 
 /* --- LES CARTES HORIZONTALES --- */
 .slider-card {
-    flex: 0 0 400px; /* Largeur fixe de chaque carte, elles ne se déforment pas */
+    flex: 0 0 400px; /* Largeur fixe de chaque carte sur grand écran */
     background: white;
     padding: 40px;
     border-radius: 24px;
@@ -58,7 +65,7 @@
     font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
-    color: var(--couleur-accent);
+    color: var(--couleur-accent, #738a6e);
     letter-spacing: 1.5px;
     margin-bottom: 20px;
     display: block;
@@ -66,7 +73,7 @@
 
 .slider-card h3 {
     font-size: 1.6rem;
-    color: var(--couleur-texte-sombre);
+    color: var(--couleur-texte-sombre, #333);
     margin: 0 0 15px 0;
 }
 
@@ -113,26 +120,77 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    color: var(--couleur-texte-sombre);
+    color: var(--couleur-texte-sombre, #333);
 }
 
 .ctrl-btn:hover {
-    background: var(--couleur-accent);
-    border-color: var(--couleur-accent);
+    background: var(--couleur-accent, #738a6e);
+    border-color: var(--couleur-accent, #738a6e);
     color: white;
     box-shadow: 0 5px 15px rgba(115, 138, 110, 0.3);
 }
 
-/* --- RESPONSIVE --- */
-@media (max-width: 600px) {
-    .slider-card {
-        flex: 0 0 290px; /* Cartes légèrement plus étroites sur mobile */
-        padding: 30px;
-        height: 350px;
-    }
+
+/* --- ADAPTATION RESPONSIVE GLOBALE --- */
+
+/* 1. Tablettes et Mobiles (Remplacement layout Sidebar -> Topbar si géré ici) */
+@media (max-width: 992px) {
     .page-projet {
         height: auto;
-        overflow-y: auto;
-        padding-top: 80px;
+        min-height: 100vh;
+        overflow-y: auto; /* Autorise le scroll vertical global de la page sur mobile */
+        padding: 100px 20px 40px 20px; /* Espace en haut pour ne pas être caché sous une barre de navigation fixe */
+        justify-content: flex-start;
+        gap: 30px;
+    }
+
+    /* Transformation du comportement du slider sur mobile pour permettre le swipe naturel au doigt */
+    .slider-wrapper {
+        overflow-x: auto; /* Permet le scroll horizontal natif tactile */
+        scrollbar-width: none; /* Cache la scrollbar sur Firefox */
+    }
+    
+    .slider-wrapper::-webkit-scrollbar {
+        display: none; /* Cache la scrollbar sur Chrome / Safari */
+    }
+
+    .slider-track {
+        transform: none !important; /* Désactive la translation JS compliquée sur mobile */
+        gap: 20px;
+    }
+
+    .slider-card {
+        flex: 0 0 85vw; /* Les cartes prennent 85% de la largeur de l'écran du mobile */
+        max-width: 360px;
+        height: auto;
+        min-height: 360px;
+        padding: 30px;
+    }
+
+    /* Masque ou adapte les boutons de contrôle devenus inutiles avec le scroll tactile */
+    .slider-controls {
+        display: none; 
+    }
+}
+
+/* 2. Petits Mobiles */
+@media (max-width: 480px) {
+    .page-projet {
+        padding-top: 90px;
+    }
+    
+    .slider-header h2 {
+        font-size: 1.8rem;
+    }
+
+    .slider-card {
+        flex: 0 0 88vw;
+        padding: 20px;
+    }
+    
+    .card-num {
+        top: 20px;
+        right: 20px;
+        font-size: 2.2rem;
     }
 }
