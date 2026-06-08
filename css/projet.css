@@ -48,7 +48,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 380px; /* Hauteur harmonisée */
+    height: 440px; /* Légèrement augmenté (de 380px à 440px) pour intégrer le bouton confortablement */
 }
 
 /* Grand numéro en arrière-plan */
@@ -81,7 +81,7 @@
     color: #666;
     font-size: 0.95rem;
     line-height: 1.6;
-    margin: 0 0 30px 0;
+    margin: 0 0 20px 0;
     flex-grow: 1; /* Le texte occupe tout l'espace libre au centre */
 }
 
@@ -90,6 +90,7 @@
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    margin-bottom: 25px; /* Ajout d'une marge sous les badges */
 }
 
 .card-skills span {
@@ -99,6 +100,27 @@
     border-radius: 50px;
     font-size: 0.75rem;
     font-weight: 600;
+}
+
+/* --- NOUVEAU BOUTON "EN SAVOIR PLUS" (AJOUTÉ) --- */
+.slider-card .btn-more {
+    display: inline-block;
+    align-self: flex-start; /* Aligne le bouton à gauche */
+    color: var(--couleur-accent, #738a6e);
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    padding: 4px 0;
+    border-bottom: 2px solid transparent;
+}
+
+.slider-card .btn-more:hover {
+    color: var(--couleur-texte-sombre, #333);
+    border-bottom-color: var(--couleur-accent, #738a6e);
+    transform: translateX(5px); /* Léger décalage vers la droite au survol comme ton effet parcours */
 }
 
 /* --- BOUTONS DE NAVIGATION (EN BAS) --- */
@@ -133,18 +155,16 @@
 
 /* --- ADAPTATION RESPONSIVE GLOBALE --- */
 
-/* 1. Tablettes et Mobiles (Remplacement layout Sidebar -> Topbar si géré ici) */
 @media (max-width: 992px) {
     .page-projet {
         height: auto;
         min-height: 100vh;
         overflow-y: auto; /* Autorise le scroll vertical global de la page sur mobile */
-        padding: 100px 20px 40px 20px; /* Espace en haut pour ne pas être caché sous une barre de navigation fixe */
+        padding: 100px 20px 40px 20px; 
         justify-content: flex-start;
         gap: 30px;
     }
 
-    /* Transformation du comportement du slider sur mobile pour permettre le swipe naturel au doigt */
     .slider-wrapper {
         overflow-x: auto; /* Permet le scroll horizontal natif tactile */
         scrollbar-width: none; /* Cache la scrollbar sur Firefox */
@@ -163,17 +183,15 @@
         flex: 0 0 85vw; /* Les cartes prennent 85% de la largeur de l'écran du mobile */
         max-width: 360px;
         height: auto;
-        min-height: 360px;
+        min-height: 380px;
         padding: 30px;
     }
 
-    /* Masque ou adapte les boutons de contrôle devenus inutiles avec le scroll tactile */
     .slider-controls {
         display: none; 
     }
 }
 
-/* 2. Petits Mobiles */
 @media (max-width: 480px) {
     .page-projet {
         padding-top: 90px;

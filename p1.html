@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Particules | AILLET Gabriel</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/p1.css">
+</head>
+<body>
+
+    <!-- Arrière-plan animé (Le canvas où les particules vont apparaître) -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Contenu Principal -->
+    <main class="project-detail-container">
+        
+        <!-- Bouton Retour -->
+        <div class="back-nav">
+            <a href="projet.html" class="btn-back">← Retour aux projets</a>
+        </div>
+
+        <article class="project-content">
+            
+            <!-- En-tête du Projet -->
+            <header class="project-header">
+                <span class="project-tag">Projet SAE — 02</span>
+                <h1>Générateur de particules</h1>
+                <div class="project-meta">
+                    <span class="meta-tech">Go</span>
+                    <span class="meta-tech">CLI</span>
+                    <span class="meta-tech">Algorithmique</span>
+                </div>
+            </header>
+
+            <!-- Grille de Description détaillée -->
+            <div class="project-body-grid">
+                
+                <!-- Colonne Principale : Description et Fonctionnement -->
+                <div class="project-main-text">
+                    <section class="project-section">
+                        <h2>Présentation du projet</h2>
+                        <p>
+                            Ce projet a été réalisé dans le cadre d'une Situation d'Apprentissage et d'Évaluation (SAE). 
+                            L'objectif principal était de concevoir et manipuler un générateur de particules entièrement développé en <strong>Go</strong> 
+                            afin d'apprendre les concepts de base du langage, la gestion de la mémoire et la manipulation des structures de données dynamiques.
+                        </p>
+                    </section>
+
+                    <section class="project-section">
+                        <h2>Comment ça fonctionne ?</h2>
+                        <p>
+                            Les particules sont des images qu'on genere depuis le code, pour rentre cela attractive nous avons créé une interface qui permet de géré les particules de pleins de manière differentes 
+                        </p>
+                        <ul>
+                            <li><strong>Position :</strong> Aléatoire ou depuis un générateur</li>
+                            <li><strong>Vecteur Vitesse :</strong> peut etre constant ou en accéleration</li>
+                            <li><strong>Cycle de vie :</strong> Une durée de vie limitée qui provoque la disparition progressive de la particule pour pas surchargé le mémoir </li>
+                        </ul>
+                        <p>
+
+                        </p>
+                    </section>
+                </div>
+
+                <!-- Colonne Latérale : Infos clés et Liens -->
+                <aside class="project-sidebar-info">
+                    <div class="info-card">
+                        <h3>Spécifications</h3>
+                        <div class="info-row">
+                            <strong>Date :</strong>
+                            <span>2026</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Équipe :</strong>
+                            <span>équipe de 4</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Contexte :</strong>
+                            <span>IUT / Université</span>
+                        </div>
+                        
+                        <a href="https://github.com/votre-pseudo" target="_blank" rel="noopener" class="btn-project-github">
+                            Code source GitHub ↗
+                        </a>
+                    </div>
+                </aside>
+
+            </div>
+
+        </article>
+    </main>
+
+    <!-- Script JavaScript pour le fond de particules animé -->
+    <script>
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Ajuster la taille du canvas à l'écran
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Récupérer la couleur d'accent du CSS pour les particules (ou couleur par défaut)
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--couleur-accent').trim() || '#738a6e';
+
+        // Tableau des particules
+        const particlesArray = [];
+        const numberOfParticles = 60; // Nombre de particules en fond
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1; // Taille entre 1px et 4px
+                this.speedX = (Math.random() - 0.5) * 0.8; // Vitesse X douce
+                this.speedY = (Math.random() - 0.5) * 0.8; // Vitesse Y douce
+                this.opacity = Math.random() * 0.5 + 0.1; // Opacité légère pour rester discret
+            }
+
+            // Mise à jour de la position
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Rebondir sur les bords de l'écran
+                if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
+                if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
+            }
+
+            // Dessiner la particule
+            draw() {
+                ctx.fillStyle = accentColor;
+                ctx.globalAlpha = this.opacity;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Initialisation
+        function init() {
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        // Boucle d'animation (Game Loop identique au principe de ton projet en Go !)
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            
+            // Relier les particules proches par une fine ligne
+            connectParticles();
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Optionnel : Relier les particules proches pour un effet "réseau" sympa
+        function connectParticles() {
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let dx = particlesArray[a].x - particlesArray[b].x;
+                    let dy = particlesArray[a].y - particlesArray[b].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 150) {
+                        ctx.globalAlpha = (1 - (distance / 150)) * 0.15; // Ligne très subtile
+                        ctx.strokeStyle = accentColor;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        init();
+        animate();
+    </script>
+</body>
+</html>

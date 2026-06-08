@@ -1,0 +1,203 @@
+/* --- CONFIGURATION GENERALE --- */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--couleur-fond, #f4f4f4);
+    font-family: inherit;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Le Canvas prend tout l'écran en arrière-plan */
+#particleCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* Derrière le contenu */
+    pointer-events: none; /* Laisse l'utilisateur cliquer à travers */
+}
+
+/* Conteneur principal au-dessus du canvas */
+.project-detail-container {
+    max-width: 1000px;
+    width: 90%;
+    margin: 0 auto;
+    padding: 60px 0;
+    position: relative;
+    z-index: 1; /* Par-dessus le canvas */
+}
+
+/* --- BOUTON RETOUR --- */
+.back-nav {
+    margin-bottom: 40px;
+}
+
+.btn-back {
+    display: inline-block;
+    color: var(--couleur-accent, #738a6e);
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.btn-back:hover {
+    transform: translateX(-5px);
+    opacity: 0.8;
+}
+
+/* --- EN-TÊTE DU PROJET --- */
+.project-header .project-tag {
+    color: var(--couleur-accent, #738a6e);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.project-header h1 {
+    font-size: 2.8rem;
+    margin: 10px 0 15px 0;
+    color: var(--couleur-texte-sombre, #333);
+}
+
+.project-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 40px;
+}
+
+.project-meta .meta-tech {
+    background: white;
+    border: 1px solid rgba(0,0,0,0.05);
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #555;
+}
+
+/* --- DISPOSITION EN GRILLE --- */
+.project-body-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 50px;
+}
+
+/* Zone de texte principale avec un léger effet de flou pour la lisibilité */
+.project-main-text {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px); /* Floute légèrement les particules derrière */
+    -webkit-backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.01);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.project-section {
+    margin-bottom: 35px;
+}
+
+.project-section:last-child {
+    margin-bottom: 0;
+}
+
+.project-section h2 {
+    font-size: 1.5rem;
+    color: var(--couleur-texte-sombre, #333);
+    margin-bottom: 15px;
+}
+
+.project-main-text p {
+    line-height: 1.7;
+    color: #555;
+    margin-bottom: 20px;
+    font-size: 1rem;
+}
+
+.project-main-text ul {
+    padding-left: 20px;
+    margin-bottom: 20px;
+    color: #555;
+    line-height: 1.7;
+}
+
+/* --- CARTE D'INFOS SÉCURISÉE (DA PARCOURS) --- */
+.info-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.01);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    border-left: 4px solid var(--couleur-accent, #738a6e);
+    position: sticky;
+    top: 40px;
+}
+
+.info-card h3 {
+    margin: 0 0 20px 0;
+    font-size: 1.2rem;
+    color: var(--couleur-texte-sombre, #333);
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+    padding-bottom: 8px;
+}
+
+.info-row strong {
+    color: var(--couleur-texte-sombre, #333);
+}
+
+.info-row span {
+    color: #666;
+}
+
+/* Bouton GitHub */
+.btn-project-github {
+    display: block;
+    text-align: center;
+    margin-top: 25px;
+    padding: 12px;
+    background-color: var(--couleur-accent, #738a6e);
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(115, 138, 110, 0.2);
+}
+
+.btn-project-github:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(115, 138, 110, 0.3);
+    opacity: 0.9;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 850px) {
+    .project-body-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    .project-main-text {
+        padding: 25px;
+    }
+    .info-card {
+        position: static;
+    }
+}

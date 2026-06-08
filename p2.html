@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu Vidéo Économique | AILLET Gabriel</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/p2.css">
+</head>
+<body>
+
+    <canvas id="retroCanvas"></canvas>
+
+    <main class="project-detail-container">
+        
+        <div class="back-nav">
+            <a href="projet.html" class="btn-back">← Retour aux projets</a>
+        </div>
+
+        <article class="project-content">
+            
+            <header class="project-header">
+                <span class="project-tag">Projet SAE — 03</span>
+                <h1>Simulation Économique (Jeu Vidéo)</h1>
+                <div class="project-meta">
+                    <span class="meta-tech">Python</span>
+                    <span class="meta-tech">CLI / CMD</span>
+                    <span class="meta-tech">Serious Game</span>
+                </div>
+            </header>
+
+            <div class="project-body-grid">
+                
+                <div class="project-main-text">
+                    <section class="project-section">
+                        <h2>Présentation du projet</h2>
+                        <p>
+                            Réalisé en équipe de 4 personnes, ce projet avait pour but de concevoir un jeu serieu pour l'apprentissage de l'économie. 
+                            Développé entièrement en Python, le jeu s'exécute directement dans le terminal (CMD).
+                        </p>
+                    </section>
+
+                    <section class="project-section">
+                        <h2>Comment ça fonctionne ?</h2>
+                        <p>
+                            Le joueur est propulsé à la tête d'une entité ou d'un marché et doit prendre des décisions financières stratégiques à chaque tour de jeu. 
+                            Le programme intègre un moteur de simulation codé en Python qui gère :
+                        </p>
+                        <ul>
+                            <li><strong>L'offre et la demande :</strong> Les prix des ressources fluctuent dynamiquement en fonction des actions du joueur et d'événements aléatoires (crises, inflations).</li>
+                            <li><strong>La gestion des ressources :</strong> Un système strict d'achats, de ventes et de calculs de rentabilité avec un capital de départ.</li>
+                            <li><strong>L'interface CMD :</strong> Des menus textuels optimisés, clairs et interactifs pour permettre une immersion rapide sans interface graphique lourde.</li>
+                        </ul>
+                    </p>
+                    </section>
+                </div>
+
+                <aside class="project-sidebar-info">
+                    <div class="info-card">
+                        <h3>Spécifications</h3>
+                        <div class="info-row">
+                            <strong>Date :</strong>
+                            <span>2026</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Équipe :</strong>
+                            <span>4 personnes</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Contexte :</strong>
+                            <span>IUT / Université</span>
+                        </div>
+                        
+                        <a href="https://github.com/votre-pseudo" target="_blank" rel="noopener" class="btn-project-github">
+                            Code source GitHub ↗
+                        </a>
+                    </div>
+                </aside>
+
+            </div>
+
+        </article>
+    </main>
+
+    <script>
+        const canvas = document.getElementById('retroCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Récupération de ta couleur d'accent pour que les pixels matchent ton portfolio
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--couleur-accent').trim() || '#738a6e';
+
+        const pixelsArray = [];
+        const numberOfPixels = 40; // Nombre de carrés qui flottent
+
+        class RetroPixel {
+            constructor() {
+                this.size = Math.random() * 12 + 6; // Des gros pixels carrés (entre 6px et 18px)
+                this.x = Math.random() * canvas.width;
+                // Ils apparaissent tous en bas ou de manière aléatoire
+                this.y = Math.random() * canvas.height;
+                // Vitesse verticale uniquement vers le haut (style flux de données / arcade)
+                this.speedY = -(Math.random() * 0.8 + 0.2); 
+                this.opacity = Math.random() * 0.25 + 0.05; // Très discret pour ne pas gêner la lecture
+            }
+
+            update() {
+                this.y += this.speedY;
+                // Si le pixel sort par le haut de l'écran, il réapparaît en bas
+                if (this.y < -this.size) {
+                    this.y = canvas.height + this.size;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = accentColor;
+                ctx.globalAlpha = this.opacity;
+                // drawRect au lieu de arc pour faire des carrés (pixels rétro) !
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+            }
+        }
+
+        function init() {
+            for (let i = 0; i < numberOfPixels; i++) {
+                pixelsArray.push(new RetroPixel());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < pixelsArray.length; i++) {
+                pixelsArray[i].update();
+                pixelsArray[i].draw();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+    </script>
+</body>
+</html>
