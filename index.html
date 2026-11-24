@@ -485,8 +485,8 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 .marquee.plus span::after { content: "+"; width: auto; height: auto; background: none; border-radius: 0; font-size: 0.3em; color: var(--muted); }
 
 /* Stores noir → clair */
-.dark-zone { padding-bottom: 35vh; }
-.blinds { position: absolute; left: 0; right: 0; bottom: 0; height: 100vh; z-index: 3; pointer-events: none; display: flex; flex-direction: column; }
+.dark-zone { padding-bottom: 12vh; }
+.blinds { position: absolute; left: 0; right: 0; bottom: 0; height: 135vh; z-index: 3; pointer-events: none; display: flex; flex-direction: column; }
 .blinds i { flex: 1; background: #dededc; transform-origin: bottom; transform: scaleY(0); will-change: transform; }
 
 /* ===== Chiffres clés ===== */
@@ -596,6 +596,12 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 .loop-big { display: grid; font: 500 clamp(3.6rem, 13vw, 12rem)/0.84 var(--f-display); letter-spacing: -0.06em; text-transform: uppercase; will-change: transform; }
 .loop-bar { width: min(60vw, 320px); height: 2px; background: #c4c4c1; overflow: hidden; }
 .loop-bar i { display: block; height: 100%; background: #111; transform-origin: left; transform: scaleX(0); }
+
+/* Nom au-dessus des cartes, une fois posées */
+.stage-name { position: absolute; left: 0; right: 0; margin: 0; z-index: 3; text-align: center; pointer-events: none; overflow: hidden; transform: translateY(-100%);
+  font: 500 clamp(2.4rem, 6.5vw, 5.6rem)/0.95 var(--f-display); letter-spacing: -0.05em; text-transform: uppercase; color: var(--ink); padding-bottom: 0.05em; }
+.stage-name span { display: inline-block; transform: translateY(110%); transition: transform 1.1s cubic-bezier(.16,1,.3,1) .15s; }
+.settled .stage-name span { transform: none; }
 </style>
 </head>
 <body>
@@ -627,7 +633,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
       <h1 class="sr-only">Gabriel Aillet, étudiant ingénieur en informatique à Polytech Nantes</h1>
       <p class="word w1" id="w1" aria-hidden="true">Code en</p>
       <p class="word w2" id="w2" aria-hidden="true">altitude</p>
-      <p class="tagline" id="tagline">Étudiant ingénieur en informatique<br>Polytech Nantes · triathlète D3</p>
+      <p class="stage-name" id="stage-name" aria-hidden="true"><span>Gabriel Aillet</span></p>
       <div class="ribbon" id="ribbon"></div>
       <div class="stage-foot">
         <span class="status"><i aria-hidden="true"></i>Ouvert aux stages et jobs d'été</span>
@@ -1026,7 +1032,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 
   /* ---------- Intro : mots qui se croisent + ruban 3D de cartes -> grille ---------- */
   const stage = document.getElementById('stage'), ribbon = document.getElementById('ribbon');
-  const w1 = document.getElementById('w1'), w2 = document.getElementById('w2'), tagline = document.getElementById('tagline');
+  const w1 = document.getElementById('w1'), w2 = document.getElementById('w2');
   const CARDS = [
     { grid: 0, href: '#projets', label: 'Générateur de particules', sub: 'Go · 2026', html: '<div class="c-go"><b>GO</b></div>' },
     { grid: 1, href: '#passions', label: 'Montagne', sub: 'GR20 en 4 jours', html: '<img src="https://picsum.photos/seed/alpes-noir/700/460?grayscale" onerror="this.onerror=null;this.src=\'img/lac-montagne.jpg\'" class="bw" alt="">' },
@@ -1057,12 +1063,14 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
     W = stage.clientWidth; H = stage.clientHeight;
     cols = W < 640 ? 2 : 3; const rows = 6 / cols;
     gap = W < 640 ? 10 : 16;
-    const maxW = Math.min(W * (W < 640 ? 0.94 : 0.84), 1240), maxH = H * 0.74;
+    const maxW = Math.min(W * (W < 640 ? 0.94 : 0.84), 1240), maxH = H * 0.62;
     cw = (maxW - gap * (cols - 1)) / cols; ch = cw * 0.66;
     if (ch * rows + (gap + 22) * (rows - 1) > maxH) { ch = (maxH - (gap + 22) * (rows - 1)) / rows; cw = ch / 0.66; }
     els.forEach(o => { o.el.style.width = cw + 'px'; o.el.style.height = ch + 'px'; });
     const gw = cw * cols + gap * (cols - 1), gh = ch * rows + (gap + 22) * (rows - 1);
-    slots = [...Array(6)].map((_, i) => ({ x: -gw / 2 + cw / 2 + (i % cols) * (cw + gap), y: -gh / 2 + ch / 2 + Math.floor(i / cols) * (ch + gap + 22) - 11, z: 0, ry: 0, rz: 0, rx: 0, s: 1 }));
+    const stageName = document.getElementById('stage-name');
+    slots = [...Array(6)].map((_, i) => ({ x: -gw / 2 + cw / 2 + (i % cols) * (cw + gap), y: -gh / 2 + ch / 2 + Math.floor(i / cols) * (ch + gap + 22) - 11 + H * 0.06, z: 0, ry: 0, rz: 0, rx: 0, s: 1 }));
+    stageName.style.top = (H / 2 + slots[0].y - ch / 2 - 22) + 'px'; // juste au-dessus de la grille
   }
   // pose d'une carte le long d'une courbe 3D (ondulation + torsion)
   function ribbonPose(u) {
@@ -1084,7 +1092,6 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
     const inK = ease(t / T.wordsIn), crossK = inout((t - T.cross[0]) / (T.cross[1] - T.cross[0]));
     w1.style.transform = `translateX(${lerp(-110, 0, inK) + crossK * 120}vw)`;
     w2.style.transform = `translateX(${lerp(110, 0, inK) - crossK * 120}vw)`;
-    tagline.style.opacity = Math.min(ease((t - 500) / 600), 1 - ease((t - 3400) / 600));
     // ruban
     const spacing = cw * 0.78 * 0.97;
     const head = lerp(-W * 0.1, W + spacing * els.length * 0.95, (t - T.ribbonStart) / (T.ribbonEnd - T.ribbonStart));
@@ -1115,7 +1122,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
   }
   function finish() {
     cancelAnimationFrame(raf);
-    w1.style.transform = 'translateX(130vw)'; w2.style.transform = 'translateX(-130vw)'; tagline.style.opacity = 0;
+    w1.style.transform = 'translateX(130vw)'; w2.style.transform = 'translateX(-130vw)';
     els.forEach(o => o.grid === undefined ? apply(o.el, { x: 0, y: 0, z: -400, ry: 0, rz: 0, rx: 0, s: 0.5 }, 0) : apply(o.el, slots[o.grid], 1));
     stage.classList.add('settled');
     if (!reduce) { cancelAnimationFrame(idleRaf); idleRaf = requestAnimationFrame(idle); }
@@ -1443,7 +1450,7 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
     const vh = innerHeight;
     // stores : les bandes noires se replient
     // bandes claires qui recouvrent la fin de la zone noire, juste avant les projets
-    const zb = blindsBox.parentElement.getBoundingClientRect().bottom, bk = clamp01((vh * 0.95 - zb) / (vh * 0.8));
+    const zb = blindsBox.parentElement.getBoundingClientRect().bottom, bk = clamp01((vh * 1.4 - zb) / (vh * 0.9));
     blinds.forEach((b, i) => b.style.transform = `scaleY(${reduce ? 0 : clamp01(bk * 1.7 - (blinds.length - 1 - i) * 0.07)})`);
     if (bk > 0.5 && bk < 1) document.body.classList.remove('inverted'); else if (bk > 0 && bk <= 0.5) document.body.classList.add('inverted');
     // cartes inclinées qui se redressent
