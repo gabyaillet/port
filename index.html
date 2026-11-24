@@ -443,6 +443,108 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 .sheet dt { font: 500 0.72rem var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; }
 .sheet dd { margin: 0.25rem 0 0; color: var(--muted); }
 .sheet .meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
+
+/* ===== Inspiré de la vidéo : pilules, menu plein écran ===== */
+.topbar .wrap { justify-content: space-between; }
+.pills { display: flex; gap: 0.5rem; align-items: center; }
+.pill { display: inline-flex; align-items: center; gap: 0.4rem; font: 500 0.72rem var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; cursor: pointer;
+  padding: 0.5rem 0.95rem; border-radius: 999px; border: 1px solid var(--ink); background: transparent; color: var(--ink); transition: background .3s, color .3s, transform .5s cubic-bezier(.16,1,.3,1); }
+.pill.solid, .pill:hover { background: var(--ink); color: var(--bg); }
+.pill.solid:hover { background: transparent; color: var(--ink); }
+.menu-toggle { display: none !important; }
+.nav, .nav[data-open="false"] { position: fixed; inset: 0; z-index: 180; margin: 0; display: flex; flex-direction: column; justify-content: center; gap: 0.2rem; list-style: none;
+  background: #0d0d0d; border: 0; padding: 5rem max(24px, 6vw) 2rem; clip-path: inset(0 0 100% 0); visibility: hidden; transition: clip-path .9s cubic-bezier(.76,0,.24,1), visibility 0s .9s; }
+.nav[data-open="true"] { clip-path: inset(0 0 0 0); visibility: visible; transition: clip-path .9s cubic-bezier(.76,0,.24,1); }
+.nav li { overflow: hidden; }
+.nav a, .nav a:hover { display: inline-block; color: #ededeb; font: 500 clamp(2.6rem, 8vw, 6.5rem)/1 var(--f-display); letter-spacing: -0.05em; text-transform: uppercase; padding: 0; background: none; border: 0;
+  transform: translateY(110%); transition: transform .9s cubic-bezier(.16,1,.3,1), color .3s; }
+.nav a:hover { color: #8f8f8b; }
+.nav[data-open="true"] a { transform: none; }
+.nav li:nth-child(2) a { transition-delay: .05s; } .nav li:nth-child(3) a { transition-delay: .1s; } .nav li:nth-child(4) a { transition-delay: .15s; } .nav li:nth-child(5) a { transition-delay: .2s; } .nav li:nth-child(6) a { transition-delay: .25s; }
+.nav .nav-foot { display: flex; gap: 1.5rem; align-items: center; margin-top: 2rem; overflow: visible; }
+.nav .nav-foot a { font: 500 0.8rem var(--f-mono); letter-spacing: 0.08em; transform: none; }
+.nav-close { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 1rem); right: max(20px, env(safe-area-inset-right, 0px)); border-color: #ededeb; color: #ededeb; }
+.nav-close:hover { background: #ededeb; color: #0d0d0d; }
+
+/* ===== Zone noire ===== */
+.dark-zone { --bg: #0d0d0d; --surface: #161616; --ink: #ededeb; --muted: #8f8f8b; --line: #262626; background: var(--bg); color: var(--ink); position: relative; }
+.dark-zone .blaze { background: #ededeb; }
+.about { position: relative; padding-block: clamp(5rem, 12vw, 9rem) clamp(4rem, 9vw, 7rem); overflow: hidden; }
+.about .wrap { position: relative; z-index: 1; }
+.shards { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+.ad-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: clamp(3rem, 8vw, 6rem); }
+.ad-side { text-align: right; line-height: 1.8; }
+.about .statement { margin-inline: auto; text-align: center; max-width: 23ch; font-size: clamp(2.2rem, 5.6vw, 5.2rem); }
+.statement .sw { transition: color .4s linear, filter .5s linear, opacity .4s linear; }
+.blast-hint { text-align: center; margin-top: 3rem; }
+.about-path .trail-step::before { background: var(--bg); }
+
+/* Bandeau à « + » */
+.marquee.plus { border: 0; padding-block: clamp(2rem, 5vw, 4rem); }
+.marquee.plus span { font-size: clamp(4rem, 13vw, 12rem); color: var(--ink); }
+.marquee.plus span::after { content: "+"; width: auto; height: auto; background: none; border-radius: 0; font-size: 0.3em; color: var(--muted); }
+
+/* Stores noir → clair */
+.blinds { height: 55vh; background: #dededc; display: flex; flex-direction: column; }
+.blinds i { flex: 1; background: #0d0d0d; transform-origin: top; will-change: transform; }
+
+/* ===== Chiffres clés ===== */
+.kf { padding-block: clamp(3rem, 8vw, 6rem) clamp(5rem, 10vw, 8rem); text-align: center; overflow: hidden; }
+.kf-title { font: 500 clamp(2.8rem, 7vw, 5.5rem)/0.95 var(--f-display); letter-spacing: -0.05em; }
+.kf-sub { color: var(--muted); margin-top: 0.8rem; }
+.blur-in { transition: filter 1.2s cubic-bezier(.16,1,.3,1), opacity 1.2s, transform 1.2s cubic-bezier(.16,1,.3,1); }
+.blur-in.pre { filter: blur(14px); opacity: 0; transform: translateY(20px) scale(1.04); }
+.blur-in.pre.in { filter: none; opacity: 1; transform: none; }
+.kf-cards { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1fr); gap: clamp(1rem, 3vw, 2.5rem); align-items: center; margin: clamp(3rem, 7vw, 5rem) auto 0; max-width: 62rem; perspective: 1200px; }
+.kf-card { position: relative; margin: 0; border-radius: 12px; overflow: hidden; aspect-ratio: 7 / 9; background: #111; will-change: transform; box-shadow: 0 30px 60px -30px rgba(0,0,0,.45); }
+.kf-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.kf-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.75), transparent 55%); }
+.kf-card figcaption { position: absolute; z-index: 1; left: 1rem; right: 1rem; bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-end; gap: 0.5rem; color: #fff; text-align: left; }
+.kf-card figcaption .label { color: rgba(255,255,255,.8); max-width: 12ch; }
+.kf-big { font: 500 clamp(2.4rem, 5vw, 3.8rem)/0.85 var(--f-display); letter-spacing: -0.05em; }
+.kf-big small { font-size: 0.32em; letter-spacing: 0; margin-left: 0.2em; }
+.kf-mid { display: grid; justify-items: center; gap: 1rem; color: var(--muted); }
+.kf-circle { width: clamp(8rem, 16vw, 11rem); aspect-ratio: 1; border-radius: 50%; background: var(--surface); display: flex; justify-content: center; align-items: center; gap: 0.1rem; color: var(--ink); box-shadow: 0 20px 40px -24px rgba(0,0,0,.35); }
+.kf-circle b { font: 500 clamp(3rem, 7vw, 4.6rem)/1 var(--f-display); letter-spacing: -0.05em; }
+.kf-circle sup { font: 500 1.4rem var(--f-display); align-self: flex-start; margin-top: 30%; }
+.kf-logos-title { margin-top: clamp(3.5rem, 8vw, 5.5rem); }
+.kf-logos { list-style: none; padding: 0; margin: 1.2rem auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem clamp(1.5rem, 4vw, 3.5rem); }
+.kf-logos li { font: 600 clamp(1.1rem, 2vw, 1.5rem) var(--f-display); letter-spacing: -0.03em; color: var(--muted); transition: color .3s; }
+.kf-logos li:hover { color: var(--ink); }
+@media (max-width: 700px) { .kf-cards { grid-template-columns: 1fr 1fr; } .kf-mid { grid-column: 1 / -1; order: -1; } }
+
+/* ===== Projets : titre dans la bande, grandes cartes ===== */
+.hscroll { border-top: 0; }
+.hs-sticky { top: 0; height: 100svh; padding-top: 4rem; }
+.hs-track { align-items: center; }
+.hs-intro { flex: none; width: min(34vw, 420px); display: grid; gap: 1.5rem; align-content: center; }
+.hs-intro h2 { font: 500 clamp(2.4rem, 4.6vw, 4.2rem)/0.95 var(--f-display); letter-spacing: -0.05em; }
+.hs-meter { justify-items: start; }
+.hs-card { width: min(56vw, 760px); grid-template-columns: 1fr; gap: 1.1rem; align-items: start; transform-origin: center; }
+.hs-media .visual { border-radius: 12px; }
+.hs-media .cli, .hs-media .wine { min-height: min(50vh, 420px); }
+.hs-media .demo canvas { height: min(50vh, 420px); }
+.hs-info { grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 1.5rem; }
+.hs-info h3 { font: 500 clamp(1.5rem, 2.4vw, 2.1rem)/1 var(--f-display); letter-spacing: -0.04em; text-transform: none; }
+.hs-info p { margin-top: 0.4rem; font-size: 0.95rem; }
+.hs-act { display: grid; justify-items: end; gap: 0.5rem; }
+.link-arrow { justify-self: start; background: none; border: 0; border-bottom: 1px solid currentColor; padding: 0 0 0.25rem; color: var(--ink); font: 500 0.72rem var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; cursor: pointer; transition: opacity .3s; }
+.link-arrow:hover { opacity: .6; }
+.hs-end { width: min(40vw, 460px); text-align: center; justify-items: center; }
+.hs-end p { font-size: clamp(1.5rem, 2.6vw, 2.2rem); }
+.hs-end .link-arrow { justify-self: center; }
+@media (max-width: 760px) {
+  .hs-sticky { padding-top: 5rem; }
+  .hs-intro { width: 80vw; scroll-snap-align: start; }
+  .hs-card { width: 86vw; }
+  .hs-info { grid-template-columns: 1fr; } .hs-act { justify-items: start; }
+}
+
+/* ===== Mots empilés ===== */
+.stack-sec { padding-block: clamp(5rem, 12vw, 9rem); overflow: hidden; text-align: center; }
+.stack { margin: 1.5rem 0 0; display: grid; justify-items: center; font: 500 clamp(3.6rem, 13vw, 12rem)/0.84 var(--f-display); letter-spacing: -0.06em; text-transform: uppercase; }
+.stack span { display: block; will-change: transform; }
+.stack-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: clamp(3rem, 7vw, 5rem); }
 </style>
 </head>
 <body>
@@ -450,7 +552,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 <header class="topbar">
   <div class="wrap">
     <a href="#top" class="brand"><span class="blaze" aria-hidden="true"></span>G. Aillet</a>
-    <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="nav">Menu</button>
+
     <ul class="nav" id="nav" data-open="false">
       <li><a href="#apropos">Qui je suis</a></li>
       <li><a href="#projets">Projets</a></li>
@@ -458,8 +560,12 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
       <li><a href="#competences">Compétences</a></li>
       <li><a href="#passions">Passions</a></li>
       <li><a href="#contact">Contact</a></li>
+      <li class="nav-foot"><a href="CV-Gabriel-Aillet.pdf" target="_blank" rel="noopener">CV ↗</a><a href="https://github.com/gabyaillet" target="_blank" rel="noopener">GitHub ↗</a><button class="pill nav-close" type="button">Fermer ✕</button></li>
     </ul>
-    <a class="btn cv-top" href="CV-Gabriel-Aillet.pdf" target="_blank" rel="noopener">CV ↗</a>
+    <div class="pills">
+      <a class="pill solid" href="#contact">Me contacter</a>
+      <button class="pill" id="menu-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu <span aria-hidden="true">+</span></button>
+    </div>
   </div>
 </header>
 
@@ -480,10 +586,15 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
     </div>
   </section>
 
-  <!-- QUI JE SUIS -->
-  <section class="block about" id="apropos">
+  <!-- ZONE NOIRE : QUI JE SUIS -->
+  <div class="dark-zone" data-dark>
+  <section class="about" id="apropos">
+    <canvas class="shards" id="shards" aria-hidden="true"></canvas>
     <div class="wrap">
-      <div class="eyebrow-line"><span class="blaze" aria-hidden="true"></span><span class="label">Qui je suis</span></div>
+      <div class="ad-top">
+        <div class="eyebrow-line"><span class="blaze" aria-hidden="true"></span><span class="label">Qui je suis</span></div>
+        <p class="ad-side label">Nantes · 44<br>BUT Info · Polytech<br>Code, sport et montagne</p>
+      </div>
       <p class="statement" data-scrub>Je m'appelle Gabriel Aillet. J'étudie l'informatique à Polytech Nantes pour devenir ingénieur, et entre deux lignes de code, je nage, je roule, je cours et je grimpe.</p>
       <div class="about-grid">
         <figure class="about-photo">
@@ -502,7 +613,8 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
           </dl>
         </div>
       </div>
-      <div class="about-path">
+      <p class="blast-hint label" aria-hidden="true">Maintenez le clic pour tout faire exploser</p>
+      <div class="about-path" id="parcours">
         <h3 class="path-title">Mon parcours</h3>
         <div class="paths">
         <div>
@@ -530,23 +642,48 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
   </section>
 
   <!-- BANDEAU -->
-  <div class="marquee" aria-hidden="true">
+  <div class="marquee plus" aria-hidden="true">
     <div class="track" id="marquee-track">
-      <span>Go</span><span class="o">Python</span><span>HTML / CSS</span><span class="o">Triathlon</span><span>Montagne</span><span class="o">Polytech</span><span>GR20</span><span class="o">Nantes</span>
+      <span>Code</span><span>Endurance</span><span>Altitude</span><span>Équipe</span><span>Rigueur</span>
     </div>
   </div>
+  <div class="blinds" id="blinds" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+
+  <!-- CHIFFRES CLÉS -->
+  <section class="kf" id="chiffres">
+    <div class="wrap">
+      <h2 class="kf-title blur-in">En quelques chiffres</h2>
+      <p class="kf-sub blur-in">Un aperçu de mon parcours,<br>et de mon endurance.</p>
+      <div class="kf-cards">
+        <figure class="kf-card" data-tilt="-1">
+          <img src="https://picsum.photos/seed/crete-alpine/700/900?grayscale" onerror="this.onerror=null;this.src='img/lac-montagne.jpg'" class="bw" alt="" width="700" height="900">
+          <figcaption><span class="label">Traversée du GR20</span><span class="kf-big">4<small>jours</small></span></figcaption>
+        </figure>
+        <div class="kf-mid">
+          <span class="label">Projets réalisés</span>
+          <div class="kf-circle"><b data-count="3">3</b><sup>+</sup></div>
+          <p>Projets d'équipe en Go,<br>Python et web.</p>
+        </div>
+        <figure class="kf-card" data-tilt="1">
+          <img src="https://picsum.photos/seed/triathlon-noir/700/900?grayscale" onerror="this.onerror=null;this.src='img/triathlon.jpg'" class="bw" alt="" width="700" height="900">
+          <figcaption><span class="label">Triathlon en compétition</span><span class="kf-big">D3</span></figcaption>
+        </figure>
+      </div>
+      <p class="label kf-logos-title">Mes outils</p>
+      <ul class="kf-logos"><li>Go</li><li>Python</li><li>HTML5</li><li>CSS3</li><li>PHP</li><li>SQL</li><li>Photoshop</li></ul>
+    </div>
+  </section>
 
   <!-- PROJETS : défilement horizontal épinglé -->
   <section class="hscroll" id="projets" aria-label="Projets">
     <div class="hs-sticky">
-      <div class="wrap hs-head">
-        <div>
-          <div class="eyebrow-line"><span class="blaze" aria-hidden="true"></span><span class="label">Projets SAE · IUT de Nantes</span></div>
-          <h2>Ce que j'ai construit</h2>
-        </div>
-        <div class="hs-meter"><span class="mono" id="hs-count">01 / 03</span><span class="hs-bar"><i id="hs-bar"></i></span></div>
-      </div>
       <div class="hs-track" id="hs-track">
+        <div class="hs-intro">
+          <h2>Projets choisis<br>&amp; explorations</h2>
+          <a class="link-arrow" href="https://github.com/gabyaillet" target="_blank" rel="noopener">Voir mon GitHub →</a>
+          <div class="hs-meter"><span class="mono" id="hs-count">01 / 03</span><span class="hs-bar"><i id="hs-bar"></i></span></div>
+        </div>
         <article class="hs-card">
           <div class="hs-media"><figure class="visual demo" style="margin:0">
           <div class="bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="label">Démo · réimplémentée en JavaScript</span></div>
@@ -563,11 +700,8 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
           </div>
         </figure></div>
           <div class="hs-info">
-            <span class="hs-num">01</span>
-            <h3>Générateur de particules</h3>
-            <span class="label">Go · 2026 · équipe de 4</span>
-            <p>Un moteur de particules écrit en Go, paramétrable depuis une interface. Essayez-le directement ici.</p>
-            <button class="btn ghost" type="button" data-sheet="sheet-go">Voir plus →</button>
+            <div><h3>Générateur de particules</h3><p>Un moteur de particules écrit en Go, paramétrable depuis une interface. Essayez-le directement.</p></div>
+            <div class="hs-act"><span class="label">Go · 2026</span><button class="link-arrow" type="button" data-sheet="sheet-go">Explorer le projet →</button></div>
           </div>
         </article>
         <article class="hs-card">
@@ -589,11 +723,8 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
           <p class="note mono">Illustration de l'interface, valeurs fictives.</p>
         </figure></div>
           <div class="hs-info">
-            <span class="hs-num">02</span>
-            <h3>Simulation économique</h3>
-            <span class="label">Python · 2026 · équipe de 4</span>
-            <p>Un serious game joué dans le terminal pour apprendre l'économie en gérant un marché.</p>
-            <button class="btn ghost" type="button" data-sheet="sheet-eco">Voir plus →</button>
+            <div><h3>Simulation économique</h3><p>Un serious game joué dans le terminal pour apprendre l'économie en gérant un marché.</p></div>
+            <div class="hs-act"><span class="label">Python · 2026</span><button class="link-arrow" type="button" data-sheet="sheet-eco">Explorer le projet →</button></div>
           </div>
         </article>
         <article class="hs-card">
@@ -611,18 +742,25 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
           <p class="note mono">Illustration de la mise en page, pas une capture du site.</p>
         </figure></div>
           <div class="hs-info">
-            <span class="hs-num">03</span>
-            <h3>Boutique de vins</h3>
-            <span class="label">HTML / CSS · 2025 · équipe de 3</span>
-            <p>Un site de caviste imaginé, maquetté puis intégré, pensé d'abord pour le mobile.</p>
-            <button class="btn ghost" type="button" data-sheet="sheet-vin">Voir plus →</button>
+            <div><h3>Boutique de vins</h3><p>Un site de caviste imaginé, maquetté puis intégré, pensé d'abord pour le mobile.</p></div>
+            <div class="hs-act"><span class="label">HTML / CSS · 2025</span><button class="link-arrow" type="button" data-sheet="sheet-vin">Explorer le projet →</button></div>
           </div>
         </article>
         <div class="hs-end">
-          <p>D'autres projets arrivent.<br>En attendant, interrogez-moi.</p>
-          <a class="btn" href="#terminal">Ouvrir le terminal ↓</a>
+          <p>Découvrez la suite de mon parcours, de mes outils et de mes passions.</p>
+          <a class="link-arrow" href="#savoirfaire">Continuer ↓</a>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- CE QUE JE FAIS -->
+  <section class="stack-sec" id="savoirfaire">
+    <p class="label">Ce que je fais</p>
+    <h2 class="stack" aria-label="Code, Web, Design, Endurance"><span>Code</span><span>Web</span><span>Design</span><span>Endurance</span></h2>
+    <div class="wrap stack-foot">
+      <span class="label">● Conçu avec méthode. Codé pour durer.</span>
+      <a class="link-arrow" href="#competences">Voir mes compétences →</a>
     </div>
   </section>
 
@@ -832,7 +970,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
   nav.addEventListener('click', e => { if (e.target.closest('a')) { nav.dataset.open = 'false'; toggle.setAttribute('aria-expanded', 'false'); } });
 
   /* Lien actif selon la section visible */
-  const links = [...nav.querySelectorAll('a')];
+  const links = [...nav.querySelectorAll('a[href^="#"]')];
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) links.forEach(a => a.setAttribute('aria-current', String(a.hash === '#' + e.target.id)));
   }), { rootMargin: '-45% 0px -50% 0px' });
@@ -1046,7 +1184,7 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
   }
 
   // Titres découpés en mots
-  document.querySelectorAll('.sec-head h2, .hs-head h2, .path-title, footer h2').forEach(h => {
+  document.querySelectorAll('.sec-head h2, .hs-intro h2, .path-title, footer h2').forEach(h => {
     const walk = node => [...node.childNodes].forEach(n => {
       if (n.nodeType === 3) {
         const frag = document.createDocumentFragment();
@@ -1071,7 +1209,7 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
     const sib = [...el.parentElement.children].filter(c => c.classList.contains('fu'));
     el.style.transitionDelay = (sib.indexOf(el) * 0.08) + 's';
   });
-  const revealables = [...document.querySelectorAll('[data-rv], .fu, .clip')];
+  const revealables = [...document.querySelectorAll('[data-rv], .fu, .clip, .blur-in')];
   if (!reduce && 'IntersectionObserver' in window) {
     // seuls les éléments sous la ligne de flottaison partent cachés : la première image est complète
     revealables.forEach(el => { if (el.getBoundingClientRect().top > innerHeight * 0.92) el.classList.add('pre'); });
@@ -1199,10 +1337,67 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
     const upd = () => {
       const r = el.getBoundingClientRect(), k = Math.min(1, Math.max(0, (innerHeight * 0.85 - r.top) / (r.height + innerHeight * 0.4)));
       const lit = reduce ? words.length : Math.round(k * words.length);
-      words.forEach((w, i) => w.style.color = i < lit ? 'var(--ink)' : 'color-mix(in srgb, var(--ink) 18%, transparent)');
+      words.forEach((w, i) => { const on = i < lit; w.style.color = on ? 'var(--ink)' : 'color-mix(in srgb, var(--ink) 22%, transparent)'; w.style.filter = on ? 'none' : 'blur(3px)'; });
     };
     upd(); (function l() { upd(); requestAnimationFrame(l); })();
   });
+
+
+  /* ===== Menu plein écran ===== */
+  document.body.appendChild(nav);
+  const setMenu = o => { nav.dataset.open = String(o); toggle.setAttribute('aria-expanded', String(o)); if (lenis) o ? lenis.stop() : lenis.start(); };
+  nav.querySelector('.nav-close').addEventListener('click', () => setMenu(false));
+  addEventListener('keydown', e => { if (e.key === 'Escape' && nav.dataset.open === 'true') setMenu(false); });
+
+  /* ===== Éclats flottants (zone noire) : maintenir le clic pour faire exploser ===== */
+  const sh = document.getElementById('shards'), shCtx = setupCanvas(sh), aboutSec = document.getElementById('apropos');
+  const lines = [...Array(70)].map(() => ({ x: Math.random(), y: Math.random(), a: Math.random() * Math.PI, va: (Math.random() - .5) * 0.004, len: 8 + Math.random() * 38, vx: 0, vy: 0, dx: (Math.random() - .5) * 0.00012, dy: (Math.random() - .5) * 0.00012, o: .15 + Math.random() * .5 }));
+  let blast = 0, holding = false, mxs = -1e4, mys = -1e4;
+  aboutSec.addEventListener('pointerdown', () => holding = true);
+  addEventListener('pointerup', () => holding = false);
+  aboutSec.addEventListener('pointermove', e => { const r = sh.getBoundingClientRect(); mxs = e.clientX - r.left; mys = e.clientY - r.top; });
+  aboutSec.addEventListener('pointerleave', () => { mxs = mys = -1e4; });
+  function drawShards(dt) {
+    const w = sh.clientWidth, h = sh.clientHeight;
+    shCtx.clearRect(0, 0, w, h);
+    blast += ((holding ? 1 : 0) - blast) * 0.06;
+    shCtx.lineWidth = 1.2; shCtx.lineCap = 'round';
+    for (const l of lines) {
+      let px = l.x * w, py = l.y * h;
+      const ddx = px - mxs, ddy = py - mys, d = Math.hypot(ddx, ddy);
+      if (d < 160) { l.vx += ddx / d * 0.6; l.vy += ddy / d * 0.6; }
+      if (holding) { const cx = px - w / 2, cy = py - h / 2, dc = Math.hypot(cx, cy) || 1; l.vx += cx / dc * 1.4; l.vy += cy / dc * 1.4; l.va += 0.01; }
+      l.vx *= 0.92; l.vy *= 0.92; l.va *= 0.98;
+      l.x += l.dx * dt + l.vx / w; l.y += l.dy * dt + l.vy / h; l.a += l.va * dt + 0.002;
+      if (l.x < -0.05) l.x = 1.05; if (l.x > 1.05) l.x = -0.05; if (l.y < -0.05) l.y = 1.05; if (l.y > 1.05) l.y = -0.05;
+      px = l.x * w; py = l.y * h;
+      const len = l.len * (1 + blast * 1.5);
+      shCtx.strokeStyle = `rgba(237,237,235,${l.o})`;
+      shCtx.beginPath(); shCtx.moveTo(px - Math.cos(l.a) * len / 2, py - Math.sin(l.a) * len / 2); shCtx.lineTo(px + Math.cos(l.a) * len / 2, py + Math.sin(l.a) * len / 2); shCtx.stroke();
+    }
+  }
+  if (reduce) drawShards(0); else loop(aboutSec, drawShards);
+
+  /* ===== Effets pilotés par le défilement ===== */
+  const blinds = [...document.querySelectorAll('#blinds i')], blindsBox = document.getElementById('blinds');
+  const tilts = [...document.querySelectorAll('[data-tilt]')];
+  const stackSec = document.getElementById('savoirfaire'), stackWords = [...stackSec.querySelectorAll('.stack span')];
+  const clamp01 = v => Math.max(0, Math.min(1, v));
+  (function scrollFx() {
+    const vh = innerHeight;
+    // stores : les bandes noires se replient
+    const br = blindsBox.getBoundingClientRect(), bk = clamp01((vh - br.top) / (br.height + vh * 0.2));
+    blinds.forEach((b, i) => b.style.transform = `scaleY(${reduce ? 0 : 1 - clamp01(bk * 1.8 - i * 0.07)})`);
+    // cartes inclinées qui se redressent
+    tilts.forEach(c => {
+      const r = c.getBoundingClientRect(), k = reduce ? 1 : clamp01((vh - r.top) / (vh * 0.9)), dir = +c.dataset.tilt, e = 1 - Math.pow(1 - k, 3);
+      c.style.transform = `translateX(${dir * (1 - e) * 30}%) rotateY(${-dir * (1 - e) * 35}deg) rotateZ(${dir * (1 - e) * 8 + dir * 3}deg)`;
+    });
+    // mots empilés qui arrivent par la droite
+    const sr = stackSec.getBoundingClientRect(), sk = clamp01((vh - sr.top) / (vh * 0.9));
+    stackWords.forEach((w, i) => { const k = reduce ? 1 : clamp01(sk * 1.5 - i * 0.12), e = 1 - Math.pow(1 - k, 3); w.style.transform = `translateX(${(1 - e) * 70}vw)`; });
+    requestAnimationFrame(scrollFx);
+  })();
 
   /* ---------- Copier l'e-mail ---------- */
   const copyBtn = document.getElementById('copy-mail');
