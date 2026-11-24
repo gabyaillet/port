@@ -1212,7 +1212,8 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
   new ResizeObserver(() => { const done = stage.classList.contains('settled'); layout(); if (done) finish(); }).observe(stage);
   document.getElementById('replay').addEventListener('click', play);
   layout();
-  if (reduce || returning) finish(); else window.__startIntro = play;
+  if (reduce || returning) finish();
+  if (!reduce) window.__startIntro = play; // aussi utilisé quand on repart du bas de la page
 
   /* Démo du projet Go */
   const demo = document.getElementById('demo'), dctx = setupCanvas(demo);
