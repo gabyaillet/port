@@ -633,6 +633,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
       <h1 class="sr-only">Gabriel Aillet, étudiant ingénieur en informatique à Polytech Nantes</h1>
       <p class="word w1" id="w1" aria-hidden="true">Code en</p>
       <p class="word w2" id="w2" aria-hidden="true">altitude</p>
+      <p class="tagline" id="tagline">Étudiant ingénieur en informatique<br>Polytech Nantes</p>
       <p class="stage-name" id="stage-name" aria-hidden="true"><span>Gabriel Aillet</span></p>
       <div class="ribbon" id="ribbon"></div>
       <div class="stage-foot">
@@ -1032,7 +1033,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 
   /* ---------- Intro : mots qui se croisent + ruban 3D de cartes -> grille ---------- */
   const stage = document.getElementById('stage'), ribbon = document.getElementById('ribbon');
-  const w1 = document.getElementById('w1'), w2 = document.getElementById('w2');
+  const w1 = document.getElementById('w1'), w2 = document.getElementById('w2'), tagline = document.getElementById('tagline');
   const CARDS = [
     { grid: 0, href: '#projets', label: 'Générateur de particules', sub: 'Go · 2026', html: '<div class="c-go"><b>GO</b></div>' },
     { grid: 1, href: '#passions', label: 'Montagne', sub: 'GR20 en 4 jours', html: '<img src="https://picsum.photos/seed/alpes-noir/700/460?grayscale" onerror="this.onerror=null;this.src=\'img/lac-montagne.jpg\'" class="bw" alt="">' },
@@ -1092,6 +1093,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
     const inK = ease(t / T.wordsIn), crossK = inout((t - T.cross[0]) / (T.cross[1] - T.cross[0]));
     w1.style.transform = `translateX(${lerp(-110, 0, inK) + crossK * 120}vw)`;
     w2.style.transform = `translateX(${lerp(110, 0, inK) - crossK * 120}vw)`;
+    tagline.style.opacity = Math.min(ease((t - 500) / 600), 1 - ease((t - 3400) / 600));
     // ruban
     const spacing = cw * 0.78 * 0.97;
     const head = lerp(-W * 0.1, W + spacing * els.length * 0.95, (t - T.ribbonStart) / (T.ribbonEnd - T.ribbonStart));
@@ -1122,7 +1124,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
   }
   function finish() {
     cancelAnimationFrame(raf);
-    w1.style.transform = 'translateX(130vw)'; w2.style.transform = 'translateX(-130vw)';
+    w1.style.transform = 'translateX(130vw)'; w2.style.transform = 'translateX(-130vw)'; tagline.style.opacity = 0;
     els.forEach(o => o.grid === undefined ? apply(o.el, { x: 0, y: 0, z: -400, ry: 0, rz: 0, rx: 0, s: 0.5 }, 0) : apply(o.el, slots[o.grid], 1));
     stage.classList.add('settled');
     if (!reduce) { cancelAnimationFrame(idleRaf); idleRaf = requestAnimationFrame(idle); }
