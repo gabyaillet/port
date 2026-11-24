@@ -281,10 +281,10 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
   function curvePath(from, to, W, R) {
     const dy = to.y - from.y, sw = (R() * 2 - 1) * Math.min(W * 0.38, 460);
     const m = { x: (from.x + to.x) / 2 + sw, y: from.y + dy * (0.3 + R() * 0.3) };
-    let d = `M ${from.x} ${from.y} C ${from.x + (R() * 2 - 1) * 120} ${from.y + dy * (0.1 + R() * 0.15)}, ${m.x - sw * (0.3 + R() * 0.5)} ${m.y - dy * (0.1 + R() * 0.15)}, ${m.x} ${m.y}`;
-    if (R() < 0.7) { const r = 20 + R() * 60; d += ` a ${r} ${r} 0 1 ${R() < 0.5 ? 1 : 0} 0.01 0`; }
-    const sw2 = (R() * 2 - 1) * Math.min(W * 0.3, 360);
-    d += ` C ${m.x + sw2} ${m.y + dy * (0.15 + R() * 0.2)}, ${to.x + (R() * 2 - 1) * 140} ${to.y - dy * (0.15 + R() * 0.15)}, ${to.x} ${to.y}`;
+    const C1 = { x: m.x - sw * (0.3 + R() * 0.5), y: m.y - dy * (0.1 + R() * 0.15) };
+    let d = `M ${from.x} ${from.y} C ${from.x + (R() * 2 - 1) * 120} ${from.y + dy * (0.1 + R() * 0.15)}, ${C1.x} ${C1.y}, ${m.x} ${m.y}`;
+    const k = 0.6 + R() * 0.6;
+    d += ` C ${m.x + (m.x - C1.x) * k} ${m.y + (m.y - C1.y) * k}, ${to.x + (R() * 2 - 1) * 140} ${to.y - dy * (0.15 + R() * 0.15)}, ${to.x} ${to.y}`;
     return d;
   }
   function buildThread() {
