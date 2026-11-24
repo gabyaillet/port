@@ -545,7 +545,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 .stack-sec { padding-block: clamp(5rem, 12vw, 9rem); overflow: hidden; text-align: center; }
 .stack { margin: 1.5rem 0 0; display: grid; justify-items: center; font: 500 clamp(3.6rem, 13vw, 12rem)/0.84 var(--f-display); letter-spacing: -0.06em; text-transform: uppercase; }
 .stack span { display: block; will-change: transform; }
-.stack-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: clamp(3rem, 7vw, 5rem); }
+.stack-foot { display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: clamp(3rem, 7vw, 5rem); }
 
 /* ===== Photo de présentation : même hauteur que le texte ===== */
 @media (min-width: 801px) {
@@ -794,7 +794,6 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
     <p class="label">Ce que je fais</p>
     <h2 class="stack" aria-label="Code, Web, Design, Découverte"><span>Code</span><span>Web</span><span>Design</span><span>Découverte</span></h2>
     <div class="wrap stack-foot">
-      <span class="label">● Conçu avec méthode. Codé pour durer.</span>
       <a class="link-arrow" href="#competences">Voir mes compétences →</a>
     </div>
   </section>
