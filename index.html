@@ -656,8 +656,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
       <p class="statement" data-scrub>Je m'appelle Gabriel Aillet. J'étudie l'informatique à Polytech Nantes pour devenir ingénieur, et entre deux lignes de code, je nage, je roule, je cours et je grimpe.</p>
       <div class="about-grid">
         <figure class="about-photo">
-          <img src="https://picsum.photos/seed/gabriel-portrait/900/1150?grayscale" onerror="this.onerror=null;this.src='img/ski-rando.jpg'" class="bw" alt="Photo de présentation (à remplacer)" width="900" height="1150">
-          <figcaption class="label">Photo provisoire · à remplacer</figcaption>
+          <img src="https://picsum.photos/seed/gabriel-portrait/900/1150?grayscale" onerror="this.onerror=null;this.src='img/ski-rando.jpg'" class="bw" alt="Gabriel Aillet" width="900" height="1150">
         </figure>
         <div class="about-text">
           <p class="about-lead">Mon parcours est marqué par une double exigence : réussir dans le numérique et m'engager à fond dans le sport.</p>
@@ -878,7 +877,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
       </div>
       <div class="passions">
         <article class="pcard big">
-          <img src="https://picsum.photos/seed/alpes-noir/1000/1300?grayscale" onerror="this.onerror=null;this.src='img/lac-montagne.jpg'" class="bw" alt="Montagne en noir et blanc (photo provisoire)" width="1050" height="1400">
+          <img src="https://picsum.photos/seed/alpes-noir/1000/1300?grayscale" onerror="this.onerror=null;this.src='img/lac-montagne.jpg'" class="bw" alt="Montagne en noir et blanc" width="1050" height="1400">
           <div class="txt">
             <span class="tag">Sport et plaisir</span>
             <h3>Montagne</h3>
@@ -891,11 +890,11 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
           </div>
         </article>
         <article class="pcard side">
-          <img src="https://picsum.photos/seed/ocean-swim/800/1000?grayscale" onerror="this.onerror=null;this.src='img/triathlon.jpg'" class="bw" alt="Photo provisoire en noir et blanc" width="736" height="1104">
+          <img src="https://picsum.photos/seed/ocean-swim/800/1000?grayscale" onerror="this.onerror=null;this.src='img/triathlon.jpg'" class="bw" alt="" width="736" height="1104">
           <div class="txt"><span class="tag">Division 3</span><h3>Triathlon</h3><p>Actuellement en D3, avec l'ambition de monter un jour en D2.</p></div>
         </article>
         <article class="pcard side">
-          <img src="https://picsum.photos/seed/route-velo/800/1000?grayscale" onerror="this.onerror=null;this.src='img/velo.jpg'" class="bw" alt="Photo provisoire en noir et blanc" width="788" height="1400" style="object-position:center 30%">
+          <img src="https://picsum.photos/seed/route-velo/800/1000?grayscale" onerror="this.onerror=null;this.src='img/velo.jpg'" class="bw" alt="" width="788" height="1400" style="object-position:center 30%">
           <div class="txt"><span class="tag">Endurance</span><h3>Vélo</h3><p>Des heures de selle pour préparer les courses et les raids en montagne.</p></div>
         </article>
         <div class="pnote">
@@ -1073,19 +1072,36 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
     stageName.style.top = (H / 2 + slots[0].y - ch / 2 - 22) + 'px'; // juste au-dessus de la grille
   }
   // pose d'une carte le long d'une courbe 3D (ondulation + torsion)
-  function ribbonPose(u) {
-    const lam = W * 0.21, A = H * 0.2, B = W * 0.14, k = u / lam;
-    const x = u - W * 0.5, y = A * Math.sin(k) - H * 0.02, z = B * Math.cos(k * 0.8) - B;
-    const dy = A / lam * Math.cos(k), dz = -B * 0.8 / lam * Math.sin(k * 0.8);
-    return { x, y, z, ry: -Math.atan2(dz, 1) * 57.3, rz: Math.atan2(dy, 1) * 57.3 * 0.7, rx: Math.sin(k * 0.6) * 28, s: 0.78 };
+  // Tracé du ruban : une vague qui arrive de la gauche, puis un looping vertical (montagnes russes)
+  const RS = 0.6; // taille des cartes dans le ruban
+  function loopTrack() {
+    const R = Math.min(H * 0.24, W * 0.17), xs = -W * 0.5 - cw, xe = -W * 0.04, ye = H * 0.16;
+    const U0 = xe - xs, Uend = U0 + 2 * Math.PI * R;
+    return { R, xs, xe, ye, U0, Uend };
+  }
+  function pathPos(u, tr) {
+    if (u <= tr.U0) {
+      const fade = Math.max(0, Math.min(1, (tr.U0 - u) / (tr.U0 * 0.55)));
+      return { x: tr.xs + u, y: tr.ye + Math.sin(u / (W * 0.12)) * H * 0.12 * fade, z: 0 };
+    }
+    if (u <= tr.Uend) {
+      const th = (u - tr.U0) / tr.R;
+      return { x: tr.xe + Math.sin(th) * tr.R + th * cw * 0.05, y: tr.ye - (1 - Math.cos(th)) * tr.R, z: Math.sin(th) * 90 };
+    }
+    return { x: tr.xe + cw * 0.05 * 2 * Math.PI + (u - tr.Uend), y: tr.ye, z: 0 };
+  }
+  function ribbonPose(u, tr) {
+    const a = pathPos(u - 2, tr), c = pathPos(u, tr), b2 = pathPos(u + 2, tr);
+    const rz = Math.atan2(b2.y - a.y, b2.x - a.x) * 57.3;
+    return { x: c.x, y: c.y, z: c.z, ry: 0, rz, rx: 0, s: RS };
   }
   const lerp = (a, b, t) => a + (b - a) * t;
   const ease = t => t < 0 ? 0 : t > 1 ? 1 : 1 - Math.pow(1 - t, 3);
   const inout = t => t < 0 ? 0 : t > 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const apply = (el, p, o = 1) => { el.style.transform = `translate3d(${p.x - cw / 2}px, ${p.y - ch / 2}px, ${p.z}px) rotateY(${p.ry}deg) rotateZ(${p.rz}deg) rotateX(${p.rx}deg) scale(${p.s})`; el.style.opacity = o; };
 
-  const T = { wordsIn: 1100, ribbonStart: 700, cross: [2600, 5000], ribbonEnd: 6600, settle: [4500, 8300], end: 8500 };
-  let t0 = 0, raf = 0;
+  const T = { wordsIn: 1100, ribbonStart: 700, cross: [2600, 5000], ribbonDur: 5600, settleDur: 800 };
+  let t0 = 0, raf = 0, doneAt = [];
   function frame(now) {
     const t = now - t0;
     // mots : arrivent des bords, se croisent, puis sortent
@@ -1093,28 +1109,26 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
     w1.style.transform = `translateX(${lerp(-110, 0, inK) + crossK * 120}vw)`;
     w2.style.transform = `translateX(${lerp(110, 0, inK) - crossK * 120}vw)`;
     tagline.style.opacity = Math.min(ease((t - 500) / 600), 1 - ease((t - 3400) / 600));
-    // ruban
-    const spacing = cw * 0.78 * 0.97;
-    const head = lerp(-W * 0.1, W + spacing * els.length * 0.95, (t - T.ribbonStart) / (T.ribbonEnd - T.ribbonStart));
-    const sk = (t - T.settle[0]) / (T.settle[1] - T.settle[0]);
+    // ruban : le train de cartes avance, fait le looping, puis chaque carte va se ranger
+    const tr = loopTrack(), spacing = cw * RS * 1.02;
+    const total = tr.Uend + spacing * (els.length - 1);
+    const hk = Math.max(0, (t - T.ribbonStart) / T.ribbonDur);
+    const head = total * (hk < 1 ? hk * (0.55 + 0.45 * hk) / 1 : hk); // démarre doucement puis accélère
+    let allDone = true;
     els.forEach((o, i) => {
-      const r = ribbonPose(head - i * spacing);
-      if (o.grid === undefined) { apply(o.el, r, 1 - ease(sk * 1.4)); return; }
-      const g = slots[o.grid], kk = Math.max(0, Math.min(1, (sk - o.grid * 0.07) / 0.65));
-      // 1) la carte rejoint sa place
-      const k1 = ease(kk / 0.35);
-      const p = {}; for (const key in g) p[key] = lerp(r[key], g[key], k1);
-      // 2) looping vertical : elle monte, passe la tête en bas au sommet, et redescend se poser
-      const lk = Math.max(0, Math.min(1, (kk - 0.35) / 0.65));
-      if (lk > 0 && lk < 1) {
-        const a = 2 * Math.PI * inout(lk), R = Math.min(H * 0.17, 150);
-        p.x += Math.sin(a) * R; p.y -= (1 - Math.cos(a)) * R;
-        p.rz -= a * 57.3; p.z += Math.sin(Math.PI * lk) * 120; p.s = 1 - Math.sin(Math.PI * lk) * 0.15;
-      }
+      const u = head - i * spacing;
+      if (u >= tr.Uend && doneAt[i] === undefined) doneAt[i] = t;
+      if (doneAt[i] === undefined) { allDone = false; apply(o.el, ribbonPose(Math.max(u, -cw * 2), tr), 1); return; }
+      const k = (t - doneAt[i]) / T.settleDur, r = ribbonPose(tr.Uend, tr);
+      if (o.grid === undefined) { const p = ribbonPose(u, tr); apply(o.el, p, 1 - ease(k * 1.5)); if (k < 1) allDone = false; return; }
+      const g = slots[o.grid], e = inout(k), p = {};
+      for (const key in g) p[key] = lerp(r[key], g[key], e);
+      p.z += Math.sin(Math.PI * Math.min(1, k)) * 160;
       apply(o.el, p, 1);
+      if (k < 1) allDone = false;
     });
-    stage.classList.toggle('settled', t > T.settle[1]);
-    if (t < T.end) raf = requestAnimationFrame(frame); else finish();
+    stage.classList.toggle('settled', allDone);
+    if (!allDone) raf = requestAnimationFrame(frame); else finish();
   }
   let idleRaf = 0, stageVis = true;
   new IntersectionObserver(([e]) => stageVis = e.isIntersecting).observe(stage);
@@ -1137,7 +1151,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
     stage.classList.add('settled');
     if (!reduce) { cancelAnimationFrame(idleRaf); idleRaf = requestAnimationFrame(idle); }
   }
-  function play() { cancelAnimationFrame(idleRaf); cancelAnimationFrame(raf); layout(); stage.classList.remove('settled'); t0 = performance.now(); raf = requestAnimationFrame(frame); }
+  function play() { cancelAnimationFrame(idleRaf); cancelAnimationFrame(raf); doneAt = []; layout(); stage.classList.remove('settled'); t0 = performance.now(); raf = requestAnimationFrame(frame); }
   new ResizeObserver(() => { const done = stage.classList.contains('settled'); layout(); if (done) finish(); }).observe(stage);
   document.getElementById('replay').addEventListener('click', play);
   layout();
