@@ -1085,7 +1085,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
   const inout = t => t < 0 ? 0 : t > 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const apply = (el, p, o = 1) => { el.style.transform = `translate3d(${p.x - cw / 2}px, ${p.y - ch / 2}px, ${p.z}px) rotateY(${p.ry}deg) rotateZ(${p.rz}deg) rotateX(${p.rx}deg) scale(${p.s})`; el.style.opacity = o; };
 
-  const T = { wordsIn: 1100, ribbonStart: 700, cross: [2600, 5000], ribbonEnd: 6600, settle: [4900, 6900], end: 7100 };
+  const T = { wordsIn: 1100, ribbonStart: 700, cross: [2600, 5000], ribbonEnd: 6600, settle: [4700, 7600], end: 7800 };
   let t0 = 0, raf = 0;
   function frame(now) {
     const t = now - t0;
@@ -1101,8 +1101,13 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
     els.forEach((o, i) => {
       const r = ribbonPose(head - i * spacing);
       if (o.grid === undefined) { apply(o.el, r, 1 - ease(sk * 1.4)); return; }
-      const g = slots[o.grid], k = inout(sk - o.grid * 0.04);
+      const g = slots[o.grid], k = inout((sk - o.grid * 0.05) / 0.75);
       const p = {}; for (const key in g) p[key] = lerp(r[key], g[key], k);
+      // looping : chaque carte fait une boucle vers le haut avant de se poser
+      if (k > 0 && k < 1) {
+        const a = 2 * Math.PI * k, R = Math.min(H * 0.32, W * 0.22);
+        p.x += Math.sin(a) * R * 0.55; p.y -= (1 - Math.cos(a)) * R; p.z += Math.sin(Math.PI * k) * 260; p.rx += 360 * k;
+      }
       apply(o.el, p, 1);
     });
     stage.classList.toggle('settled', t > T.settle[1]);
@@ -1452,9 +1457,9 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
     const vh = innerHeight;
     // stores : les bandes noires se replient
     // bandes claires qui recouvrent la fin de la zone noire, juste avant les projets
-    const zb = blindsBox.parentElement.getBoundingClientRect().bottom, bk = clamp01((vh * 1.4 - zb) / (vh * 0.9));
+    const mq = document.querySelector('.marquee.plus').getBoundingClientRect(), bk = clamp01((vh * 0.3 - mq.top) / (vh * 0.75)); // démarre quand le bandeau a bien défilé au milieu
     blinds.forEach((b, i) => b.style.transform = `scaleY(${reduce ? 0 : clamp01(bk * 1.7 - (blinds.length - 1 - i) * 0.07)})`);
-    if (bk > 0.5 && bk < 1) document.body.classList.remove('inverted'); else if (bk > 0 && bk <= 0.5) document.body.classList.add('inverted');
+    if (bk > 0.2 && bk < 1) document.body.classList.remove('inverted'); else if (bk > 0 && bk <= 0.2) document.body.classList.add('inverted');
     // cartes inclinées qui se redressent
     tilts.forEach(c => {
       const r = c.getBoundingClientRect(), k = reduce ? 1 : clamp01((vh - r.top) / (vh * 0.9)), dir = +c.dataset.tilt, e = 1 - Math.pow(1 - k, 3);
