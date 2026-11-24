@@ -139,7 +139,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
 </header>
 
 <main id="main">
-  <svg class="thread" id="thread" aria-hidden="true"><path id="thread-path" d=""/><circle id="thread-dot" r="5" cx="-20" cy="-20"/></svg>
+  <svg class="thread" id="thread" aria-hidden="true"><g id="thread-segs"></g><circle id="thread-dot" r="5" cx="-20" cy="-20"/></svg>
   <header class="head wrap">
     <h1 class="reveal-text">Mes projets</h1>
     <p class="reveal-text">Projets d'équipe réalisés à l'IUT de Nantes :<br>moteur en Go, simulation en Python et site web.</p>
@@ -273,8 +273,8 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
   })();
 
   /* Le fil : tracé en arcs et petites boucles, dessiné au fur et à mesure du défilement */
-  const main = document.getElementById('main'), svg = document.getElementById('thread'), path = document.getElementById('thread-path'), dot = document.getElementById('thread-dot');
-  let table = [], total = 0, cur = 0;
+  const main = document.getElementById('main'), svg = document.getElementById('thread'), segG = document.getElementById('thread-segs'), dot = document.getElementById('thread-dot');
+  let table = [], total = 0, cur = 0, segs = [];
   function buildThread() {
     const mr = main.getBoundingClientRect(), W = main.clientWidth, H = main.scrollHeight;
     svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -282,7 +282,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
     const st = rel(document.getElementById('thread-start'));
     const stops = [{ x: st.x + st.w / 2, y: st.y + st.h + 24 }];
     const targets = [...document.querySelectorAll('.item .media'), document.querySelector('.end-in')];
-    let d = `M ${stops[0].x} ${stops[0].y}`, from = stops[0], side = 1;
+    const ds = []; let d = `M ${stops[0].x} ${stops[0].y}`, from = stops[0], side = 1;
     targets.forEach((el, i) => {
       const r = rel(el), to = { x: r.x + r.w / 2, y: r.y };
       const dy = to.y - from.y, swing = Math.min(W * 0.32, 420) * side, R = Math.min(70, dy * 0.08);
@@ -291,23 +291,29 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
       d += ` C ${from.x} ${from.y + dy * 0.2}, ${m.x - swing * 0.6} ${m.y - dy * 0.2}, ${m.x} ${m.y}`;
       d += ` a ${R} ${R} 0 1 ${side > 0 ? 1 : 0} 0.01 0`;
       d += ` C ${m.x + swing * 0.5} ${m.y + dy * 0.25}, ${to.x} ${to.y - dy * 0.25}, ${to.x} ${to.y}`;
-      if (i < targets.length - 1) { const tb = el.closest('.item').getBoundingClientRect(); from = { x: to.x, y: tb.bottom - mr.top + 30 }; d += ` M ${from.x} ${from.y}`; }
+      ds.push(d);
+      if (i < targets.length - 1) { const tb = el.closest('.item').getBoundingClientRect(); from = { x: to.x, y: tb.bottom - mr.top + 30 }; d = `M ${from.x} ${from.y}`; }
       side = -side;
     });
-    path.setAttribute('d', d);
-    total = path.getTotalLength();
+    // un tracé par trajet : chacun ne se dessine que jusqu'au point
+    segG.innerHTML = ''; segs = []; total = 0;
+    ds.forEach(dd => {
+      const pe = document.createElementNS('http://www.w3.org/2000/svg', 'path'); pe.setAttribute('d', dd); segG.appendChild(pe);
+      const len = pe.getTotalLength(); pe.style.strokeDasharray = `${len} ${len}`; pe.style.strokeDashoffset = len;
+      segs.push({ el: pe, start: total, len }); total += len;
+    });
     // table longueur → hauteur maximale atteinte, pour avancer le point selon le défilement
     table = []; let maxY = 0;
-    for (let l = 0; l <= total; l += 3) { const pt = path.getPointAtLength(l); maxY = Math.max(maxY, pt.y); table.push([l, maxY]); }
-    path.style.strokeDasharray = `${total} ${total}`;
+    for (let l = 0; l <= total; l += 3) { const pt = pointAt(l); maxY = Math.max(maxY, pt.y); table.push([l, maxY]); }
   }
+  function pointAt(l) { for (const sg of segs) if (l <= sg.start + sg.len) return sg.el.getPointAtLength(Math.max(0, l - sg.start)); const last = segs[segs.length - 1]; return last ? last.el.getPointAtLength(last.len) : { x: -20, y: -20 }; }
   function lenForY(y) { let lo = 0, hi = table.length - 1; if (!table.length) return 0; while (lo < hi) { const mid = (lo + hi) >> 1; if (table[mid][1] < y) lo = mid + 1; else hi = mid; } return table[lo][0]; }
   (function threadLoop() {
     if (table.length) {
       const target = reduce ? total : lenForY(scrollY + innerHeight * 0.62 - (main.getBoundingClientRect().top + scrollY));
       cur += (target - cur) * 0.12;
-      path.style.strokeDashoffset = total - cur;
-      const pt = path.getPointAtLength(cur); dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y);
+      segs.forEach(sg => { const drawn = Math.max(0, Math.min(sg.len, cur - sg.start)); sg.el.style.strokeDashoffset = sg.len - drawn; });
+      const pt = pointAt(cur); dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y);
     }
     requestAnimationFrame(threadLoop);
   })();
