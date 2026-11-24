@@ -625,6 +625,19 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
   .about { padding-block: 4rem 3rem; }
   .ad-top { margin-bottom: 2.5rem; }
 }
+
+/* ===== Cartes de l'intro : effet liquide une fois posées ===== */
+.fx-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.settled .card:not(.extra) .face { filter: url(#liquid); animation: liquid-blob 9s ease-in-out infinite; transform-origin: 50% 50%; }
+.settled .card:not(.extra):nth-child(2n) .face { animation-duration: 11s; animation-delay: -3s; }
+.settled .card:not(.extra):nth-child(3n) .face { animation-duration: 10s; animation-delay: -6s; }
+@keyframes liquid-blob {
+  0%, 100% { border-radius: 18px 24px 16px 26px / 24px 16px 26px 18px; transform: scale(1, 1); }
+  25% { border-radius: 28px 14px 26px 16px / 14px 28px 16px 24px; transform: scale(1.018, 0.985) skewX(0.6deg); }
+  50% { border-radius: 16px 26px 20px 22px / 26px 20px 28px 14px; transform: scale(0.988, 1.016) skewY(-0.5deg); }
+  75% { border-radius: 24px 18px 28px 14px / 18px 26px 14px 28px; transform: scale(1.01, 0.992) skewX(-0.5deg); }
+}
+@media (prefers-reduced-motion: reduce) { .settled .card .face { filter: none; animation: none; } }
 </style>
 </head>
 <body>
@@ -658,6 +671,14 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
       <p class="word w2" id="w2" aria-hidden="true">altitude</p>
       <p class="tagline" id="tagline">Étudiant ingénieur en informatique<br>Polytech Nantes</p>
       <p class="stage-name" id="stage-name" aria-hidden="true"><span>Gabriel Aillet</span></p>
+      <svg class="fx-defs" width="0" height="0" aria-hidden="true" focusable="false">
+        <filter id="liquid" x="-8%" y="-8%" width="116%" height="116%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.011 0.016" numOctaves="2" seed="4" result="n">
+            <animate attributeName="baseFrequency" dur="16s" values="0.011 0.016;0.018 0.010;0.009 0.019;0.011 0.016" repeatCount="indefinite"/>
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="11" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+      </svg>
       <div class="ribbon" id="ribbon"></div>
       <div class="stage-foot">
         <span class="status"><i aria-hidden="true"></i>Ouvert aux stages et jobs d'été</span>
