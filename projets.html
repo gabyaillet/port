@@ -31,8 +31,8 @@ p { margin: 0; }
 /* Le fil : un point blanc qui trace un trait fin d'un projet à l'autre */
 main { position: relative; }
 .thread { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; overflow: visible; }
-.thread path { fill: none; stroke: rgba(237,237,235,.55); stroke-width: 1; stroke-linecap: round; }
-.thread circle { fill: #ededeb; filter: drop-shadow(0 0 6px rgba(255,255,255,.8)); }
+.thread path { fill: none; stroke: rgba(237,237,235,.45); stroke-width: 0.8; stroke-linecap: round; }
+.thread circle { fill: #ededeb; filter: drop-shadow(0 0 4px rgba(255,255,255,.8)); }
 .head, .item, .end { position: relative; z-index: 1; }
 .media { box-shadow: 0 0 0 1px #1f1f1f; }
 
@@ -139,7 +139,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
 </header>
 
 <main id="main">
-  <svg class="thread" id="thread" aria-hidden="true"><g id="thread-segs"></g><circle id="thread-dot" r="5" cx="-20" cy="-20"/></svg>
+  <svg class="thread" id="thread" aria-hidden="true"><g id="thread-segs"></g><g id="thread-dots"><circle r="3" cx="-20" cy="-20"/><circle r="3" cx="-20" cy="-20"/><circle r="3" cx="-20" cy="-20"/></g></svg>
   <header class="head wrap">
     <h1 class="reveal-text">Mes projets</h1>
     <p class="reveal-text">Projets d'équipe réalisés à l'IUT de Nantes :<br>moteur en Go, simulation en Python et site web.</p>
@@ -272,48 +272,53 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
     requestAnimationFrame(ghostLoop);
   })();
 
-  /* Le fil : tracé en arcs et petites boucles, dessiné au fur et à mesure du défilement */
-  const main = document.getElementById('main'), svg = document.getElementById('thread'), segG = document.getElementById('thread-segs'), dot = document.getElementById('thread-dot');
-  let table = [], total = 0, cur = 0, segs = [];
+  /* Le fil : 3 points qui partent ensemble, suivent chacun une courbe au hasard et se retrouvent sur le projet */
+  const main = document.getElementById('main'), svg = document.getElementById('thread'), segG = document.getElementById('thread-segs');
+  const dots = [...document.querySelectorAll('#thread-dots circle')];
+  const seed0 = Math.floor(Math.random() * 1e9); // tirage au hasard à chaque visite, stable pendant la visite
+  function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  let segs = [], curY = 0;
+  function curvePath(from, to, W, R) {
+    const dy = to.y - from.y, sw = (R() * 2 - 1) * Math.min(W * 0.38, 460);
+    const m = { x: (from.x + to.x) / 2 + sw, y: from.y + dy * (0.3 + R() * 0.3) };
+    let d = `M ${from.x} ${from.y} C ${from.x + (R() * 2 - 1) * 120} ${from.y + dy * (0.1 + R() * 0.15)}, ${m.x - sw * (0.3 + R() * 0.5)} ${m.y - dy * (0.1 + R() * 0.15)}, ${m.x} ${m.y}`;
+    if (R() < 0.7) { const r = 20 + R() * 60; d += ` a ${r} ${r} 0 1 ${R() < 0.5 ? 1 : 0} 0.01 0`; }
+    const sw2 = (R() * 2 - 1) * Math.min(W * 0.3, 360);
+    d += ` C ${m.x + sw2} ${m.y + dy * (0.15 + R() * 0.2)}, ${to.x + (R() * 2 - 1) * 140} ${to.y - dy * (0.15 + R() * 0.15)}, ${to.x} ${to.y}`;
+    return d;
+  }
   function buildThread() {
     const mr = main.getBoundingClientRect(), W = main.clientWidth, H = main.scrollHeight;
     svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     const rel = el => { const r = el.getBoundingClientRect(); return { x: r.left - mr.left, y: r.top - mr.top, w: r.width, h: r.height }; };
     const st = rel(document.getElementById('thread-start'));
-    const stops = [{ x: st.x + st.w / 2, y: st.y + st.h + 24 }];
+    let from = { x: st.x + st.w / 2, y: st.y + st.h + 24 };
     const targets = [...document.querySelectorAll('.item .media'), document.querySelector('.end-in')];
-    const ds = []; let d = `M ${stops[0].x} ${stops[0].y}`, from = stops[0], side = 1;
+    const R = rng(seed0);
+    segG.innerHTML = ''; segs = [];
     targets.forEach((el, i) => {
       const r = rel(el), to = { x: r.x + r.w / 2, y: r.y };
-      const dy = to.y - from.y, swing = Math.min(W * 0.32, 420) * side, R = Math.min(70, dy * 0.08);
-      const m = { x: (from.x + to.x) / 2 + swing * 0.55, y: from.y + dy * 0.45 };
-      // arc vers le côté, petite boucle, puis arc qui rejoint le haut du projet
-      d += ` C ${from.x} ${from.y + dy * 0.2}, ${m.x - swing * 0.6} ${m.y - dy * 0.2}, ${m.x} ${m.y}`;
-      d += ` a ${R} ${R} 0 1 ${side > 0 ? 1 : 0} 0.01 0`;
-      d += ` C ${m.x + swing * 0.5} ${m.y + dy * 0.25}, ${to.x} ${to.y - dy * 0.25}, ${to.x} ${to.y}`;
-      ds.push(d);
-      if (i < targets.length - 1) { const tb = el.closest('.item').getBoundingClientRect(); from = { x: to.x, y: tb.bottom - mr.top + 30 }; d = `M ${from.x} ${from.y}`; }
-      side = -side;
+      const paths = [0, 1, 2].map(() => {
+        const pe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pe.setAttribute('d', curvePath(from, to, W, R)); segG.appendChild(pe);
+        const len = pe.getTotalLength(); pe.style.strokeDasharray = `${len} ${len}`; pe.style.strokeDashoffset = len;
+        return { el: pe, len };
+      });
+      segs.push({ from, to, paths });
+      if (i < targets.length - 1) { const tb = el.closest('.item').getBoundingClientRect(); from = { x: to.x, y: tb.bottom - mr.top + 30 }; }
     });
-    // un tracé par trajet : chacun ne se dessine que jusqu'au point
-    segG.innerHTML = ''; segs = []; total = 0;
-    ds.forEach(dd => {
-      const pe = document.createElementNS('http://www.w3.org/2000/svg', 'path'); pe.setAttribute('d', dd); segG.appendChild(pe);
-      const len = pe.getTotalLength(); pe.style.strokeDasharray = `${len} ${len}`; pe.style.strokeDashoffset = len;
-      segs.push({ el: pe, start: total, len }); total += len;
-    });
-    // table longueur → hauteur maximale atteinte, pour avancer le point selon le défilement
-    table = []; let maxY = 0;
-    for (let l = 0; l <= total; l += 3) { const pt = pointAt(l); maxY = Math.max(maxY, pt.y); table.push([l, maxY]); }
   }
-  function pointAt(l) { for (const sg of segs) if (l <= sg.start + sg.len) return sg.el.getPointAtLength(Math.max(0, l - sg.start)); const last = segs[segs.length - 1]; return last ? last.el.getPointAtLength(last.len) : { x: -20, y: -20 }; }
-  function lenForY(y) { let lo = 0, hi = table.length - 1; if (!table.length) return 0; while (lo < hi) { const mid = (lo + hi) >> 1; if (table[mid][1] < y) lo = mid + 1; else hi = mid; } return table[lo][0]; }
   (function threadLoop() {
-    if (table.length) {
-      const target = reduce ? total : lenForY(scrollY + innerHeight * 0.62 - (main.getBoundingClientRect().top + scrollY));
-      cur += (target - cur) * 0.12;
-      segs.forEach(sg => { const drawn = Math.max(0, Math.min(sg.len, cur - sg.start)); sg.el.style.strokeDashoffset = sg.len - drawn; });
-      const pt = pointAt(cur); dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y);
+    if (segs.length) {
+      const target = reduce ? 1e9 : scrollY + innerHeight * 0.62 - (main.getBoundingClientRect().top + scrollY);
+      curY += (target - curY) * 0.12;
+      let active = null, at = 0;
+      segs.forEach(sg => {
+        const t = Math.max(0, Math.min(1, (curY - sg.from.y) / (sg.to.y - sg.from.y)));
+        sg.paths.forEach(pp => pp.el.style.strokeDashoffset = pp.len * (1 - t));
+        if (curY >= sg.from.y || !active) { active = sg; at = t; }
+      });
+      dots.forEach((c, k) => { const pp = active.paths[k], pt = pp.el.getPointAtLength(pp.len * at); c.setAttribute('cx', pt.x); c.setAttribute('cy', pt.y); });
     }
     requestAnimationFrame(threadLoop);
   })();
