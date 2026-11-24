@@ -315,7 +315,7 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
 .loader .bar { position: absolute; left: 0; bottom: 0; height: 3px; background: #ededeb; width: 0; }
 
 /* Curseur */
-.cursor { position: fixed; left: 0; top: 0; z-index: 150; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #fff; mix-blend-mode: difference; pointer-events: none;
+.cursor { position: fixed; left: 0; top: 0; z-index: 150; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #111; box-shadow: 0 0 0 1.5px rgba(255,255,255,.85); pointer-events: none;
   display: grid; place-items: center; transition: width .35s cubic-bezier(.2,.8,.2,1), height .35s cubic-bezier(.2,.8,.2,1), margin .35s cubic-bezier(.2,.8,.2,1); }
 .cursor span { font: 500 0.68rem var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: #000; opacity: 0; transition: opacity .2s; }
 .cursor.big { width: 88px; height: 88px; margin: -44px 0 0 -44px; }
@@ -373,6 +373,76 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
   .pre, .pre * { transform: none !important; opacity: 1 !important; clip-path: none !important; }
   .cursor, .loader { display: none; }
 }
+
+/* ===== Qui je suis ===== */
+.eyebrow-line { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1.5rem; }
+.statement { font: 500 clamp(2rem, 5.2vw, 4.6rem)/1.02 var(--f-display); letter-spacing: -0.045em; max-width: 20ch; text-wrap: balance; }
+.statement .sw { transition: color .25s linear; }
+.about-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(2rem, 6vw, 6rem); margin-top: clamp(3rem, 8vw, 6rem); align-items: start; }
+.about-photo { margin: 0; position: relative; overflow: hidden; border-radius: 10px; }
+.about-photo img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+.about-photo figcaption { position: absolute; left: 0.8rem; bottom: 0.8rem; background: rgba(0,0,0,.6); color: #eee; padding: 0.25rem 0.5rem; border-radius: 3px; }
+.about-text { display: grid; gap: 1.25rem; color: var(--muted); font-size: 1.08rem; max-width: 52ch; }
+.about-lead { font: 500 clamp(1.4rem, 2.6vw, 2rem)/1.2 var(--f-display); letter-spacing: -0.03em; color: var(--ink); }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; margin: 0.75rem 0 0; border-top: 1px solid var(--line); }
+.facts > div { padding: 0.9rem 0; border-bottom: 1px solid var(--line); }
+.facts dt { font: 500 0.7rem var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 0.2rem 0 0; color: var(--ink); font-weight: 500; }
+.about-path { margin-top: clamp(4rem, 9vw, 7rem); }
+.path-title { font: 500 clamp(2.4rem, 6.5vw, 4.6rem)/0.92 var(--f-display); letter-spacing: -0.045em; text-transform: uppercase; margin-bottom: clamp(2rem, 5vw, 3rem); }
+@media (max-width: 800px) { .about-grid { grid-template-columns: 1fr; } .facts { grid-template-columns: 1fr; } }
+
+/* Photos en noir et blanc, grain d'argentique */
+img.bw { filter: grayscale(1) contrast(1.12) brightness(0.96); }
+.pcard::before, .about-photo::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: .18; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+/* ===== Projets : défilement horizontal épinglé ===== */
+.hscroll { position: relative; border-top: 1px solid var(--line); }
+.hs-sticky { position: sticky; top: calc(4rem + env(safe-area-inset-top, 0px)); height: calc(100svh - 4rem - env(safe-area-inset-top, 0px)); overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: clamp(1.25rem, 3vh, 2.5rem); }
+.hs-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem; width: 100%; }
+.hs-head .eyebrow-line { margin-bottom: 0.8rem; }
+.hs-head h2 { font: 500 clamp(2.2rem, 6vw, 4.6rem)/0.92 var(--f-display); letter-spacing: -0.045em; text-transform: uppercase; }
+.hs-meter { display: grid; gap: 0.5rem; justify-items: end; min-width: 9rem; }
+.hs-bar { width: 9rem; height: 2px; background: var(--line); overflow: hidden; } .hs-bar i { display: block; height: 100%; width: 100%; background: var(--ink); transform-origin: left; transform: scaleX(0); }
+.hs-track { display: flex; align-items: stretch; gap: clamp(1rem, 3vw, 2.5rem); padding-left: max(20px, calc((100vw - var(--wrap)) / 2 + 20px)); padding-right: 10vw; will-change: transform; }
+.hs-card { flex: none; width: min(78vw, 980px); display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(1rem, 2.5vw, 2rem); align-items: center; }
+.hs-media { min-width: 0; } .hs-media .visual { margin: 0; }
+.hs-media .cli, .hs-media .wine { min-height: min(46vh, 360px); }
+.hs-media .demo canvas { height: min(46vh, 360px); }
+.hs-info { display: grid; gap: 0.7rem; align-content: start; }
+.hs-num { font: 500 clamp(3.5rem, 8vw, 6.5rem)/0.8 var(--f-display); letter-spacing: -0.06em; color: transparent; -webkit-text-stroke: 1.2px var(--ink); }
+.hs-info h3 { font: 500 clamp(1.8rem, 3.4vw, 2.8rem)/0.95 var(--f-display); letter-spacing: -0.04em; text-transform: uppercase; }
+.hs-info p { color: var(--muted); max-width: 36ch; }
+.hs-info .btn { justify-self: start; margin-top: 0.4rem; }
+.hs-end { flex: none; width: min(60vw, 560px); display: grid; align-content: center; gap: 1.25rem; }
+.hs-end p { font: 500 clamp(1.8rem, 4vw, 3.2rem)/1.02 var(--f-display); letter-spacing: -0.04em; }
+.hs-end .btn { justify-self: start; }
+@media (max-width: 760px) {
+  .hscroll { height: auto !important; }
+  .hs-sticky { position: static; height: auto; padding-block: 4rem; }
+  .hs-head { flex-direction: column; align-items: flex-start; }
+  .hs-meter { justify-items: start; }
+  .hs-track { overflow-x: auto; scroll-snap-type: x mandatory; padding-right: 20px; transform: none !important; scrollbar-width: none; }
+  .hs-card { width: 86vw; grid-template-columns: 1fr; scroll-snap-align: start; }
+  .hs-end { width: 70vw; scroll-snap-align: start; }
+}
+
+/* Fiches projet « Voir plus » */
+dialog.sheet { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: min(100vw, 720px); max-width: 100vw; padding: 0; border: 0; background: var(--bg); color: var(--ink);
+  transform: translateX(100%); transition: transform .7s cubic-bezier(.76,0,.24,1); }
+dialog.sheet[open] { transform: none; }
+dialog.sheet.closing { transform: translateX(100%); }
+dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px); }
+.sheet-in { padding: calc(env(safe-area-inset-top, 0px) + 1.5rem) max(24px, env(safe-area-inset-right, 0px)) 3rem max(24px, env(safe-area-inset-left, 0px)); display: grid; gap: 1rem; }
+.sheet-close { justify-self: end; background: none; border: 1px solid var(--line); color: var(--ink); border-radius: 999px; padding: 0.45rem 0.9rem; font: 500 0.75rem var(--f-mono); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; }
+.sheet-close:hover { border-color: var(--ink); }
+.sheet h3 { font: 500 clamp(2.2rem, 6vw, 3.6rem)/0.92 var(--f-display); letter-spacing: -0.045em; text-transform: uppercase; }
+.sheet .pitch { font-size: var(--step-1); line-height: 1.4; margin-top: 0.6rem; }
+.sheet dl { display: grid; gap: 1.1rem; margin: 1.25rem 0 0; }
+.sheet dt { font: 500 0.72rem var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; }
+.sheet dd { margin: 0.25rem 0 0; color: var(--muted); }
+.sheet .meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
 </style>
 </head>
 <body>
@@ -382,10 +452,10 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
     <a href="#top" class="brand"><span class="blaze" aria-hidden="true"></span>G. Aillet</a>
     <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="nav">Menu</button>
     <ul class="nav" id="nav" data-open="false">
+      <li><a href="#apropos">Qui je suis</a></li>
       <li><a href="#projets">Projets</a></li>
       <li><a href="#terminal">Terminal</a></li>
       <li><a href="#competences">Compétences</a></li>
-      <li><a href="#parcours">Parcours</a></li>
       <li><a href="#passions">Passions</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
@@ -410,6 +480,55 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
     </div>
   </section>
 
+  <!-- QUI JE SUIS -->
+  <section class="block about" id="apropos">
+    <div class="wrap">
+      <div class="eyebrow-line"><span class="blaze" aria-hidden="true"></span><span class="label">Qui je suis</span></div>
+      <p class="statement" data-scrub>Je m'appelle Gabriel Aillet. J'étudie l'informatique à Polytech Nantes pour devenir ingénieur, et entre deux lignes de code, je nage, je roule, je cours et je grimpe.</p>
+      <div class="about-grid">
+        <figure class="about-photo">
+          <img src="https://picsum.photos/seed/gabriel-portrait/900/1150?grayscale" onerror="this.onerror=null;this.src='img/ski-rando.jpg'" class="bw" alt="Photo de présentation (à remplacer)" width="900" height="1150">
+          <figcaption class="label">Photo provisoire · à remplacer</figcaption>
+        </figure>
+        <div class="about-text">
+          <p class="about-lead">Mon parcours est marqué par une double exigence : réussir dans le numérique et m'engager à fond dans le sport.</p>
+          <p>Le football, le tennis puis le triathlon en compétition D3 m'ont appris la discipline, la gestion de l'effort et l'esprit d'équipe. Je les retrouve dans chaque projet : on découpe, on s'entraîne, on livre.</p>
+          <p>Animateur BAFA en colonies, au ski comme à la mer, j'ai appris à encadrer un groupe, à organiser et à garder mon calme. Côté créatif, je fais du montage vidéo et du design, que j'ai découvert pendant un stage chez Springart.</p>
+          <dl class="facts">
+            <div><dt>Basé à</dt><dd>Nantes (44)</dd></div>
+            <div><dt>Formation</dt><dd>BUT Info intégré Polytech</dd></div>
+            <div><dt>Bac</dt><dd>STI2D option SIN, Lyon</dd></div>
+            <div><dt>Brevets</dt><dd>PSC1 · PSSM · BAFA · Permis B</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="about-path">
+        <h3 class="path-title">Mon parcours</h3>
+        <div class="paths">
+        <div>
+          <h3><span class="blaze" aria-hidden="true"></span>Études</h3>
+          <ol class="trail-list">
+            <li class="trail-step now"><span class="label">Aujourd'hui</span><h4>BUT Info intégré — Polytech</h4><p class="where">Nantes (44)</p><p class="desc">Première année de BUT Informatique intégré au parcours Polytech, pour obtenir le diplôme d'ingénieur en informatique.</p></li>
+            <li class="trail-step"><span class="label">Première – Terminale</span><h4>Bac STI2D, option SIN</h4><p class="where">Lyon</p><p class="desc">Deux années en Systèmes d'Information et Numérique pour entrer dans le monde de l'informatique.</p></li>
+            <li class="trail-step"><span class="label">Seconde</span><h4>Seconde générale</h4><p class="where">Établissement public</p><p class="desc">Gain d'autonomie et choix de l'orientation vers les sciences technologiques.</p></li>
+            <li class="trail-step"><span class="label">Collège</span><h4>Brevet des collèges</h4><p class="where">Établissement privé</p></li>
+          </ol>
+        </div>
+        <div>
+          <h3><span class="blaze" aria-hidden="true"></span>Expériences</h3>
+          <ol class="trail-list">
+            <li class="trail-step now"><span class="label">2026</span><h4>BAFA SB</h4><p class="desc">Formation d'animateur et mise en sécurité d'une baignade organisée.</p><ul class="chips"><li>Pédagogie</li><li>Sécurité</li></ul></li>
+            <li class="trail-step"><span class="label">Hiver 2024 · Été 2025</span><h4>Animateur de séjours</h4><p class="desc">Encadrement de groupes d'enfants sur une colo ski puis une colo découverte. Grands jeux, veillées et beaucoup d'expérience.</p><ul class="chips"><li>Responsabilité</li><li>Travail d'équipe</li></ul></li>
+            <li class="trail-step"><span class="label">2024</span><h4>Stage design · Springart</h4><p class="desc">Trois jours chez une marque de textile d'athlétisme : créer un vêtement de A à Z en dessinant mon propre maillot.</p><ul class="chips"><li>Illustrator</li><li>Créativité</li></ul></li>
+            <li class="trail-step"><span class="label">2024</span><h4>BAFA stagiaire</h4><p class="desc">Règles de sécurité et psychologie de l'enfant, mises en pratique en séjour.</p></li>
+            <li class="trail-step"><span class="label">2021</span><h4>Stage en pâtisserie</h4><p class="desc">Stage de 3<sup>e</sup> : exigence du travail manuel, préparation et vente.</p></li>
+          </ol>
+        </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- BANDEAU -->
   <div class="marquee" aria-hidden="true">
     <div class="track" id="marquee-track">
@@ -417,43 +536,19 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
     </div>
   </div>
 
-  <!-- CHIFFRES -->
-  <section class="numbers" aria-label="En chiffres">
-    <div class="wrap">
-      <p class="numbers-intro">Je construis des logiciels comme je prépare une course. <em>Méthode, endurance, et une équipe sur qui compter.</em></p>
-      <div class="num-grid">
-        <div class="num"><b data-count="3">3</b><span class="label">Projets d'équipe</span></div>
-        <div class="num"><b data-count="4">4</b><span class="label">Jours pour le GR20</span></div>
-        <div class="num"><b data-count="9">9</b><span class="label">Ans de football</span></div>
-        <div class="num"><b data-count="7">7</b><span class="label">Ans de tennis</span></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PROJETS -->
-  <section class="block" id="projets">
-    <div class="wrap">
-      <div class="sec-head">
+  <!-- PROJETS : défilement horizontal épinglé -->
+  <section class="hscroll" id="projets" aria-label="Projets">
+    <div class="hs-sticky">
+      <div class="wrap hs-head">
         <div>
-          <div class="eyebrow"><span class="blaze" aria-hidden="true"></span><span class="label">Projets SAE · IUT de Nantes</span></div>
+          <div class="eyebrow-line"><span class="blaze" aria-hidden="true"></span><span class="label">Projets SAE · IUT de Nantes</span></div>
           <h2>Ce que j'ai construit</h2>
         </div>
-        <p>Trois projets d'équipe, de l'objectif à ce que j'en retiens. Le premier se teste directement ici.</p>
+        <div class="hs-meter"><span class="mono" id="hs-count">01 / 03</span><span class="hs-bar"><i id="hs-bar"></i></span></div>
       </div>
-
-      <article class="case">
-        <div>
-          <div class="meta"><span class="label">2026</span><span class="label">Équipe de 4</span><span class="label">Algorithmique</span></div>
-          <h3>Générateur de particules</h3>
-          <p class="pitch">Un moteur de particules écrit en Go, paramétrable depuis une interface.</p>
-          <dl>
-            <div><dt>Objectif</dt><dd>Apprendre les bases du Go, la gestion de la mémoire et les structures de données dynamiques en construisant un vrai moteur.</dd></div>
-            <div><dt>Ce que j'ai fait</dt><dd>Les particules sont générées par le code et réglables de plusieurs façons : position aléatoire ou depuis un point d'émission, vitesse constante ou accélérée, et durée de vie limitée pour ne pas saturer la mémoire.</dd></div>
-            <div><dt>Ce que j'en retiens</dt><dd>Penser au coût de chaque objet créé, et découper un programme pour que quatre personnes puissent coder en parallèle.</dd></div>
-          </dl>
-          <ul class="chips"><li>Go</li><li>Structures de données</li><li>Mémoire</li></ul>
-        </div>
-        <figure class="visual demo" style="margin:0">
+      <div class="hs-track" id="hs-track">
+        <article class="hs-card">
+          <div class="hs-media"><figure class="visual demo" style="margin:0">
           <div class="bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="label">Démo · réimplémentée en JavaScript</span></div>
           <canvas id="demo" aria-label="Démonstration interactive d'un générateur de particules"></canvas>
           <div class="controls">
@@ -466,22 +561,17 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
               <button type="button" data-motion="accel" aria-pressed="true">Accélération</button>
             </span>
           </div>
-        </figure>
-      </article>
-
-      <article class="case">
-        <div>
-          <div class="meta"><span class="label">2026</span><span class="label">Équipe de 4</span><span class="label">Serious game</span></div>
-          <h3>Simulation économique</h3>
-          <p class="pitch">Un jeu en Python, joué dans le terminal, pour apprendre l'économie en gérant un marché.</p>
-          <dl>
-            <div><dt>Objectif</dt><dd>Concevoir un jeu sérieux qui fait comprendre l'offre, la demande et la rentabilité en jouant.</dd></div>
-            <div><dt>Ce que j'ai fait</dt><dd>Un moteur de simulation où les prix varient selon les décisions du joueur et des événements aléatoires (crises, inflation), un système d'achats et de ventes à partir d'un capital de départ, et des menus textuels clairs.</dd></div>
-            <div><dt>Ce que j'en retiens</dt><dd>Une bonne interface en ligne de commande demande autant de soin qu'une interface graphique : chaque menu doit être lisible en un coup d'œil.</dd></div>
-          </dl>
-          <ul class="chips"><li>Python</li><li>CLI</li><li>Simulation</li></ul>
-        </div>
-        <figure class="visual" style="margin:0">
+        </figure></div>
+          <div class="hs-info">
+            <span class="hs-num">01</span>
+            <h3>Générateur de particules</h3>
+            <span class="label">Go · 2026 · équipe de 4</span>
+            <p>Un moteur de particules écrit en Go, paramétrable depuis une interface. Essayez-le directement ici.</p>
+            <button class="btn ghost" type="button" data-sheet="sheet-go">Voir plus →</button>
+          </div>
+        </article>
+        <article class="hs-card">
+          <div class="hs-media"><figure class="visual" style="margin:0">
           <div class="bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="label">Terminal</span></div>
           <div class="cli"><pre><span class="d">$ python simulation.py</span>
 
@@ -497,23 +587,17 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
   [3] Marché    [4] Fin du tour
 <span class="d">&gt;</span> _</pre></div>
           <p class="note mono">Illustration de l'interface, valeurs fictives.</p>
-        </figure>
-      </article>
-
-      <article class="case">
-        <div>
-          <div class="meta"><span class="label">2025</span><span class="label">Équipe de 3</span><span class="label">Intégration web</span></div>
-          <h3>Boutique de vins</h3>
-          <p class="pitch">Un site de caviste imaginé, maquetté puis intégré en HTML et CSS.</p>
-          <dl>
-            <div><dt>Objectif</dt><dd>Découvrir et maîtriser l'intégration web fondamentale sur un vrai cas de boutique en ligne.</dd></div>
-            <div><dt>Ce que j'ai fait</dt><dd>Une structure HTML5 sémantique et accessible, des feuilles de style CSS3 adaptées à l'univers du terroir, et des menus et grilles de produits responsive pour smartphone et tablette.</dd></div>
-            <div><dt>Ce que j'en retiens</dt><dd>Partir de la maquette avant d'écrire la moindre ligne de CSS fait gagner beaucoup de temps à toute l'équipe.</dd></div>
-          </dl>
-          <ul class="chips"><li>HTML5</li><li>CSS3</li><li>Responsive</li><li>UI / UX</li></ul>
-          <div class="hero-actions"><a class="btn ghost" href="https://github.com/gabyaillet" target="_blank" rel="noopener">Voir sur GitHub ↗</a></div>
-        </div>
-        <figure class="visual" style="margin:0">
+        </figure></div>
+          <div class="hs-info">
+            <span class="hs-num">02</span>
+            <h3>Simulation économique</h3>
+            <span class="label">Python · 2026 · équipe de 4</span>
+            <p>Un serious game joué dans le terminal pour apprendre l'économie en gérant un marché.</p>
+            <button class="btn ghost" type="button" data-sheet="sheet-eco">Voir plus →</button>
+          </div>
+        </article>
+        <article class="hs-card">
+          <div class="hs-media"><figure class="visual" style="margin:0">
           <div class="bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="label">Maquette</span></div>
           <div class="wine" aria-hidden="true">
             <div class="nav-m"><b>Le Cellier</b><span>Rouges · Blancs · Rosés</span></div>
@@ -525,8 +609,20 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
             </div>
           </div>
           <p class="note mono">Illustration de la mise en page, pas une capture du site.</p>
-        </figure>
-      </article>
+        </figure></div>
+          <div class="hs-info">
+            <span class="hs-num">03</span>
+            <h3>Boutique de vins</h3>
+            <span class="label">HTML / CSS · 2025 · équipe de 3</span>
+            <p>Un site de caviste imaginé, maquetté puis intégré, pensé d'abord pour le mobile.</p>
+            <button class="btn ghost" type="button" data-sheet="sheet-vin">Voir plus →</button>
+          </div>
+        </article>
+        <div class="hs-end">
+          <p>D'autres projets arrivent.<br>En attendant, interrogez-moi.</p>
+          <a class="btn" href="#terminal">Ouvrir le terminal ↓</a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -596,40 +692,6 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
     </div>
   </section>
 
-  <!-- PARCOURS -->
-  <section class="block" id="parcours">
-    <div class="wrap">
-      <div class="sec-head">
-        <div>
-          <div class="eyebrow"><span class="blaze" aria-hidden="true"></span><span class="label">Formation et terrain</span></div>
-          <h2>Mon parcours</h2>
-        </div>
-        <p>Deux sentiers en parallèle : les études qui me mènent au diplôme d'ingénieur, et les expériences où j'ai appris la responsabilité.</p>
-      </div>
-      <div class="paths">
-        <div>
-          <h3><span class="blaze" aria-hidden="true"></span>Études</h3>
-          <ol class="trail-list">
-            <li class="trail-step now"><span class="label">Aujourd'hui</span><h4>BUT Info intégré — Polytech</h4><p class="where">Nantes (44)</p><p class="desc">Première année de BUT Informatique intégré au parcours Polytech, pour obtenir le diplôme d'ingénieur en informatique.</p></li>
-            <li class="trail-step"><span class="label">Première – Terminale</span><h4>Bac STI2D, option SIN</h4><p class="where">Lyon</p><p class="desc">Deux années en Systèmes d'Information et Numérique pour entrer dans le monde de l'informatique.</p></li>
-            <li class="trail-step"><span class="label">Seconde</span><h4>Seconde générale</h4><p class="where">Établissement public</p><p class="desc">Gain d'autonomie et choix de l'orientation vers les sciences technologiques.</p></li>
-            <li class="trail-step"><span class="label">Collège</span><h4>Brevet des collèges</h4><p class="where">Établissement privé</p></li>
-          </ol>
-        </div>
-        <div>
-          <h3><span class="blaze" aria-hidden="true"></span>Expériences</h3>
-          <ol class="trail-list">
-            <li class="trail-step now"><span class="label">2026</span><h4>BAFA SB</h4><p class="desc">Formation d'animateur et mise en sécurité d'une baignade organisée.</p><ul class="chips"><li>Pédagogie</li><li>Sécurité</li></ul></li>
-            <li class="trail-step"><span class="label">Hiver 2024 · Été 2025</span><h4>Animateur de séjours</h4><p class="desc">Encadrement de groupes d'enfants sur une colo ski puis une colo découverte. Grands jeux, veillées et beaucoup d'expérience.</p><ul class="chips"><li>Responsabilité</li><li>Travail d'équipe</li></ul></li>
-            <li class="trail-step"><span class="label">2024</span><h4>Stage design · Springart</h4><p class="desc">Trois jours chez une marque de textile d'athlétisme : créer un vêtement de A à Z en dessinant mon propre maillot.</p><ul class="chips"><li>Illustrator</li><li>Créativité</li></ul></li>
-            <li class="trail-step"><span class="label">2024</span><h4>BAFA stagiaire</h4><p class="desc">Règles de sécurité et psychologie de l'enfant, mises en pratique en séjour.</p></li>
-            <li class="trail-step"><span class="label">2021</span><h4>Stage en pâtisserie</h4><p class="desc">Stage de 3<sup>e</sup> : exigence du travail manuel, préparation et vente.</p></li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- PASSIONS -->
   <section class="block" id="passions" data-dark>
     <div class="wrap">
@@ -642,7 +704,7 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
       </div>
       <div class="passions">
         <article class="pcard big">
-          <img src="img/lac-montagne.jpg" alt="Deux randonneurs souriants devant un lac de montagne" width="1050" height="1400">
+          <img src="https://picsum.photos/seed/alpes-noir/1000/1300?grayscale" onerror="this.onerror=null;this.src='img/lac-montagne.jpg'" class="bw" alt="Montagne en noir et blanc (photo provisoire)" width="1050" height="1400">
           <div class="txt">
             <span class="tag">Sport et plaisir</span>
             <h3>Montagne</h3>
@@ -655,11 +717,11 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
           </div>
         </article>
         <article class="pcard side">
-          <img src="img/triathlon.jpg" alt="Triathlète en combinaison sortant de l'eau" width="736" height="1104">
+          <img src="https://picsum.photos/seed/ocean-swim/800/1000?grayscale" onerror="this.onerror=null;this.src='img/triathlon.jpg'" class="bw" alt="Photo provisoire en noir et blanc" width="736" height="1104">
           <div class="txt"><span class="tag">Division 3</span><h3>Triathlon</h3><p>Actuellement en D3, avec l'ambition de monter un jour en D2.</p></div>
         </article>
         <article class="pcard side">
-          <img src="img/velo.jpg" alt="Sortie vélo de route en groupe" width="788" height="1400" style="object-position:center 30%">
+          <img src="https://picsum.photos/seed/route-velo/800/1000?grayscale" onerror="this.onerror=null;this.src='img/velo.jpg'" class="bw" alt="Photo provisoire en noir et blanc" width="788" height="1400" style="object-position:center 30%">
           <div class="txt"><span class="tag">Endurance</span><h3>Vélo</h3><p>Des heures de selle pour préparer les courses et les raids en montagne.</p></div>
         </article>
         <div class="pnote">
@@ -704,6 +766,60 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
   </div>
 </footer>
 
+
+<dialog class="sheet" id="sheet-go" aria-label="Générateur de particules">
+  <div class="sheet-in">
+    <button class="sheet-close" type="button" aria-label="Fermer">Fermer ✕</button>
+    <span class="hs-num">01</span>
+    
+          <div class="meta"><span class="label">2026</span><span class="label">Équipe de 4</span><span class="label">Algorithmique</span></div>
+          <h3>Générateur de particules</h3>
+          <p class="pitch">Un moteur de particules écrit en Go, paramétrable depuis une interface.</p>
+          <dl>
+            <div><dt>Objectif</dt><dd>Apprendre les bases du Go, la gestion de la mémoire et les structures de données dynamiques en construisant un vrai moteur.</dd></div>
+            <div><dt>Ce que j'ai fait</dt><dd>Les particules sont générées par le code et réglables de plusieurs façons : position aléatoire ou depuis un point d'émission, vitesse constante ou accélérée, et durée de vie limitée pour ne pas saturer la mémoire.</dd></div>
+            <div><dt>Ce que j'en retiens</dt><dd>Penser au coût de chaque objet créé, et découper un programme pour que quatre personnes puissent coder en parallèle.</dd></div>
+          </dl>
+          <ul class="chips"><li>Go</li><li>Structures de données</li><li>Mémoire</li></ul>
+        
+  </div>
+</dialog>
+<dialog class="sheet" id="sheet-eco" aria-label="Simulation économique">
+  <div class="sheet-in">
+    <button class="sheet-close" type="button" aria-label="Fermer">Fermer ✕</button>
+    <span class="hs-num">02</span>
+    
+          <div class="meta"><span class="label">2026</span><span class="label">Équipe de 4</span><span class="label">Serious game</span></div>
+          <h3>Simulation économique</h3>
+          <p class="pitch">Un jeu en Python, joué dans le terminal, pour apprendre l'économie en gérant un marché.</p>
+          <dl>
+            <div><dt>Objectif</dt><dd>Concevoir un jeu sérieux qui fait comprendre l'offre, la demande et la rentabilité en jouant.</dd></div>
+            <div><dt>Ce que j'ai fait</dt><dd>Un moteur de simulation où les prix varient selon les décisions du joueur et des événements aléatoires (crises, inflation), un système d'achats et de ventes à partir d'un capital de départ, et des menus textuels clairs.</dd></div>
+            <div><dt>Ce que j'en retiens</dt><dd>Une bonne interface en ligne de commande demande autant de soin qu'une interface graphique : chaque menu doit être lisible en un coup d'œil.</dd></div>
+          </dl>
+          <ul class="chips"><li>Python</li><li>CLI</li><li>Simulation</li></ul>
+        
+  </div>
+</dialog>
+<dialog class="sheet" id="sheet-vin" aria-label="Boutique de vins">
+  <div class="sheet-in">
+    <button class="sheet-close" type="button" aria-label="Fermer">Fermer ✕</button>
+    <span class="hs-num">03</span>
+    
+          <div class="meta"><span class="label">2025</span><span class="label">Équipe de 3</span><span class="label">Intégration web</span></div>
+          <h3>Boutique de vins</h3>
+          <p class="pitch">Un site de caviste imaginé, maquetté puis intégré en HTML et CSS.</p>
+          <dl>
+            <div><dt>Objectif</dt><dd>Découvrir et maîtriser l'intégration web fondamentale sur un vrai cas de boutique en ligne.</dd></div>
+            <div><dt>Ce que j'ai fait</dt><dd>Une structure HTML5 sémantique et accessible, des feuilles de style CSS3 adaptées à l'univers du terroir, et des menus et grilles de produits responsive pour smartphone et tablette.</dd></div>
+            <div><dt>Ce que j'en retiens</dt><dd>Partir de la maquette avant d'écrire la moindre ligne de CSS fait gagner beaucoup de temps à toute l'équipe.</dd></div>
+          </dl>
+          <ul class="chips"><li>HTML5</li><li>CSS3</li><li>Responsive</li><li>UI / UX</li></ul>
+          <div class="hero-actions"><a class="btn ghost" href="https://github.com/gabyaillet" target="_blank" rel="noopener">Voir sur GitHub ↗</a></div>
+        
+  </div>
+</dialog>
+
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
 <script>
 (() => {
@@ -741,16 +857,16 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
   const w1 = document.getElementById('w1'), w2 = document.getElementById('w2'), tagline = document.getElementById('tagline');
   const CARDS = [
     { grid: 0, href: '#projets', label: 'Générateur de particules', sub: 'Go · 2026', html: '<div class="c-go"><b>GO</b></div>' },
-    { grid: 1, href: '#passions', label: 'Montagne', sub: 'GR20 en 4 jours', html: '<img src="img/lac-montagne.jpg" alt="">' },
+    { grid: 1, href: '#passions', label: 'Montagne', sub: 'GR20 en 4 jours', html: '<img src="https://picsum.photos/seed/alpes-noir/700/460?grayscale" onerror="this.onerror=null;this.src=\'img/lac-montagne.jpg\'" class="bw" alt="">' },
     { grid: 2, href: '#projets', label: 'Simulation économique', sub: 'Python · 2026', html: '<div class="c-cli">$ python simulation.py<br><br>=== TOUR 7 ===<br>Capital : 12 480 €<br>[1] Acheter [2] Vendre</div>' },
-    { grid: 3, href: '#passions', label: 'Triathlon', sub: 'Division 3', html: '<img src="img/triathlon.jpg" alt="">' },
-    { grid: 4, href: '#parcours', label: 'BUT Info · Polytech', sub: 'Nantes', html: '<div class="c-year"><b>2026</b><span>BUT Info intégré<br>Polytech Nantes</span></div>' },
+    { grid: 3, href: '#passions', label: 'Triathlon', sub: 'Division 3', html: '<img src="https://picsum.photos/seed/ocean-swim/700/460?grayscale" onerror="this.onerror=null;this.src=\'img/triathlon.jpg\'" class="bw" alt="">' },
+    { grid: 4, href: '#apropos', label: 'BUT Info · Polytech', sub: 'Nantes', html: '<div class="c-year"><b>2026</b><span>BUT Info intégré<br>Polytech Nantes</span></div>' },
     { grid: 5, href: '#projets', label: 'Boutique de vins', sub: 'HTML · CSS · 2025', html: '<div class="c-wine"><b>LE CELLIER</b><span>Vins de terroir</span><i></i><i></i><i></i></div>' },
-    { html: '<img src="img/ski-rando.jpg" alt="">' },
-    { html: '<img src="img/velo.jpg" alt="">' },
-    { html: '<img src="img/sommet.jpg" alt="">' },
+    { html: '<img src="https://picsum.photos/seed/neige-ski/700/460?grayscale" onerror="this.onerror=null;this.src=\'img/ski-rando.jpg\'" class="bw" alt="">' },
+    { html: '<img src="https://picsum.photos/seed/route-velo/700/460?grayscale" onerror="this.onerror=null;this.src=\'img/velo.jpg\'" class="bw" alt="">' },
+    { html: '<img src="https://picsum.photos/seed/sommet-nb/700/460?grayscale" onerror="this.onerror=null;this.src=\'img/sommet.jpg\'" class="bw" alt="">' },
     { html: '<div class="c-year dark"><b>D3</b><span>Triathlon</span></div>' },
-    { html: '<img src="img/lac-montagne.jpg" alt="">' },
+    { html: '<img src="https://picsum.photos/seed/alpes-noir/700/460?grayscale" onerror="this.onerror=null;this.src=\'img/lac-montagne.jpg\'" class="bw" alt="">' },
     { html: '<div class="c-go"><b>GR20</b></div>' }
   ];
   // ordre dans le ruban : on mélange les cartes de grille et les cartes de passage
@@ -760,7 +876,7 @@ body.inverted .term-hints button { background: #181818; color: #ededeb; }
     el.className = 'card' + (c.grid === undefined ? ' extra' : '');
     if (c.href) { el.href = c.href; el.setAttribute('aria-label', c.label + ', ' + c.sub); }
     el.innerHTML = '<div class="face">' + c.html + '</div>' + (c.label ? '<div class="cap"><span>' + c.label + '</span><span>' + c.sub + '</span></div>' : '');
-    el.querySelectorAll('img').forEach(im => { im.alt = ''; im.decoding = 'async'; });
+    el.querySelectorAll('img').forEach(im => { im.decoding = 'async'; });
     ribbon.appendChild(el); return { el, grid: c.grid };
   });
 
@@ -930,7 +1046,7 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
   }
 
   // Titres découpés en mots
-  document.querySelectorAll('.sec-head h2, .numbers-intro, footer h2').forEach(h => {
+  document.querySelectorAll('.sec-head h2, .hs-head h2, .path-title, footer h2').forEach(h => {
     const walk = node => [...node.childNodes].forEach(n => {
       if (n.nodeType === 3) {
         const frag = document.createDocumentFragment();
@@ -947,7 +1063,7 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
     h.querySelectorAll('.rv-w > span').forEach((sp, i) => sp.style.transitionDelay = (i * 0.06) + 's');
     h.dataset.rv = 'words';
   });
-  const fadeSel = '.sec-head p, .sec-head .eyebrow, .case .meta, .case .pitch, .case dl > div, .case .chips, .case .hero-actions, .skill-group, .certs, .trail-step, .paths > div > h3, .pnote > div, .term-hints, .num, details.letter, footer .row, footer p.sub';
+  const fadeSel = '.about-text > *, .facts > div, .about-photo, .hs-meter, .sec-head p, .sec-head .eyebrow, .case .meta, .case .pitch, .case dl > div, .case .chips, .case .hero-actions, .skill-group, .certs, .trail-step, .paths > div > h3, .pnote > div, .term-hints, .num, details.letter, footer .row, footer p.sub';
   document.querySelectorAll(fadeSel).forEach(el => el.classList.add('fu'));
   document.querySelectorAll('.visual, .pcard, .terminal').forEach(el => el.classList.add('clip'));
   // Délai en cascade entre éléments frères
@@ -1004,15 +1120,10 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
 
   // Curseur personnalisé + boutons magnétiques
   if (fine && !reduce) {
-    const cur = document.createElement('div'); cur.className = 'cursor'; cur.innerHTML = '<span>Voir</span>'; document.body.appendChild(cur);
+    const cur = document.createElement('div'); cur.className = 'cursor'; document.body.appendChild(cur);
     let cx = innerWidth / 2, cy = innerHeight / 2, tx = cx, ty = cy;
     addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; });
-    (function mv() { cx += (tx - cx) * 0.18; cy += (ty - cy) * 0.18; cur.style.transform = `translate3d(${cx}px, ${cy}px, 0)`; requestAnimationFrame(mv); })();
-    document.addEventListener('pointerover', e => {
-      const t = e.target.closest('.card:not(.extra), .pcard, .visual, .case h3');
-      cur.classList.toggle('big', !!t);
-      cur.querySelector('span').textContent = t && t.closest('.visual') ? 'Jouer' : 'Voir';
-    });
+    (function mv() { cx += (tx - cx) * 0.35; cy += (ty - cy) * 0.35; cur.style.transform = `translate3d(${cx}px, ${cy}px, 0)`; requestAnimationFrame(mv); })();
     document.querySelectorAll('.btn, .brand, .replay, .scroll-hint').forEach(b => {
       b.addEventListener('pointermove', e => { const r = b.getBoundingClientRect(); b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.3}px, ${(e.clientY - r.top - r.height / 2) * 0.4}px)`; });
       b.addEventListener('pointerleave', () => b.style.transform = '');
@@ -1033,6 +1144,65 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
     };
     requestAnimationFrame(step);
   }
+
+
+  /* ===== Projets : défilement horizontal épinglé ===== */
+  const hs = document.getElementById('projets'), hsTrack = document.getElementById('hs-track');
+  const hsSticky = hs.querySelector('.hs-sticky'), hsCount = document.getElementById('hs-count'), hsBar = document.getElementById('hs-bar');
+  const hsCards = [...hsTrack.querySelectorAll('.hs-card')];
+  let hsDist = 0, hsOn = false;
+  function hsLayout() {
+    hsOn = innerWidth > 760;
+    if (!hsOn) { hs.style.height = ''; hsTrack.style.transform = ''; return; }
+    hsDist = Math.max(0, hsTrack.scrollWidth - innerWidth);
+    hs.style.height = (hsSticky.offsetHeight + hsDist) + 'px';
+  }
+  function hsTick() {
+    if (!hsOn) {
+      const k = hsTrack.scrollLeft / Math.max(1, hsTrack.scrollWidth - hsTrack.clientWidth);
+      hsBar.style.transform = `scaleX(${k})`;
+      hsCount.textContent = String(Math.min(hsCards.length, Math.round(k * (hsCards.length - 1)) + 1)).padStart(2, '0') + ' / ' + String(hsCards.length).padStart(2, '0');
+      return;
+    }
+    const top = hs.getBoundingClientRect().top - hsSticky.getBoundingClientRect().top + (hsSticky.offsetTop - hs.offsetTop);
+    const k = Math.min(1, Math.max(0, -hs.getBoundingClientRect().top / Math.max(1, hsDist)));
+    hsTrack.style.transform = `translate3d(${-k * hsDist}px, 0, 0)`;
+    hsBar.style.transform = `scaleX(${k})`;
+    hsCount.textContent = String(Math.min(hsCards.length, Math.floor(k * hsCards.length) + 1)).padStart(2, '0') + ' / ' + String(hsCards.length).padStart(2, '0');
+    // léger effet de profondeur : les cartes hors centre s'inclinent
+    hsCards.forEach(c => {
+      const r = c.getBoundingClientRect(), d = (r.left + r.width / 2 - innerWidth / 2) / innerWidth;
+      c.style.transform = reduce ? '' : `perspective(1400px) rotateY(${d * -10}deg) scale(${1 - Math.min(Math.abs(d), 1) * 0.08})`;
+      c.style.opacity = 1 - Math.min(Math.abs(d), 1.2) * 0.45;
+    });
+  }
+  hsLayout(); addEventListener('resize', hsLayout); new ResizeObserver(hsLayout).observe(hsTrack);
+  (function hsLoop() { hsTick(); requestAnimationFrame(hsLoop); })();
+  hsTrack.addEventListener('scroll', hsTick, { passive: true });
+
+  /* Fiches « Voir plus » */
+  document.querySelectorAll('[data-sheet]').forEach(b => b.addEventListener('click', () => {
+    const d = document.getElementById(b.dataset.sheet); d.classList.remove('closing'); d.showModal(); lenis && lenis.stop();
+  }));
+  document.querySelectorAll('dialog.sheet').forEach(d => {
+    const close = () => { d.classList.add('closing'); setTimeout(() => { d.close(); d.classList.remove('closing'); }, reduce ? 0 : 650); };
+    d.querySelector('.sheet-close').addEventListener('click', close);
+    d.addEventListener('click', e => { if (e.target === d) close(); });
+    d.addEventListener('cancel', e => { e.preventDefault(); close(); });
+    d.addEventListener('close', () => lenis && lenis.start());
+  });
+
+  /* Texte qui s'allume mot par mot au défilement */
+  document.querySelectorAll('[data-scrub]').forEach(el => {
+    el.innerHTML = el.textContent.split(/(\s+)/).map(w => /^\s+$/.test(w) ? w : `<span class="sw">${w}</span>`).join('');
+    const words = [...el.querySelectorAll('.sw')];
+    const upd = () => {
+      const r = el.getBoundingClientRect(), k = Math.min(1, Math.max(0, (innerHeight * 0.85 - r.top) / (r.height + innerHeight * 0.4)));
+      const lit = reduce ? words.length : Math.round(k * words.length);
+      words.forEach((w, i) => w.style.color = i < lit ? 'var(--ink)' : 'color-mix(in srgb, var(--ink) 18%, transparent)');
+    };
+    upd(); (function l() { upd(); requestAnimationFrame(l); })();
+  });
 
   /* ---------- Copier l'e-mail ---------- */
   const copyBtn = document.getElementById('copy-mail');
