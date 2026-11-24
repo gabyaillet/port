@@ -652,6 +652,9 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 @keyframes liquid-sheen { 0% { background-position: 140% 0, 0 0; } 55%, 100% { background-position: -40% 0, 0 0; } }
 @keyframes liquid-rim { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .settled .card .face, .settled .card .face::after, .settled .card .face::before { animation: none; } }
+
+/* Easter egg : commande « rigole » dans le terminal */
+body.joke-cursor .cursor { width: 26px; height: 42px; margin: -2px 0 0 -13px; border-radius: 0; box-shadow: none; background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 64'><g fill='%23f3d2bd' stroke='%23111' stroke-width='2.5' stroke-linejoin='round'><circle cx='12' cy='51' r='10'/><circle cx='28' cy='51' r='10'/><rect x='12' y='10' width='16' height='42' rx='8'/><path d='M11 14 Q20 -2 29 14 Q20 19 11 14 Z' fill='%23e9a6a0'/></g><path d='M20 5 V9' stroke='%23111' stroke-width='2' stroke-linecap='round'/></svg>") center / contain no-repeat; filter: drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
 </style>
 </head>
 <body>
@@ -1292,7 +1295,8 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
     cv: () => { window.open('CV-Gabriel-Aillet.pdf', '_blank', 'noopener'); return `Ouverture du CV… sinon : <a href="CV-Gabriel-Aillet.pdf" target="_blank" rel="noopener">CV-Gabriel-Aillet.pdf</a>`; },
     sudo: () => `<span class="r">Permission refusée.</span> Mais un entretien, je dis oui.`,
     ls: () => `projets/  competences/  sport/  cv.pdf`,
-    whoami: () => `gabriel`
+    whoami: () => `gabriel`,
+    rigole: () => { const on = document.body.classList.toggle('joke-cursor'); return on ? `<span class="ok">Curseur spécial activé.</span> <span class="d">Retapez « rigole » pour revenir à la normale.</span>` : `Curseur normal rétabli.`; }
   };
   C.help = C.aide;
   const print = html => { const d = document.createElement('div'); d.innerHTML = html; out.appendChild(d); out.scrollTop = out.scrollHeight; };
