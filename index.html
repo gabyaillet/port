@@ -250,10 +250,10 @@ footer .blaze::before { background: #eef2f3; box-shadow: none; } footer .blaze::
 .cv-top { padding: 0.4rem 0.95rem; font-size: 0.85rem; }
 .intro { position: relative; }
 .stage { position: relative; height: calc(100svh - 4rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); min-height: 32rem; max-height: 60rem; overflow: hidden; perspective: 1400px; }
-.word { position: absolute; margin: 0; font: 500 clamp(3rem, 9vw, 8.5rem)/0.9 var(--f-display); letter-spacing: -0.045em; text-transform: uppercase; white-space: nowrap; color: var(--ink); will-change: transform; z-index: 1; }
-.w1 { left: max(20px, 7vw); top: 24%; }
-.w2 { right: max(20px, 7vw); top: 49%; }
-.tagline { position: absolute; left: 50%; top: 42.5%; transform: translateX(-50%); text-align: center; font: 500 0.72rem/1.5 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); z-index: 1; }
+.word { position: absolute; margin: 0; font: 500 clamp(3.6rem, 14vw, 14rem)/0.86 var(--f-display); letter-spacing: -0.045em; text-transform: uppercase; white-space: nowrap; color: var(--ink); will-change: transform; z-index: 1; }
+.w1 { left: max(16px, 3vw); top: 14%; }
+.w2 { right: max(16px, 3vw); top: 50%; }
+.tagline { position: absolute; left: 50%; top: 41%; transform: translateX(-50%); text-align: center; font: 500 0.72rem/1.5 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); z-index: 1; }
 .ribbon { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; z-index: 2; }
 .card { position: absolute; left: 0; top: 0; display: block; text-decoration: none; color: var(--ink); transform-style: preserve-3d; will-change: transform, opacity; backface-visibility: visible; }
 .card .face { position: absolute; inset: 0; border-radius: var(--radius); overflow: hidden; background: #fff; box-shadow: 0 10px 30px -12px rgba(0,0,0,.35); }
@@ -295,6 +295,84 @@ footer .btn { background: #ececea; border-color: #ececea; color: #111; }
 footer .btn:hover { background: transparent; color: #ececea; }
 footer .blaze { background: #ececea; }
 .pcard .tag { background: #ececea; color: #111; }
+
+/* ===== Animations partout ===== */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+body { transition: background-color .9s cubic-bezier(.65,0,.35,1), color .9s cubic-bezier(.65,0,.35,1); overflow-x: clip; }
+body.inverted { --bg: #0d0d0d; --surface: #181818; --ink: #ededeb; --muted: #9a9a96; --line: #2a2a2a; }
+body.inverted .topbar { background: color-mix(in srgb, #0d0d0d 85%, transparent); }
+body.inverted .btn:not(.ghost) { background: #ededeb; color: #0d0d0d; border-color: #ededeb; }
+body.inverted .term-hints button { background: #181818; color: #ededeb; }
+
+/* Préchargement */
+.loader { position: fixed; inset: 0; z-index: 200; background: #0d0d0d; color: #ededeb; display: flex; flex-direction: column; justify-content: space-between;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.25rem) max(20px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 1.25rem) max(20px, env(safe-area-inset-left, 0px));
+  transition: transform 1s cubic-bezier(.76,0,.24,1); }
+.loader.done { transform: translateY(-101%); }
+.loader .top, .loader .bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; font: 500 0.75rem var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: #9a9a96; }
+.loader .count { font: 500 clamp(6rem, 26vw, 22rem)/0.78 var(--f-display); letter-spacing: -0.06em; color: #ededeb; font-variant-numeric: tabular-nums; }
+.loader .bar { position: absolute; left: 0; bottom: 0; height: 3px; background: #ededeb; width: 0; }
+
+/* Curseur */
+.cursor { position: fixed; left: 0; top: 0; z-index: 150; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #fff; mix-blend-mode: difference; pointer-events: none;
+  display: grid; place-items: center; transition: width .35s cubic-bezier(.2,.8,.2,1), height .35s cubic-bezier(.2,.8,.2,1), margin .35s cubic-bezier(.2,.8,.2,1); }
+.cursor span { font: 500 0.68rem var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: #000; opacity: 0; transition: opacity .2s; }
+.cursor.big { width: 88px; height: 88px; margin: -44px 0 0 -44px; }
+.cursor.big span { opacity: 1; }
+@media (hover: none), (pointer: coarse) { .cursor { display: none; } }
+
+/* Révélations au défilement */
+.rv-w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.rv-w > span { display: inline-block; }
+.pre .rv-w > span { transform: translateY(110%) rotate(4deg); }
+.rv-w > span { transition: transform 1.1s cubic-bezier(.16,1,.3,1); }
+.pre.in .rv-w > span { transform: none; }
+.fu { transition: opacity 1s cubic-bezier(.16,1,.3,1), transform 1.1s cubic-bezier(.16,1,.3,1); }
+.fu.pre { opacity: 0; transform: translateY(48px); }
+.fu.pre.in { opacity: 1; transform: none; }
+.clip { transition: clip-path 1.4s cubic-bezier(.76,0,.24,1); }
+.clip.pre { clip-path: inset(100% 0 0 0 round 10px); }
+.clip.pre.in { clip-path: inset(0 0 0 0 round 10px); }
+.clip:not(.pcard) img { transition: transform 1.8s cubic-bezier(.16,1,.3,1); }
+.clip.pre:not(.pcard) img { transform: scale(1.25); }
+.clip.pre.in:not(.pcard) img { transform: scale(1.12); }
+
+/* Bandeau défilant */
+.marquee { overflow: hidden; padding-block: clamp(1rem, 3vw, 2rem); border-block: 1px solid var(--line); }
+.marquee .track { display: flex; width: max-content; will-change: transform; }
+.marquee span { font: 500 clamp(3.4rem, 11vw, 10rem)/1 var(--f-display); letter-spacing: -0.05em; text-transform: uppercase; white-space: nowrap; padding-right: 0.45em; display: inline-flex; align-items: center; gap: 0.45em; }
+.marquee span::after { content: ""; width: 0.22em; height: 0.2em; border-radius: 52% 48% 46% 54% / 55% 50% 50% 45%; background: var(--ink); }
+.marquee span.o { color: transparent; -webkit-text-stroke: 1.5px var(--ink); }
+
+/* Chiffres */
+.numbers { padding-block: clamp(4rem, 10vw, 8rem); }
+.numbers-intro { font: 500 clamp(1.8rem, 4.6vw, 3.8rem)/1.05 var(--f-display); letter-spacing: -0.04em; max-width: 22ch; text-wrap: balance; }
+.numbers-intro em { font-style: normal; color: var(--muted); }
+.num-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border-block: 1px solid var(--line); margin-top: clamp(2.5rem, 6vw, 4.5rem); }
+.num { background: var(--bg); padding: 1.5rem 1rem 1.5rem 0; transition: background-color .9s; }
+.num b { display: block; font: 500 clamp(4.5rem, 12vw, 10rem)/0.85 var(--f-display); letter-spacing: -0.06em; font-variant-numeric: tabular-nums; }
+.num .label { display: block; margin-top: 0.8rem; }
+@media (max-width: 700px) { .num-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Liens et boutons */
+.nav a { border-bottom: 0; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size .45s cubic-bezier(.16,1,.3,1), color .2s; }
+.nav a:hover, .nav a[aria-current="true"] { background-size: 100% 1px; }
+.btn { will-change: transform; transition: background .25s, color .25s, border-color .25s, transform .5s cubic-bezier(.16,1,.3,1); }
+.case h3 { transition: letter-spacing .6s cubic-bezier(.16,1,.3,1); }
+.case:hover h3 { letter-spacing: -0.02em; }
+.pcard img { will-change: transform; }
+.skill-row { transition: padding-left .4s cubic-bezier(.16,1,.3,1); }
+.skill-row:hover { padding-left: 0.6rem; }
+.pips i { transition: transform .5s cubic-bezier(.16,1,.3,1); transform-origin: left; }
+.pre .pips i.on { transform: scaleX(0); }
+.in .pips i.on { transform: none; }
+.in .pips i.on:nth-child(2) { transition-delay: .12s; } .in .pips i.on:nth-child(3) { transition-delay: .24s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pre, .pre * { transform: none !important; opacity: 1 !important; clip-path: none !important; }
+  .cursor, .loader { display: none; }
+}
 </style>
 </head>
 <body>
@@ -328,6 +406,26 @@ footer .blaze { background: #ececea; }
         <span class="status"><i aria-hidden="true"></i>Ouvert aux stages et jobs d'été</span>
         <button class="replay" id="replay" type="button">Rejouer l'intro ↺</button>
         <a class="scroll-hint" href="#projets">Défiler ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- BANDEAU -->
+  <div class="marquee" aria-hidden="true">
+    <div class="track" id="marquee-track">
+      <span>Go</span><span class="o">Python</span><span>HTML / CSS</span><span class="o">Triathlon</span><span>Montagne</span><span class="o">Polytech</span><span>GR20</span><span class="o">Nantes</span>
+    </div>
+  </div>
+
+  <!-- CHIFFRES -->
+  <section class="numbers" aria-label="En chiffres">
+    <div class="wrap">
+      <p class="numbers-intro">Je construis des logiciels comme je prépare une course. <em>Méthode, endurance, et une équipe sur qui compter.</em></p>
+      <div class="num-grid">
+        <div class="num"><b data-count="3">3</b><span class="label">Projets d'équipe</span></div>
+        <div class="num"><b data-count="4">4</b><span class="label">Jours pour le GR20</span></div>
+        <div class="num"><b data-count="9">9</b><span class="label">Ans de football</span></div>
+        <div class="num"><b data-count="7">7</b><span class="label">Ans de tennis</span></div>
       </div>
     </div>
   </section>
@@ -433,7 +531,7 @@ footer .blaze { background: #ececea; }
   </section>
 
   <!-- TERMINAL -->
-  <section class="block" id="terminal">
+  <section class="block" id="terminal" data-dark>
     <div class="wrap">
       <div class="sec-head">
         <div>
@@ -444,7 +542,7 @@ footer .blaze { background: #ececea; }
       </div>
       <div class="terminal">
         <div class="bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span>gabriel@nantes: ~</span></div>
-        <div class="term-out" id="term-out" role="log" aria-live="polite"></div>
+        <div class="term-out" id="term-out" data-lenis-prevent role="log" aria-live="polite"></div>
         <form class="term-line" id="term-form" autocomplete="off">
           <label for="term-input">gabriel@nantes:~$</label>
           <input id="term-input" name="term-input" type="text" spellcheck="false" autocapitalize="off" aria-label="Commande">
@@ -533,7 +631,7 @@ footer .blaze { background: #ececea; }
   </section>
 
   <!-- PASSIONS -->
-  <section class="block" id="passions">
+  <section class="block" id="passions" data-dark>
     <div class="wrap">
       <div class="sec-head">
         <div>
@@ -606,6 +704,7 @@ footer .blaze { background: #ececea; }
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
 <script>
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -670,7 +769,7 @@ footer .blaze { background: #ececea; }
     W = stage.clientWidth; H = stage.clientHeight;
     cols = W < 640 ? 2 : 3; const rows = 6 / cols;
     gap = W < 640 ? 10 : 16;
-    const maxW = Math.min(W * (W < 640 ? 0.92 : 0.66), 880), maxH = H * 0.62;
+    const maxW = Math.min(W * (W < 640 ? 0.94 : 0.84), 1240), maxH = H * 0.74;
     cw = (maxW - gap * (cols - 1)) / cols; ch = cw * 0.66;
     if (ch * rows + (gap + 22) * (rows - 1) > maxH) { ch = (maxH - (gap + 22) * (rows - 1)) / rows; cw = ch / 0.66; }
     els.forEach(o => { o.el.style.width = cw + 'px'; o.el.style.height = ch + 'px'; });
@@ -679,17 +778,17 @@ footer .blaze { background: #ececea; }
   }
   // pose d'une carte le long d'une courbe 3D (ondulation + torsion)
   function ribbonPose(u) {
-    const lam = W * 0.16, A = H * 0.16, B = W * 0.12, k = u / lam;
+    const lam = W * 0.21, A = H * 0.2, B = W * 0.14, k = u / lam;
     const x = u - W * 0.5, y = A * Math.sin(k) - H * 0.02, z = B * Math.cos(k * 0.8) - B;
     const dy = A / lam * Math.cos(k), dz = -B * 0.8 / lam * Math.sin(k * 0.8);
-    return { x, y, z, ry: -Math.atan2(dz, 1) * 57.3, rz: Math.atan2(dy, 1) * 57.3 * 0.7, rx: Math.sin(k * 0.6) * 28, s: 0.5 };
+    return { x, y, z, ry: -Math.atan2(dz, 1) * 57.3, rz: Math.atan2(dy, 1) * 57.3 * 0.7, rx: Math.sin(k * 0.6) * 28, s: 0.78 };
   }
   const lerp = (a, b, t) => a + (b - a) * t;
   const ease = t => t < 0 ? 0 : t > 1 ? 1 : 1 - Math.pow(1 - t, 3);
   const inout = t => t < 0 ? 0 : t > 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const apply = (el, p, o = 1) => { el.style.transform = `translate3d(${p.x - cw / 2}px, ${p.y - ch / 2}px, ${p.z}px) rotateY(${p.ry}deg) rotateZ(${p.rz}deg) rotateX(${p.rx}deg) scale(${p.s})`; el.style.opacity = o; };
 
-  const T = { wordsIn: 1100, ribbonStart: 700, cross: [2600, 5000], ribbonEnd: 6400, settle: [4700, 6600], end: 6800 };
+  const T = { wordsIn: 1100, ribbonStart: 700, cross: [2600, 5000], ribbonEnd: 6600, settle: [4900, 6900], end: 7100 };
   let t0 = 0, raf = 0;
   function frame(now) {
     const t = now - t0;
@@ -699,7 +798,7 @@ footer .blaze { background: #ececea; }
     w2.style.transform = `translateX(${lerp(110, 0, inK) - crossK * 120}vw)`;
     tagline.style.opacity = Math.min(ease((t - 500) / 600), 1 - ease((t - 3400) / 600));
     // ruban
-    const spacing = cw * 0.5 * 0.97;
+    const spacing = cw * 0.78 * 0.97;
     const head = lerp(-W * 0.1, W + spacing * els.length * 0.95, (t - T.ribbonStart) / (T.ribbonEnd - T.ribbonStart));
     const sk = (t - T.settle[0]) / (T.settle[1] - T.settle[0]);
     els.forEach((o, i) => {
@@ -722,7 +821,7 @@ footer .blaze { background: #ececea; }
   new ResizeObserver(() => { const done = stage.classList.contains('settled'); layout(); if (done) finish(); }).observe(stage);
   document.getElementById('replay').addEventListener('click', play);
   layout();
-  if (reduce) finish(); else play();
+  if (reduce) finish(); else window.__startIntro = play;
 
   /* Démo du projet Go */
   const demo = document.getElementById('demo'), dctx = setupCanvas(demo);
@@ -813,6 +912,127 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
   out.addEventListener('click', () => input.focus({ preventScroll: true }));
   print(`<span class="d">Bienvenue. Portfolio de Gabriel Aillet, version ligne de commande.</span>`);
   run('apropos');
+
+
+  /* ===== Animations partout ===== */
+  const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  // Défilement fluide
+  let lenis = null;
+  if (window.Lenis && !reduce) {
+    lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 1 });
+    const raf = t => { lenis.raf(t); requestAnimationFrame(raf); }; requestAnimationFrame(raf);
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[href^="#"]'); if (!a) return;
+      const target = document.querySelector(a.getAttribute('href')); if (!target) return;
+      e.preventDefault(); lenis.scrollTo(target, { offset: a.getAttribute('href') === '#top' ? 0 : -64, duration: 1.4 });
+    });
+  }
+
+  // Titres découpés en mots
+  document.querySelectorAll('.sec-head h2, .numbers-intro, footer h2').forEach(h => {
+    const walk = node => [...node.childNodes].forEach(n => {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach(w => {
+          if (!w) return;
+          if (/^\s+$/.test(w)) { frag.appendChild(document.createTextNode(w)); return; }
+          const o = document.createElement('span'); o.className = 'rv-w';
+          const i = document.createElement('span'); i.textContent = w; o.appendChild(i); frag.appendChild(o);
+        });
+        n.replaceWith(frag);
+      } else if (n.nodeType === 1 && !n.classList.contains('rv-w')) walk(n);
+    });
+    walk(h);
+    h.querySelectorAll('.rv-w > span').forEach((sp, i) => sp.style.transitionDelay = (i * 0.06) + 's');
+    h.dataset.rv = 'words';
+  });
+  const fadeSel = '.sec-head p, .sec-head .eyebrow, .case .meta, .case .pitch, .case dl > div, .case .chips, .case .hero-actions, .skill-group, .certs, .trail-step, .paths > div > h3, .pnote > div, .term-hints, .num, details.letter, footer .row, footer p.sub';
+  document.querySelectorAll(fadeSel).forEach(el => el.classList.add('fu'));
+  document.querySelectorAll('.visual, .pcard, .terminal').forEach(el => el.classList.add('clip'));
+  // Délai en cascade entre éléments frères
+  document.querySelectorAll('.fu').forEach(el => {
+    const sib = [...el.parentElement.children].filter(c => c.classList.contains('fu'));
+    el.style.transitionDelay = (sib.indexOf(el) * 0.08) + 's';
+  });
+  const revealables = [...document.querySelectorAll('[data-rv], .fu, .clip')];
+  if (!reduce && 'IntersectionObserver' in window) {
+    // seuls les éléments sous la ligne de flottaison partent cachés : la première image est complète
+    revealables.forEach(el => { if (el.getBoundingClientRect().top > innerHeight * 0.92) el.classList.add('pre'); });
+    const rio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rio.unobserve(e.target); } }), { rootMargin: '0px 0px -12% 0px' });
+    revealables.forEach(el => el.classList.contains('pre') && rio.observe(el));
+  }
+
+  // Compteurs
+  const cio = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return; cio.unobserve(e.target);
+    const el = e.target, n = +el.dataset.count; if (reduce) return;
+    const t0 = performance.now();
+    const step = t => { const k = Math.min((t - t0) / 1400, 1); el.textContent = Math.round(n * (1 - Math.pow(1 - k, 4))); if (k < 1) requestAnimationFrame(step); };
+    el.textContent = '0'; requestAnimationFrame(step);
+  }), { threshold: 0.6 });
+  document.querySelectorAll('[data-count]').forEach(el => cio.observe(el));
+
+  // Sections qui passent au noir
+  const darkIO = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) document.body.classList.add('inverted');
+    else if (![...document.querySelectorAll('[data-dark]')].some(s => { const r = s.getBoundingClientRect(); return r.top < innerHeight * 0.5 && r.bottom > innerHeight * 0.5; })) document.body.classList.remove('inverted');
+  }), { rootMargin: '-50% 0px -50% 0px' });
+  document.querySelectorAll('[data-dark]').forEach(s => darkIO.observe(s));
+
+  // Bandeau défilant, accéléré par la vitesse de défilement
+  const track = document.getElementById('marquee-track');
+  track.innerHTML += track.innerHTML;
+  let mx = 0, lastY = scrollY, vel = 0;
+  // Parallaxe des photos
+  const para = [...document.querySelectorAll('.pcard img, .hero-photo img')];
+  function tickFx() {
+    const y = scrollY; vel += ((y - lastY) - vel) * 0.1; lastY = y;
+    if (!reduce) {
+      mx -= 0.6 + Math.abs(vel) * 0.35;
+      const half = track.scrollWidth / 2; if (-mx > half) mx += half;
+      track.style.transform = `translate3d(${mx}px,0,0) skewX(${Math.max(-8, Math.min(8, -vel * 0.25))}deg)`;
+      para.forEach(img => {
+        const r = img.parentElement.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
+        const k = (r.top + r.height / 2 - innerHeight / 2) / innerHeight;
+        img.style.transform = `translate3d(0, ${k * -9}%, 0) scale(1.18)`;
+      });
+    }
+    requestAnimationFrame(tickFx);
+  }
+  requestAnimationFrame(tickFx);
+
+  // Curseur personnalisé + boutons magnétiques
+  if (fine && !reduce) {
+    const cur = document.createElement('div'); cur.className = 'cursor'; cur.innerHTML = '<span>Voir</span>'; document.body.appendChild(cur);
+    let cx = innerWidth / 2, cy = innerHeight / 2, tx = cx, ty = cy;
+    addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; });
+    (function mv() { cx += (tx - cx) * 0.18; cy += (ty - cy) * 0.18; cur.style.transform = `translate3d(${cx}px, ${cy}px, 0)`; requestAnimationFrame(mv); })();
+    document.addEventListener('pointerover', e => {
+      const t = e.target.closest('.card:not(.extra), .pcard, .visual, .case h3');
+      cur.classList.toggle('big', !!t);
+      cur.querySelector('span').textContent = t && t.closest('.visual') ? 'Jouer' : 'Voir';
+    });
+    document.querySelectorAll('.btn, .brand, .replay, .scroll-hint').forEach(b => {
+      b.addEventListener('pointermove', e => { const r = b.getBoundingClientRect(); b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.3}px, ${(e.clientY - r.top - r.height / 2) * 0.4}px)`; });
+      b.addEventListener('pointerleave', () => b.style.transform = '');
+    });
+  }
+
+  // Préchargement : compteur 0 → 100 puis rideau qui monte, et l'intro démarre
+  if (!reduce) {
+    const ld = document.createElement('div'); ld.className = 'loader'; ld.setAttribute('aria-hidden', 'true');
+    ld.innerHTML = '<div class="top"><span>Gabriel Aillet</span><span>Portfolio 2026</span></div><div class="bottom"><span class="count">0</span><span>Nantes · Polytech</span></div><div class="bar"></div>';
+    document.body.appendChild(ld);
+    const cnt = ld.querySelector('.count'), bar = ld.querySelector('.bar'), t0 = performance.now(), dur = 1500;
+    const step = t => {
+      const k = Math.min((t - t0) / dur, 1), e = 1 - Math.pow(1 - k, 3);
+      cnt.textContent = Math.round(e * 100); bar.style.width = e * 100 + '%';
+      if (k < 1) requestAnimationFrame(step);
+      else { ld.classList.add('done'); setTimeout(() => window.__startIntro && window.__startIntro(), 350); setTimeout(() => ld.remove(), 1200); }
+    };
+    requestAnimationFrame(step);
+  }
 
   /* ---------- Copier l'e-mail ---------- */
   const copyBtn = document.getElementById('copy-mail');
