@@ -1072,28 +1072,32 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
     stageName.style.top = (H / 2 + slots[0].y - ch / 2 - 22) + 'px'; // juste au-dessus de la grille
   }
   // pose d'une carte le long d'une courbe 3D (ondulation + torsion)
-  // Tracé du ruban : une vague qui arrive de la gauche, puis un looping vertical (montagnes russes)
-  const RS = 0.6; // taille des cartes dans le ruban
+  // Tracé du ruban : une vague arrive de la gauche, puis UN grand looping vu en perspective (montagnes russes)
+  const RS = 0.6, PHI = -42; // taille des cartes dans le ruban, inclinaison du plan de la boucle (degrés)
   function loopTrack() {
-    const R = Math.min(H * 0.24, W * 0.17), xs = -W * 0.5 - cw, xe = -W * 0.04, ye = H * 0.16;
-    const U0 = xe - xs, Uend = U0 + 2 * Math.PI * R;
-    return { R, xs, xe, ye, U0, Uend };
+    const R = Math.min(H * 0.34, W * 0.24), xe = -W * 0.02, ye = H * 0.3, U0 = W * 0.5 + cw + xe;
+    return { R, xe, ye, U0, Uend: U0 + 2 * Math.PI * R };
   }
-  function pathPos(u, tr) {
+  // position dans le plan de la boucle (lx vers l'avant, ly vers le bas, lz décalage latéral)
+  function pathLocal(u, tr) {
     if (u <= tr.U0) {
-      const fade = Math.max(0, Math.min(1, (tr.U0 - u) / (tr.U0 * 0.55)));
-      return { x: tr.xs + u, y: tr.ye + Math.sin(u / (W * 0.12)) * H * 0.12 * fade, z: 0 };
+      const d = u - tr.U0, fade = Math.max(0, Math.min(1, -d / (tr.U0 * 0.5)));
+      return { lx: d, ly: Math.sin(u / (W * 0.11)) * H * 0.1 * fade, lz: 0 };
     }
     if (u <= tr.Uend) {
       const th = (u - tr.U0) / tr.R;
-      return { x: tr.xe + Math.sin(th) * tr.R + th * cw * 0.05, y: tr.ye - (1 - Math.cos(th)) * tr.R, z: Math.sin(th) * 90 };
+      return { lx: Math.sin(th) * tr.R, ly: -(1 - Math.cos(th)) * tr.R, lz: th / (2 * Math.PI) * cw * 0.7 };
     }
-    return { x: tr.xe + cw * 0.05 * 2 * Math.PI + (u - tr.Uend), y: tr.ye, z: 0 };
+    return { lx: u - tr.Uend, ly: 0, lz: cw * 0.7 };
   }
   function ribbonPose(u, tr) {
-    const a = pathPos(u - 2, tr), c = pathPos(u, tr), b2 = pathPos(u + 2, tr);
-    const rz = Math.atan2(b2.y - a.y, b2.x - a.x) * 57.3;
-    return { x: c.x, y: c.y, z: c.z, ry: 0, rz, rx: 0, s: RS };
+    const a = pathLocal(u - 2, tr), c = pathLocal(u, tr), b2 = pathLocal(u + 2, tr);
+    // le plan de la boucle tourne progressivement en profondeur à l'approche du looping
+    const ph = PHI * Math.max(0, Math.min(1, 1 - (tr.U0 - u) / (W * 0.3))), pr = ph / 57.3;
+    return {
+      x: tr.xe + c.lx * Math.cos(pr) + c.lz * Math.sin(pr), y: tr.ye + c.ly, z: -c.lx * Math.sin(pr) + c.lz * Math.cos(pr),
+      ry: ph, rz: Math.atan2(b2.ly - a.ly, b2.lx - a.lx) * 57.3, rx: 0, s: RS
+    };
   }
   const lerp = (a, b, t) => a + (b - a) * t;
   const ease = t => t < 0 ? 0 : t > 1 ? 1 : 1 - Math.pow(1 - t, 3);
