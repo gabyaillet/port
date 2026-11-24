@@ -124,6 +124,14 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
 .cursor { position: fixed; left: 0; top: 0; z-index: 150; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #111; box-shadow: 0 0 0 1.5px rgba(255,255,255,.85); pointer-events: none; }
 @media (hover: none), (pointer: coarse) { .cursor { display: none; } }
 @media (prefers-reduced-motion: reduce) { .pre { opacity: 1 !important; filter: none !important; transform: none !important; clip-path: none !important; } }
+
+/* Téléphone : trajets plus courts entre les projets */
+@media (max-width: 760px) {
+  .head { min-height: 75svh; }
+  .list { gap: 55vh; padding-top: 40vh; padding-bottom: 45vh; }
+  .end { min-height: 60vh; }
+  .pills .pill { padding: 0.45rem 0.75rem; }
+}
 </style>
 </head>
 <body>
