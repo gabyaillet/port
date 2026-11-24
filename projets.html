@@ -272,11 +272,11 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
   }
 
   /* Traînée fantôme des titres */
-  let lastY = scrollY, vel = 0;
+  let lastY = scrollY, vel = 0, lastGv = null;
   const ghosts = [...document.querySelectorAll('.text h3')];
   (function ghostLoop() {
     vel += ((scrollY - lastY) - vel) * 0.15; lastY = scrollY;
-    if (!reduce) { const gv = Math.max(-26, Math.min(26, -vel * 0.9)); ghosts.forEach(g => g.style.setProperty('--gv', gv + 'px')); }
+    if (!reduce) { const gv = Math.round(Math.max(-26, Math.min(26, -vel * 0.9)) * 2) / 2; if (gv !== lastGv) { lastGv = gv; ghosts.forEach(g => g.style.setProperty('--gv', gv + 'px')); } }
     requestAnimationFrame(ghostLoop);
   })();
 
