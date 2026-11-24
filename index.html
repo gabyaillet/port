@@ -485,8 +485,9 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 .marquee.plus span::after { content: "+"; width: auto; height: auto; background: none; border-radius: 0; font-size: 0.3em; color: var(--muted); }
 
 /* Stores noir → clair */
-.blinds { height: 55vh; background: #dededc; display: flex; flex-direction: column; }
-.blinds i { flex: 1; background: #0d0d0d; transform-origin: top; will-change: transform; }
+.dark-zone { padding-bottom: 35vh; }
+.blinds { position: absolute; left: 0; right: 0; bottom: 0; height: 100vh; z-index: 3; pointer-events: none; display: flex; flex-direction: column; }
+.blinds i { flex: 1; background: #dededc; transform-origin: bottom; transform: scaleY(0); will-change: transform; }
 
 /* ===== Chiffres clés ===== */
 .kf { padding-block: clamp(3rem, 8vw, 6rem) clamp(5rem, 10vw, 8rem); text-align: center; overflow: hidden; }
@@ -700,31 +701,6 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
   <div class="blinds" id="blinds" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
   </div>
 
-  <!-- CHIFFRES CLÉS -->
-  <section class="kf" id="chiffres">
-    <div class="wrap">
-      <h2 class="kf-title blur-in">En quelques chiffres</h2>
-      <p class="kf-sub blur-in">Un aperçu de mon parcours,<br>et de mon endurance.</p>
-      <div class="kf-cards">
-        <figure class="kf-card" data-tilt="-1">
-          <img src="https://picsum.photos/seed/crete-alpine/700/900?grayscale" onerror="this.onerror=null;this.src='img/lac-montagne.jpg'" class="bw" alt="" width="700" height="900">
-          <figcaption><span class="label">Traversée du GR20</span><span class="kf-big">4<small>jours</small></span></figcaption>
-        </figure>
-        <div class="kf-mid">
-          <span class="label">Projets réalisés</span>
-          <div class="kf-circle"><b data-count="3">3</b><sup>+</sup></div>
-          <p>Projets d'équipe en Go,<br>Python et web.</p>
-        </div>
-        <figure class="kf-card" data-tilt="1">
-          <img src="https://picsum.photos/seed/triathlon-noir/700/900?grayscale" onerror="this.onerror=null;this.src='img/triathlon.jpg'" class="bw" alt="" width="700" height="900">
-          <figcaption><span class="label">Triathlon en compétition</span><span class="kf-big">D3</span></figcaption>
-        </figure>
-      </div>
-      <p class="label kf-logos-title">Mes outils</p>
-      <ul class="kf-logos"><li>Go</li><li>Python</li><li>HTML5</li><li>CSS3</li><li>PHP</li><li>SQL</li><li>Photoshop</li></ul>
-    </div>
-  </section>
-
   <!-- PROJETS : défilement horizontal épinglé -->
   <section class="hscroll" id="projets" aria-label="Projets">
     <div class="hs-sticky">
@@ -805,6 +781,31 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- CHIFFRES CLÉS -->
+  <section class="kf" id="chiffres">
+    <div class="wrap">
+      <h2 class="kf-title blur-in">En quelques chiffres</h2>
+      <p class="kf-sub blur-in">Un aperçu de mon parcours,<br>et de mon endurance.</p>
+      <div class="kf-cards">
+        <figure class="kf-card" data-tilt="-1">
+          <img src="https://picsum.photos/seed/crete-alpine/700/900?grayscale" onerror="this.onerror=null;this.src='img/lac-montagne.jpg'" class="bw" alt="" width="700" height="900">
+          <figcaption><span class="label">Traversée du GR20</span><span class="kf-big">4<small>jours</small></span></figcaption>
+        </figure>
+        <div class="kf-mid">
+          <span class="label">Projets réalisés</span>
+          <div class="kf-circle"><b data-count="3">3</b><sup>+</sup></div>
+          <p>Projets d'équipe en Go,<br>Python et web.</p>
+        </div>
+        <figure class="kf-card" data-tilt="1">
+          <img src="https://picsum.photos/seed/triathlon-noir/700/900?grayscale" onerror="this.onerror=null;this.src='img/triathlon.jpg'" class="bw" alt="" width="700" height="900">
+          <figcaption><span class="label">Triathlon en compétition</span><span class="kf-big">D3</span></figcaption>
+        </figure>
+      </div>
+      <p class="label kf-logos-title">Mes outils</p>
+      <ul class="kf-logos"><li>Go</li><li>Python</li><li>HTML5</li><li>CSS3</li><li>PHP</li><li>SQL</li><li>Photoshop</li></ul>
     </div>
   </section>
 
@@ -1472,8 +1473,10 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
   (function scrollFx() {
     const vh = innerHeight;
     // stores : les bandes noires se replient
-    const br = blindsBox.getBoundingClientRect(), bk = clamp01((vh - br.top) / (br.height + vh * 0.2));
-    blinds.forEach((b, i) => b.style.transform = `scaleY(${reduce ? 0 : 1 - clamp01(bk * 1.8 - i * 0.07)})`);
+    // bandes claires qui recouvrent la fin de la zone noire, juste avant les projets
+    const zb = blindsBox.parentElement.getBoundingClientRect().bottom, bk = clamp01((vh * 0.95 - zb) / (vh * 0.8));
+    blinds.forEach((b, i) => b.style.transform = `scaleY(${reduce ? 0 : clamp01(bk * 1.7 - (blinds.length - 1 - i) * 0.07)})`);
+    if (bk > 0.5 && bk < 1) document.body.classList.remove('inverted'); else if (bk > 0 && bk <= 0.5) document.body.classList.add('inverted');
     // cartes inclinées qui se redressent
     tilts.forEach(c => {
       const r = c.getBoundingClientRect(), k = reduce ? 1 : clamp01((vh - r.top) / (vh * 0.9)), dir = +c.dataset.tilt, e = 1 - Math.pow(1 - k, 3);
