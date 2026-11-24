@@ -1000,6 +1000,10 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 <script>
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // retour depuis la page « Tous mes projets » : on revient sur l'écran final des projets
+  let returning = location.hash === '#tous-projets';
+  try { if (sessionStorage.getItem('ga-return') === 'all') returning = true; sessionStorage.removeItem('ga-return'); } catch (e) {}
+  if (returning && 'scrollRestoration' in history) history.scrollRestoration = 'manual';
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
   /* ---------- Menu mobile ---------- */
@@ -1158,7 +1162,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
   new ResizeObserver(() => { const done = stage.classList.contains('settled'); layout(); if (done) finish(); }).observe(stage);
   document.getElementById('replay').addEventListener('click', play);
   layout();
-  if (reduce) finish(); else window.__startIntro = play;
+  if (reduce || returning) finish(); else window.__startIntro = play;
 
   /* Démo du projet Go */
   const demo = document.getElementById('demo'), dctx = setupCanvas(demo);
@@ -1352,7 +1356,7 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
   }
 
   // Préchargement : compteur 0 → 100 puis rideau qui monte, et l'intro démarre
-  if (!reduce) {
+  if (!reduce && !returning) {
     const ld = document.createElement('div'); ld.className = 'loader'; ld.setAttribute('aria-hidden', 'true');
     ld.innerHTML = '<div class="top"><span>Gabriel Aillet</span><span>Portfolio 2026</span></div><div class="bottom"><span class="count">0</span><span>Nantes · Polytech</span></div><div class="bar"></div>';
     document.body.appendChild(ld);
@@ -1405,6 +1409,14 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
     });
   }
   hsLayout(); addEventListener('resize', hsLayout); new ResizeObserver(hsLayout).observe(hsTrack);
+  // en partant vers la page projets, on retient d'où l'on vient (utile pour le bouton retour du navigateur)
+  document.getElementById('all-projects').addEventListener('click', () => { try { sessionStorage.setItem('ga-return', 'all'); } catch (e) {} });
+  function goAllProjects() {
+    hsLayout();
+    const y = hs.offsetTop + (hsOn ? hsDist + innerHeight * 0.2 : 0);
+    if (lenis) lenis.scrollTo(y, { immediate: true, force: true }); else window.scrollTo({ top: y, behavior: 'instant' });
+  }
+  if (returning) { goAllProjects(); addEventListener('load', goAllProjects); setTimeout(goAllProjects, 300); if (location.hash) history.replaceState(null, '', location.pathname); }
   (function hsLoop() { hsTick(); requestAnimationFrame(hsLoop); })();
   hsTrack.addEventListener('scroll', hsTick, { passive: true });
 
