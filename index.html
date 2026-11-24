@@ -545,6 +545,56 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 .stack { margin: 1.5rem 0 0; display: grid; justify-items: center; font: 500 clamp(3.6rem, 13vw, 12rem)/0.84 var(--f-display); letter-spacing: -0.06em; text-transform: uppercase; }
 .stack span { display: block; will-change: transform; }
 .stack-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: clamp(3rem, 7vw, 5rem); }
+
+/* ===== Photo de présentation : même hauteur que le texte ===== */
+@media (min-width: 801px) {
+  .about-grid { align-items: stretch; }
+  .about-photo { position: relative; min-height: 0; height: auto; }
+  .about-photo img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; }
+}
+
+/* ===== Cartes de l'intro : verre dépoli ===== */
+.card .face { padding: 0; border-radius: 18px; overflow: hidden;
+  background: linear-gradient(135deg, rgba(255,255,255,.62), rgba(255,255,255,.16));
+  -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%);
+  border: 1px solid rgba(255,255,255,.7);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.95), inset 0 -1px 2px rgba(0,0,0,.06), 0 28px 60px -26px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.06); }
+.card .face > * { position: absolute; top: 7px; left: 7px; width: calc(100% - 14px) !important; height: calc(100% - 14px) !important; border-radius: 12px; overflow: hidden; }
+.card .face::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(90% 70% at var(--gx, 25%) var(--gy, 0%), rgba(255,255,255,.42), rgba(255,255,255,0) 55%),
+              linear-gradient(155deg, rgba(255,255,255,.28) 0%, rgba(255,255,255,0) 38%);
+  mix-blend-mode: screen; }
+
+/* ===== Projets : coupure et écran final ===== */
+.hs-sticky { padding-top: 0; }
+.hs-track { height: 100%; padding-right: 0; }
+.hs-intro, .hs-card { margin-top: 4rem; }
+.hs-cut { flex: none; width: 14vw; align-self: stretch; display: grid; place-items: center; position: relative; }
+.hs-cut::before { content: ""; position: absolute; top: 12%; bottom: 12%; left: 50%; width: 1px; background: var(--line); }
+.hs-cut .label { position: relative; writing-mode: vertical-rl; transform: rotate(180deg); background: var(--bg); padding: 1rem 0; }
+.hs-all { flex: none; width: 100vw; align-self: stretch; background: #0d0d0d; color: #ededeb; display: grid; place-items: center; text-align: center; }
+.hs-all-in { display: grid; justify-items: center; gap: 1.6rem; will-change: transform; }
+.hs-all-in .label { color: #8f8f8b; }
+.hs-all-title { font: 500 clamp(3.8rem, 12vw, 11rem)/0.84 var(--f-display); letter-spacing: -0.06em; text-transform: uppercase; }
+.pill.big { font-size: 0.85rem; padding: 1rem 1.7rem; }
+.hs-all .pill { border-color: #ededeb; color: #ededeb; }
+.hs-all .pill.solid { background: #ededeb; color: #0d0d0d; }
+.hs-all .pill.solid:hover { background: transparent; color: #ededeb; }
+@media (max-width: 760px) {
+  .hs-track { height: auto; }
+  .hs-intro, .hs-card { margin-top: 0; }
+  .hs-cut { width: 8vw; }
+  .hs-cut .label { display: none; }
+  .hs-all { width: 86vw; min-height: 60vh; border-radius: 14px; scroll-snap-align: start; }
+}
+
+/* ===== Zone de boucle ===== */
+.loop-zone { height: 90svh; background: #dededc; color: #111; display: grid; place-items: center; text-align: center; }
+.loop-in { display: grid; justify-items: center; gap: 1.5rem; }
+.loop-in .label { color: #5f5f5c; }
+.loop-big { display: grid; font: 500 clamp(3.6rem, 13vw, 12rem)/0.84 var(--f-display); letter-spacing: -0.06em; text-transform: uppercase; will-change: transform; }
+.loop-bar { width: min(60vw, 320px); height: 2px; background: #c4c4c1; overflow: hidden; }
+.loop-bar i { display: block; height: 100%; background: #111; transform-origin: left; transform: scaleX(0); }
 </style>
 </head>
 <body>
@@ -746,9 +796,13 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
             <div class="hs-act"><span class="label">HTML / CSS · 2025</span><button class="link-arrow" type="button" data-sheet="sheet-vin">Explorer le projet →</button></div>
           </div>
         </article>
-        <div class="hs-end">
-          <p>Découvrez la suite de mon parcours, de mes outils et de mes passions.</p>
-          <a class="link-arrow" href="#savoirfaire">Continuer ↓</a>
+        <div class="hs-cut" aria-hidden="true"><span class="label">Fin de la sélection</span></div>
+        <div class="hs-all" id="hs-all">
+          <div class="hs-all-in" id="hs-all-in">
+            <span class="label">Projets · IUT et personnels</span>
+            <h2 class="hs-all-title">Tous mes<br>projets</h2>
+            <a class="pill solid big" id="all-projects" href="https://github.com/gabyaillet" target="_blank" rel="noopener">Voir tous les projets →</a>
+          </div>
         </div>
       </div>
     </div>
@@ -903,6 +957,15 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
     </div>
   </div>
 </footer>
+
+<!-- BOUCLE : continuer à défiler ramène au début -->
+<section class="loop-zone" id="loop" aria-label="Retour au début">
+  <div class="loop-in">
+    <p class="label">Continuez à défiler</p>
+    <p class="loop-big" id="loop-big"><span>Retour</span><span>au début</span></p>
+    <span class="loop-bar"><i id="loop-bar"></i></span>
+  </div>
+</section>
 
 
 <dialog class="sheet" id="sheet-go" aria-label="Générateur de particules">
@@ -1065,13 +1128,29 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
     stage.classList.toggle('settled', t > T.settle[1]);
     if (t < T.end) raf = requestAnimationFrame(frame); else finish();
   }
+  let idleRaf = 0, stageVis = true;
+  new IntersectionObserver(([e]) => stageVis = e.isIntersecting).observe(stage);
+  function idle(now) {
+    if (stageVis) {
+      const t = now / 1000;
+      els.forEach((o, i) => {
+        if (o.grid === undefined) return;
+        const g = slots[o.grid];
+        apply(o.el, { x: g.x + Math.sin(t * 0.55 + i * 1.3) * 3, y: g.y + Math.sin(t * 0.8 + i) * 5, z: Math.sin(t * 0.5 + i * 2) * 14,
+          ry: Math.sin(t * 0.45 + i) * 2.4, rx: Math.cos(t * 0.5 + i * 1.7) * 2, rz: Math.sin(t * 0.3 + i * 0.7) * 0.6, s: 1 }, 1);
+      });
+    }
+    idleRaf = requestAnimationFrame(idle);
+  }
+  stage.addEventListener('pointermove', e => { const r = stage.getBoundingClientRect(); stage.style.setProperty('--gx', ((e.clientX - r.left) / r.width * 100) + '%'); stage.style.setProperty('--gy', ((e.clientY - r.top) / r.height * 100) + '%'); });
   function finish() {
     cancelAnimationFrame(raf);
     w1.style.transform = 'translateX(130vw)'; w2.style.transform = 'translateX(-130vw)'; tagline.style.opacity = 0;
     els.forEach(o => o.grid === undefined ? apply(o.el, { x: 0, y: 0, z: -400, ry: 0, rz: 0, rx: 0, s: 0.5 }, 0) : apply(o.el, slots[o.grid], 1));
     stage.classList.add('settled');
+    if (!reduce) { cancelAnimationFrame(idleRaf); idleRaf = requestAnimationFrame(idle); }
   }
-  function play() { cancelAnimationFrame(raf); layout(); stage.classList.remove('settled'); t0 = performance.now(); raf = requestAnimationFrame(frame); }
+  function play() { cancelAnimationFrame(idleRaf); cancelAnimationFrame(raf); layout(); stage.classList.remove('settled'); t0 = performance.now(); raf = requestAnimationFrame(frame); }
   new ResizeObserver(() => { const done = stage.classList.contains('settled'); layout(); if (done) finish(); }).observe(stage);
   document.getElementById('replay').addEventListener('click', play);
   layout();
@@ -1288,12 +1367,13 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
   const hs = document.getElementById('projets'), hsTrack = document.getElementById('hs-track');
   const hsSticky = hs.querySelector('.hs-sticky'), hsCount = document.getElementById('hs-count'), hsBar = document.getElementById('hs-bar');
   const hsCards = [...hsTrack.querySelectorAll('.hs-card')];
-  let hsDist = 0, hsOn = false;
+  let hsDist = 0, hsOn = false, hsInv = false;
+  const hsAll = document.getElementById('hs-all'), hsAllIn = document.getElementById('hs-all-in');
   function hsLayout() {
     hsOn = innerWidth > 760;
     if (!hsOn) { hs.style.height = ''; hsTrack.style.transform = ''; return; }
     hsDist = Math.max(0, hsTrack.scrollWidth - innerWidth);
-    hs.style.height = (hsSticky.offsetHeight + hsDist) + 'px';
+    hs.style.height = (hsSticky.offsetHeight + hsDist + innerHeight * 0.6) + 'px'; // petite pause, écran centré, avant de redescendre
   }
   function hsTick() {
     if (!hsOn) {
@@ -1307,6 +1387,12 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
     hsTrack.style.transform = `translate3d(${-k * hsDist}px, 0, 0)`;
     hsBar.style.transform = `scaleX(${k})`;
     hsCount.textContent = String(Math.min(hsCards.length, Math.floor(k * hsCards.length) + 1)).padStart(2, '0') + ' / ' + String(hsCards.length).padStart(2, '0');
+    // écran final : il grandit en arrivant, et la page passe au noir
+    const ar = hsAll.getBoundingClientRect(), hr = hs.getBoundingClientRect();
+    const ak = Math.max(0, Math.min(1, 1 - ar.left / innerWidth));
+    hsAllIn.style.transform = reduce ? '' : `scale(${0.82 + ak * 0.18})`; hsAllIn.style.opacity = 0.2 + ak * 0.8;
+    const cover = hr.top <= 1 && hr.bottom >= innerHeight * 0.5 && ar.left < innerWidth * 0.5;
+    if (cover) { document.body.classList.add('inverted'); hsInv = true; } else if (hsInv) { document.body.classList.remove('inverted'); hsInv = false; }
     // léger effet de profondeur : les cartes hors centre s'inclinent
     hsCards.forEach(c => {
       const r = c.getBoundingClientRect(), d = (r.left + r.width / 2 - innerWidth / 2) / innerWidth;
@@ -1397,6 +1483,24 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
     const sr = stackSec.getBoundingClientRect(), sk = clamp01((vh - sr.top) / (vh * 0.9));
     stackWords.forEach((w, i) => { const k = reduce ? 1 : clamp01(sk * 1.5 - i * 0.12), e = 1 - Math.pow(1 - k, 3); w.style.transform = `translateX(${(1 - e) * 70}vw)`; });
     requestAnimationFrame(scrollFx);
+  })();
+
+
+  /* ===== Boucle infinie : arrivé tout en bas, on repart en haut avec l'animation des cartes ===== */
+  const loopZone = document.getElementById('loop'), loopBar = document.getElementById('loop-bar'), loopBig = document.getElementById('loop-big');
+  let looping = false;
+  (function loopTick() {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    const r = loopZone.getBoundingClientRect(), k = Math.max(0, Math.min(1, (innerHeight - r.top) / r.height));
+    loopBar.style.transform = `scaleX(${k})`;
+    loopBig.style.transform = reduce ? '' : `scale(${0.85 + k * 0.15})`; loopBig.style.opacity = 0.25 + k * 0.75;
+    if (!looping && scrollY >= max - 2 && k > 0.95) {
+      looping = true;
+      if (lenis) lenis.scrollTo(0, { immediate: true, force: true }); else window.scrollTo({ top: 0, behavior: 'instant' });
+      if (window.__startIntro) window.__startIntro();
+      setTimeout(() => looping = false, 1500);
+    }
+    requestAnimationFrame(loopTick);
   })();
 
   /* ---------- Copier l'e-mail ---------- */
