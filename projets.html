@@ -28,8 +28,13 @@ p { margin: 0; }
 .wrap { max-width: 78rem; margin-inline: auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
 .label { font: 500 0.72rem var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 
-/* Points qui défilent */
-.stars { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+/* Le fil : un point blanc qui trace un trait fin d'un projet à l'autre */
+main { position: relative; }
+.thread { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; overflow: visible; }
+.thread path { fill: none; stroke: rgba(237,237,235,.55); stroke-width: 1; stroke-linecap: round; }
+.thread circle { fill: #ededeb; filter: drop-shadow(0 0 6px rgba(255,255,255,.8)); }
+.head, .item, .end { position: relative; z-index: 1; }
+.media { box-shadow: 0 0 0 1px #1f1f1f; }
 
 /* Barre du haut */
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--bg); }
@@ -51,7 +56,8 @@ main { position: relative; z-index: 1; }
 .count { display: inline-block; margin-top: 2rem; }
 
 /* Galerie en zigzag */
-.list { display: grid; gap: clamp(8rem, 22vh, 14rem); padding-bottom: clamp(6rem, 14vh, 10rem); }
+.list { display: grid; gap: 95vh; padding-top: 70vh; padding-bottom: 80vh; }
+.head { min-height: calc(100svh - 4rem); display: grid; align-content: center; padding-block: 2rem; }
 .item { width: min(100%, 44rem); will-change: transform; }
 .item.left { justify-self: start; margin-left: 2vw; }
 .item.right { justify-self: end; margin-right: 2vw; }
@@ -121,7 +127,6 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
 </style>
 </head>
 <body>
-<canvas class="stars" id="stars" aria-hidden="true"></canvas>
 
 <header class="topbar">
   <div class="wrap">
@@ -133,11 +138,12 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
   </div>
 </header>
 
-<main>
+<main id="main">
+  <svg class="thread" id="thread" aria-hidden="true"><path id="thread-path" d=""/><circle id="thread-dot" r="5" cx="-20" cy="-20"/></svg>
   <header class="head wrap">
     <h1 class="reveal-text">Mes projets</h1>
     <p class="reveal-text">Projets d'équipe réalisés à l'IUT de Nantes :<br>moteur en Go, simulation en Python et site web.</p>
-    <span class="label count reveal-text">03 projets</span>
+    <span class="label count reveal-text" id="thread-start">03 projets</span>
   </header>
 
   <div class="wrap list">
@@ -257,32 +263,57 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
     fit(); new ResizeObserver(fit).observe(cv); return ctx;
   }
 
-  /* Points qui défilent : trois couches à des vitesses différentes, étirés par la vitesse de défilement */
-  const sc = document.getElementById('stars'), sctx = setupCanvas(sc);
-  const stars = [...Array(220)].map(() => ({ x: Math.random(), y: Math.random(), z: [0.25, 0.55, 1][Math.floor(Math.random() * 3)], tw: Math.random() * 6 }));
+  /* Traînée fantôme des titres */
   let lastY = scrollY, vel = 0;
-  const items = [...document.querySelectorAll('.item')], ghosts = [...document.querySelectorAll('.text h3')];
-  function frame(t) {
-    const w = sc.clientWidth, h = sc.clientHeight, y = scrollY;
-    vel += ((y - lastY) - vel) * 0.15; lastY = y;
-    sctx.clearRect(0, 0, w, h);
-    for (const s of stars) {
-      const py = ((s.y * h - y * s.z * 0.8) % h + h) % h, px = s.x * w;
-      const a = (0.25 + s.z * 0.6) * (0.75 + 0.25 * Math.sin(t / 700 + s.tw));
-      const len = Math.min(40, Math.abs(vel) * s.z * 1.2);
-      sctx.strokeStyle = sctx.fillStyle = `rgba(237,237,235,${a})`;
-      if (len > 1.5 && !reduce) { sctx.lineWidth = s.z * 1.4; sctx.beginPath(); sctx.moveTo(px, py); sctx.lineTo(px, py + len * Math.sign(vel)); sctx.stroke(); }
-      else { sctx.beginPath(); sctx.arc(px, py, s.z * 1.1, 0, 7); sctx.fill(); }
-    }
-    if (!reduce) {
-      // parallaxe légère des projets, et traînée fantôme des titres
-      items.forEach(it => { const r = it.getBoundingClientRect(), k = (r.top + r.height / 2 - innerHeight / 2); it.style.transform = `translate3d(0, ${k * +it.dataset.speed}px, 0)`; });
-      const gv = Math.max(-26, Math.min(26, -vel * 0.9));
-      ghosts.forEach(g => g.style.setProperty('--gv', gv + 'px'));
-    }
-    requestAnimationFrame(frame);
+  const ghosts = [...document.querySelectorAll('.text h3')];
+  (function ghostLoop() {
+    vel += ((scrollY - lastY) - vel) * 0.15; lastY = scrollY;
+    if (!reduce) { const gv = Math.max(-26, Math.min(26, -vel * 0.9)); ghosts.forEach(g => g.style.setProperty('--gv', gv + 'px')); }
+    requestAnimationFrame(ghostLoop);
+  })();
+
+  /* Le fil : tracé en arcs et petites boucles, dessiné au fur et à mesure du défilement */
+  const main = document.getElementById('main'), svg = document.getElementById('thread'), path = document.getElementById('thread-path'), dot = document.getElementById('thread-dot');
+  let table = [], total = 0, cur = 0;
+  function buildThread() {
+    const mr = main.getBoundingClientRect(), W = main.clientWidth, H = main.scrollHeight;
+    svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const rel = el => { const r = el.getBoundingClientRect(); return { x: r.left - mr.left, y: r.top - mr.top, w: r.width, h: r.height }; };
+    const st = rel(document.getElementById('thread-start'));
+    const stops = [{ x: st.x + st.w / 2, y: st.y + st.h + 24 }];
+    const targets = [...document.querySelectorAll('.item .media'), document.querySelector('.end-in')];
+    let d = `M ${stops[0].x} ${stops[0].y}`, from = stops[0], side = 1;
+    targets.forEach((el, i) => {
+      const r = rel(el), to = { x: r.x + r.w / 2, y: r.y };
+      const dy = to.y - from.y, swing = Math.min(W * 0.32, 420) * side, R = Math.min(70, dy * 0.08);
+      const m = { x: (from.x + to.x) / 2 + swing * 0.55, y: from.y + dy * 0.45 };
+      // arc vers le côté, petite boucle, puis arc qui rejoint le haut du projet
+      d += ` C ${from.x} ${from.y + dy * 0.2}, ${m.x - swing * 0.6} ${m.y - dy * 0.2}, ${m.x} ${m.y}`;
+      d += ` a ${R} ${R} 0 1 ${side > 0 ? 1 : 0} 0.01 0`;
+      d += ` C ${m.x + swing * 0.5} ${m.y + dy * 0.25}, ${to.x} ${to.y - dy * 0.25}, ${to.x} ${to.y}`;
+      if (i < targets.length - 1) { const tb = el.closest('.item').getBoundingClientRect(); from = { x: to.x, y: tb.bottom - mr.top + 30 }; d += ` M ${from.x} ${from.y}`; }
+      side = -side;
+    });
+    path.setAttribute('d', d);
+    total = path.getTotalLength();
+    // table longueur → hauteur maximale atteinte, pour avancer le point selon le défilement
+    table = []; let maxY = 0;
+    for (let l = 0; l <= total; l += 3) { const pt = path.getPointAtLength(l); maxY = Math.max(maxY, pt.y); table.push([l, maxY]); }
+    path.style.strokeDasharray = `${total} ${total}`;
   }
-  requestAnimationFrame(frame);
+  function lenForY(y) { let lo = 0, hi = table.length - 1; if (!table.length) return 0; while (lo < hi) { const mid = (lo + hi) >> 1; if (table[mid][1] < y) lo = mid + 1; else hi = mid; } return table[lo][0]; }
+  (function threadLoop() {
+    if (table.length) {
+      const target = reduce ? total : lenForY(scrollY + innerHeight * 0.62 - (main.getBoundingClientRect().top + scrollY));
+      cur += (target - cur) * 0.12;
+      path.style.strokeDashoffset = total - cur;
+      const pt = path.getPointAtLength(cur); dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y);
+    }
+    requestAnimationFrame(threadLoop);
+  })();
+  addEventListener('load', buildThread); addEventListener('resize', buildThread);
+  document.fonts && document.fonts.ready.then(buildThread);
+  buildThread();
 
   /* Animation de particules (projet Go) */
   const gc = document.getElementById('go-canvas'), gctx = setupCanvas(gc); let parts = [];
