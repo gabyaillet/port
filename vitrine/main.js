@@ -24,19 +24,19 @@ renderer.setPixelRatio(Math.min(devicePixelRatio || 1, LITE ? 1 : 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.95;
+renderer.toneMappingExposure = 1.2;
 renderer.shadowMap.enabled = !LITE;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
 const FOG = new THREE.Color('#2c2766');
 scene.background = FOG;
-scene.fog = new THREE.Fog(FOG, 45, 150);
+scene.fog = new THREE.Fog(FOG, 70, 210);
 const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.5, 400);
 
 /* Lumières de nuit : lune froide, ambiance violette, lanternes chaudes */
-scene.add(new THREE.HemisphereLight('#8a84f0', '#241b40', 1.05));
-const moon = new THREE.DirectionalLight('#b2aef5', 1.2);
+scene.add(new THREE.HemisphereLight('#9993ff', '#2e2450', 1.6));
+const moon = new THREE.DirectionalLight('#c4c0ff', 1.7);
 moon.castShadow = true; moon.shadow.mapSize.set(2048, 2048);
 Object.assign(moon.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 200 });
 moon.shadow.bias = -0.0004; moon.shadow.normalBias = 0.05;
@@ -225,8 +225,8 @@ function rock(x, z, s) { P.rock.add(mtx(x, H(x, z) + 0.3 * s, z, rnd() * 3, rnd(
 const grassUniforms = { uTime: { value: 0 } };
 {
   const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute([-0.1, 0, 0, 0.1, 0, 0, 0, 1.1, 0], 3));
-  g.setAttribute('color', new THREE.Float32BufferAttribute([0.16, 0.16, 0.36, 0.16, 0.16, 0.36, 0.5, 0.5, 0.92], 3));
+  g.setAttribute('position', new THREE.Float32BufferAttribute([-0.32, 0, 0, 0.32, 0, 0, 0, 0.55, 0], 3));
+  g.setAttribute('color', new THREE.Float32BufferAttribute([0.2, 0.2, 0.45, 0.2, 0.2, 0.45, 0.36, 0.37, 0.72], 3));
   g.computeVertexNormals();
   const mat = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
   mat.onBeforeCompile = sh => {
@@ -238,7 +238,7 @@ const grassUniforms = { uTime: { value: 0 } };
       float ph = 0.;
       #endif
       float w = sin(uTime * 1.6 + ph) * 0.5 + sin(uTime * 2.7 + ph * 1.7) * 0.25;
-      transformed.x += w * 0.25 * position.y; transformed.z += w * 0.12 * position.y;`);
+      transformed.x += w * 0.12 * position.y; transformed.z += w * 0.06 * position.y;`);
   };
   const N = LITE ? 9000 : 30000, grass = new THREE.InstancedMesh(g, mat, N);
   let n = 0, tries = 0;
@@ -248,7 +248,7 @@ const grassUniforms = { uTime: { value: 0 } };
     for (let k = 0; k < 40 && n < N; k++) {
       const x = cx + (rnd() - .5) * 7, z = cz + (rnd() - .5) * 7;
       if (nearest(x, z) < PATH_W / 2 + 0.3 || Math.hypot(x - PLAZA.x, z - PLAZA.z) < PLAZA.r + 0.5) continue;
-      grass.setMatrixAt(n++, mtx(x, H(x, z), z, (rnd() - .5) * 0.3, rnd() * 6, (rnd() - .5) * 0.3, 0.8 + rnd() * 0.6, 0.6 + rnd() * 0.9, 1));
+      grass.setMatrixAt(n++, mtx(x, H(x, z) - 0.05, z, 0, rnd() * 6, 0, 0.8 + rnd() * 0.6, 0.7 + rnd() * 0.6, 1));
     }
   }
   grass.count = n; grass.receiveShadow = !LITE; scene.add(grass);
@@ -336,7 +336,7 @@ Object.values(P).forEach(p => p.build());
 const VIEW = new THREE.Vector3(1, 0, 1).normalize();            // côté où se tient la caméra
 const START = { x: PLAZA.x + VIEW.x * 5, z: PLAZA.z + VIEW.z * 5, h: Math.atan2(VIEW.z, -VIEW.x) }; // la voiture s'éloigne de la caméra
 const props = [];
-function addProp(mesh, x, z, r, k, lift) { const g = new THREE.Group(); g.add(mesh); g.position.set(x, H(x, z) + lift, z); scene.add(g); props.push({ g, r, k, lift, v: new THREE.Vector3(), w: new THREE.Vector3(), still: true }); return g; }
+function addProp(mesh, x, z, r, k, lift) { const g = new THREE.Group(); g.add(mesh); g.position.set(x, H(x, z) + lift, z); scene.add(g); props.push({ g, r, k, lift, v: new THREE.Vector3(), w: new THREE.Vector3(), still: true, cd: 0 }); return g; }
 fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(json => {
   const font = new FontLoader().parse(json), word = 'BIENVENUE', size = 2.3, gap = 0.35;
   const geos = [...word].map(ch => { const g = new TextGeometry(ch, { font, size, depth: 0.9, curveSegments: 6, bevelEnabled: true, bevelThickness: 0.12, bevelSize: 0.08, bevelSegments: 3 }); g.computeBoundingBox(); return g; });
@@ -344,10 +344,10 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
   const right = new THREE.Vector3(VIEW.z, 0, -VIEW.x), cx = PLAZA.x - VIEW.x * 3.5, cz = PLAZA.z - VIEW.z * 3.5, rotY = Math.atan2(VIEW.x, VIEW.z);
   let off = -total / 2;
   geos.forEach((g, i) => {
-    const w = widths[i]; g.translate(-g.boundingBox.min.x - w / 2, 0, -0.45);
+    const w = widths[i], hgt = g.boundingBox.max.y - g.boundingBox.min.y; g.translate(-g.boundingBox.min.x - w / 2, -g.boundingBox.min.y - hgt / 2, -0.45);
     const m = shadowy(new THREE.Mesh(g, M.letters)); m.rotation.y = rotY;
     const along = off + w / 2; off += w + gap;
-    addProp(m, cx + right.x * along, cz + right.z * along, Math.max(0.9, w / 2), 0.55, 0.05);
+    addProp(m, cx + right.x * along, cz + right.z * along, Math.max(0.9, w / 2), 0.8, hgt / 2 + 0.1);
   });
 }).catch(() => {});
 // caisses en bois empilées
@@ -432,12 +432,12 @@ car.add(body); scene.add(car);
   const plateM = std({ map: plateTex, roughness: 0.5 });
   for (const [x, ry] of [[2.12, Math.PI / 2], [-2.06, -Math.PI / 2]]) add(new THREE.PlaneGeometry(0.5, 0.14), plateM, x, 0.62, 0, false).rotation.y = ry;
   // roues fines et hautes
-  const tg = new THREE.TorusGeometry(0.34, 0.1, 12, 32), sg = new THREE.CylinderGeometry(0.3, 0.3, 0.18, 28).rotateX(Math.PI / 2), hg = new THREE.CylinderGeometry(0.2, 0.22, 0.24, 24).rotateX(Math.PI / 2), cg = new THREE.SphereGeometry(0.08, 10, 8);
-  for (const [x, z, front] of [[1.28, 0.78, true], [1.28, -0.78, true], [-1.22, 0.78, false], [-1.22, -0.78, false]]) {
-    const pivot = new THREE.Group(); pivot.position.set(x, 0.43, z);
+  const tg = new THREE.TorusGeometry(0.44, 0.17, 14, 36), sg = new THREE.CylinderGeometry(0.42, 0.42, 0.32, 30).rotateX(Math.PI / 2), hg = new THREE.CylinderGeometry(0.27, 0.3, 0.36, 26).rotateX(Math.PI / 2), cg = new THREE.SphereGeometry(0.1, 12, 10); // grosses roues bien visibles
+  for (const [x, z, front] of [[1.3, 0.92, true], [1.3, -0.92, true], [-1.24, 0.92, false], [-1.24, -0.92, false]]) {
+    const pivot = new THREE.Group(); pivot.position.set(x, 0.61, z);
     const spin = new THREE.Group(); pivot.add(spin);
     spin.add(shadowy(new THREE.Mesh(tg, tire)), shadowy(new THREE.Mesh(sg, tire)), shadowy(new THREE.Mesh(hg, hub)));
-    const cap = new THREE.Mesh(cg, chrome); cap.position.z = z > 0 ? 0.13 : -0.13; spin.add(cap);
+    const cap = new THREE.Mesh(cg, chrome); cap.position.z = z > 0 ? 0.19 : -0.19; spin.add(cap);
     car.add(pivot); wheels.push({ pivot, spin, front });
   }
   // ombre douce sous la voiture
@@ -516,7 +516,7 @@ const dust = (() => {
 function puff(x, y, z, vx, vz) { const d = dust.items[dust.i = (dust.i + 1) % dust.items.length]; d.life = 0; d.p.set(x, y + 0.3, z); d.v.set(vx + (Math.random() - .5), 0.6 + Math.random(), vz + (Math.random() - .5)); d.s = 0.4 + Math.random() * 0.4; }
 
 /* ---------- Caméra : vue plongeante qui suit la voiture ---------- */
-const cam = { yaw: Math.atan2(VIEW.z, VIEW.x), pitch: 0.82, dist: LITE ? 24 : 22 };
+const cam = { yaw: Math.atan2(VIEW.z, VIEW.x), pitch: 0.7, dist: LITE ? 38 : 33 };
 const camPos = new THREE.Vector3(), camLook = new THREE.Vector3(), follow = new THREE.Vector3(), look = new THREE.Vector3();
 const intro = { t: 0, dur: reduce ? 0.01 : 3.8, done: false, started: false };
 const INTRO_FROM = new THREE.Vector3(START.x + 70, 80, START.z + 70);
@@ -569,6 +569,7 @@ canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); showErr('
 addEventListener('error', e => showErr('Erreur : ' + (e.message || 'inconnue')));
 
 /* ---------- Boucle ---------- */
+const propBox = new THREE.Box3();
 const clock = new THREE.Clock(), fwd = new THREE.Vector3(), tmp = new THREE.Vector3(), Om = new THREE.Object3D();
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
 function tick() {
@@ -610,26 +611,41 @@ function tick() {
   state.roll += (targetRoll - state.roll) * Math.min(1, dt * 5);
   state.pitch += (throttle * 0.03 + Math.atan2(hF - hB, 4.8) - state.pitch) * Math.min(1, dt * 5);
   state.bounce += dt * (4 + Math.abs(state.speed) * 0.4);
-  body.rotation.set(state.roll, 0, state.pitch); body.position.y = Math.sin(state.bounce) * 0.015 * (0.3 + Math.abs(state.speed) / MAX) + 0.02;
-  state.wheelSpin -= state.speed * dt / (0.43 * 1.6);
+  body.rotation.set(state.roll, 0, state.pitch); body.position.y = Math.sin(state.bounce) * 0.015 * (0.3 + Math.abs(state.speed) / MAX) + 0.16; // caisse relevée sur les grosses roues
+  state.wheelSpin -= state.speed * dt / (0.61 * 1.6);
   for (const w of wheels) { w.spin.rotation.z = state.wheelSpin; if (w.front) w.pivot.rotation.y = state.steer * 0.9; }
 
   if (intro.done && Math.abs(state.speed) > 6 && Math.random() < 0.5) for (const side of [-1, 1]) { tmp.set(-fwd.z, 0, fwd.x).multiplyScalar(side * 1.2); puff(state.x - fwd.x * 2.2 + tmp.x, state.y, state.z - fwd.z * 2.2 + tmp.z, -fwd.x * 2, -fwd.z * 2); }
   dust.items.forEach((d, i) => { if (d.life < 1) { d.life += dt * 1.1; d.p.addScaledVector(d.v, dt); d.v.multiplyScalar(0.96); } const s = d.life < 1 ? d.s * (0.6 + d.life * 1.4) * (1 - d.life) : 0; Om.position.copy(d.p); Om.rotation.set(0, 0, 0); Om.scale.setScalar(s); Om.updateMatrix(); dust.m.setMatrixAt(i, Om.matrix); });
   dust.m.instanceMatrix.needsUpdate = true;
 
-  // lettres, caisses, foin
+  // lettres, caisses, foin : poussés par la voiture, ils basculent et glissent
   for (const c of props) {
-    const dx = c.g.position.x - state.x, dz = c.g.position.z - state.z, d = Math.hypot(dx, dz) || 1e-3;
-    if (d < c.r + 1.8 && Math.abs(state.speed) > 1.5 && c.g.position.y < H(c.g.position.x, c.g.position.z) + 6) {
-      const k = Math.abs(state.speed) * 0.55 * c.k;
-      c.v.set(dx / d * k + fwd.x * state.speed * 0.5 * c.k, (3 + Math.abs(state.speed) * 0.25) * c.k, dz / d * k + fwd.z * state.speed * 0.5 * c.k);
-      c.w.set((Math.random() - .5) * 8, (Math.random() - .5) * 6, (Math.random() - .5) * 8); if (c.still) bump(); c.still = false;
+    c.cd = Math.max(0, c.cd - dt);
+    const dx = c.g.position.x - state.x, dz = c.g.position.z - state.z, d = Math.hypot(dx, dz) || 1e-3, reach = c.r + CAR_R * 0.75;
+    if (d < reach) {
+      const sp = Math.abs(state.speed);
+      if (sp > 1.2 && c.cd === 0) {
+        const nx = dx / d, nz = dz / d, push = sp * 0.75 * c.k;
+        c.v.set(nx * push * 0.6 + fwd.x * state.speed * 0.7 * c.k, Math.min(5, 1.2 + sp * 0.12) * c.k, nz * push * 0.6 + fwd.z * state.speed * 0.7 * c.k);
+        const hx = c.v.x, hz = c.v.z, hl = Math.hypot(hx, hz) || 1; // bascule dans le sens de la poussée
+        c.w.set(hz / hl * (2 + sp * 0.18), (Math.random() - .5) * 2, -hx / hl * (2 + sp * 0.18));
+        c.cd = 0.35; if (c.still) bump(); c.still = false;
+        state.speed *= 0.88; // la voiture ralentit un peu au choc
+      }
+      if (c.still) { c.g.position.x += dx / d * (reach - d) * 0.5; c.g.position.z += dz / d * (reach - d) * 0.5; } // poussé doucement à basse vitesse
     }
     if (!c.still) {
-      c.v.y -= 25 * dt; c.g.position.addScaledVector(c.v, dt); c.g.rotation.x += c.w.x * dt; c.g.rotation.y += c.w.y * dt; c.g.rotation.z += c.w.z * dt;
-      const g0 = H(c.g.position.x, c.g.position.z) + 0.3;
-      if (c.g.position.y < g0) { c.g.position.y = g0; c.v.y *= -0.3; c.v.x *= 0.6; c.v.z *= 0.6; c.w.multiplyScalar(0.55); if (Math.abs(c.v.y) < 0.6 && Math.hypot(c.v.x, c.v.z) < 0.3) c.still = true; }
+      c.v.y -= 22 * dt; c.g.position.addScaledVector(c.v, dt);
+      c.g.rotation.x += c.w.x * dt; c.g.rotation.y += c.w.y * dt; c.g.rotation.z += c.w.z * dt;
+      propBox.setFromObject(c.g, false);
+      const ground = H(c.g.position.x, c.g.position.z) + 0.1;
+      if (propBox.min.y < ground) {
+        c.g.position.y += ground - propBox.min.y;               // ne s'enfonce jamais dans le sol
+        if (c.v.y < 0) c.v.y *= -0.25;
+        const fr = Math.pow(0.08, dt); c.v.x *= fr; c.v.z *= fr; c.w.multiplyScalar(Math.pow(0.05, dt));
+        if (Math.abs(c.v.y) < 0.5 && Math.hypot(c.v.x, c.v.z) < 0.25 && c.w.length() < 0.25) c.still = true;
+      }
     }
   }
 
@@ -641,7 +657,7 @@ function tick() {
   cam.yaw += camTurn; camTurn = 0;
   const speedK = Math.abs(state.speed) / MAX, dist = cam.dist * (camera.aspect < 0.8 ? 1.15 : 1) * (1 + speedK * 0.12);
   follow.set(Math.cos(cam.pitch) * Math.cos(cam.yaw) * dist, Math.sin(cam.pitch) * dist, Math.cos(cam.pitch) * Math.sin(cam.yaw) * dist).add(car.position);
-  look.set(car.position.x + fwd.x * speedK * 4, car.position.y + 0.8, car.position.z + fwd.z * speedK * 4);
+  look.set(car.position.x + fwd.x * (4 + speedK * 6), car.position.y + 0.5, car.position.z + fwd.z * (4 + speedK * 6)); // on regarde un peu devant la voiture
   if (intro.started && !intro.done) {
     intro.t += Math.min(rawDt, 0.1) / intro.dur; const e = ease(Math.min(1, intro.t));
     camPos.lerpVectors(INTRO_FROM, follow, e); camLook.lerpVectors(tmp.set(START.x, 0, START.z), look, e);
