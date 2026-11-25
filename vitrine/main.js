@@ -79,8 +79,17 @@ const TEX = {
   plaster: canvasTex(256, (g, s) => { g.fillStyle = '#fff'; g.fillRect(0, 0, s, s); for (let i = 0; i < 3000; i++) { g.fillStyle = `rgba(0,0,0,${Math.random() * 0.08})`; g.fillRect(Math.random() * s, Math.random() * s, 2, 2); } }, 2, 2),
   wood: canvasTex(128, (g, s) => { g.fillStyle = '#c99a6a'; g.fillRect(0, 0, s, s); for (let i = 0; i < 40; i++) { g.strokeStyle = 'rgba(60,35,15,.25)'; g.beginPath(); const y = Math.random() * s; g.moveTo(0, y); g.bezierCurveTo(s * .3, y + 3, s * .6, y - 3, s, y + 1); g.stroke(); } g.strokeStyle = 'rgba(50,25,10,.6)'; g.lineWidth = 8; g.strokeRect(4, 4, s - 8, s - 8); g.beginPath(); g.moveTo(4, 4); g.lineTo(s - 4, s - 4); g.stroke(); })
 };
+TEX.ground = canvasTex(256, (g, s) => { g.fillStyle = '#d9d9d9'; g.fillRect(0, 0, s, s);
+  for (let i = 0; i < 2600; i++) { const v = 170 + Math.random() * 85; g.fillStyle = `rgb(${v},${v},${v})`; const r = 1 + Math.random() * 3; g.beginPath(); g.arc(Math.random() * s, Math.random() * s, r, 0, 7); g.fill(); }
+  for (let i = 0; i < 500; i++) { g.strokeStyle = `rgba(255,255,255,${0.2 + Math.random() * 0.3})`; const x = Math.random() * s, y = Math.random() * s; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (Math.random() - .5) * 4, y - 4 - Math.random() * 5); g.stroke(); } }, 70, 70);
+TEX.bricks = canvasTex(256, (g, s) => { g.fillStyle = '#4c4889'; g.fillRect(0, 0, s, s); const rows = 6, h = s / rows;
+  for (let r = 0; r < rows; r++) for (let c = -1; c < 5; c++) { const w = s / 4, x = c * w + (r % 2) * w / 2; const v = 0.85 + Math.random() * 0.3; g.fillStyle = `rgb(${130 * v | 0},${126 * v | 0},${200 * v | 0})`; g.beginPath(); g.roundRect(x + 3, r * h + 3, w - 6, h - 6, 6); g.fill(); } });
+TEX.planks = canvasTex(256, (g, s) => { g.fillStyle = '#7a5a3c'; g.fillRect(0, 0, s, s); for (let i = 0; i < 6; i++) { const v = 0.8 + Math.random() * 0.35; g.fillStyle = `rgb(${190 * v | 0},${140 * v | 0},${95 * v | 0})`; g.fillRect(4, i * s / 6 + 3, s - 8, s / 6 - 6); }
+  for (let i = 0; i < 60; i++) { g.strokeStyle = 'rgba(60,35,15,.25)'; g.beginPath(); const y = Math.random() * s; g.moveTo(0, y); g.lineTo(s, y + (Math.random() - .5) * 6); g.stroke(); }
+  g.fillStyle = '#3a2a1d'; for (let i = 0; i < 6; i++) for (const x of [14, s - 14]) { g.beginPath(); g.arc(x, i * s / 6 + s / 12, 3, 0, 7); g.fill(); } });
+TEX.barrel = canvasTex(128, (g, s) => { for (let i = 0; i < 8; i++) { const v = 0.8 + Math.random() * 0.3; g.fillStyle = `rgb(${170 * v | 0},${115 * v | 0},${70 * v | 0})`; g.fillRect(i * s / 8, 0, s / 8 - 2, s); } g.fillStyle = '#2b2546'; for (const y of [0.12, 0.85]) g.fillRect(0, y * s, s, s * 0.07); });
 const M = {
-  terrain: std({ vertexColors: true, roughness: 0.95 }),
+  terrain: std({ vertexColors: true, roughness: 0.95, map: TEX.ground }),
   path: std({ color: '#ffffff', map: TEX.cobble, roughness: 0.9 }),
   bark: std({ color: '#c9c6f2', roughness: 0.8 }),
   barkDark: flat({ color: '#3b2f5c' }),
@@ -205,11 +214,11 @@ function pine(x, z, s) {
 }
 function rock(x, z, s) { P.rock.add(mtx(x, H(x, z) + 0.3 * s, z, rnd() * 3, rnd() * 6, rnd() * 3, s * (1 + rnd() * 0.5), s * (0.6 + rnd() * 0.4), s * (1 + rnd() * 0.5)), C('#6e6bc0').multiplyScalar(0.8 + rnd() * 0.4)); circles.push({ x, z, r: s }); }
 {
-  const N = LITE ? 300 : 520; let placed = 0, tries = 0;
+  const N = LITE ? 190 : 330; let placed = 0, tries = 0;
   while (placed < N && tries++ < N * 20) {
     const x = (rnd() * 2 - 1) * 140, z = (rnd() * 2 - 1) * 140;
-    if (!free(x, z, 3)) continue;
-    const dens = Math.min(1, smooth(60, 5, Math.hypot(x - FOREST.x, z - FOREST.z)) + smooth(95, 125, Math.hypot(x, z)) + 0.12);
+    if (!free(x, z, 6)) continue;
+    const dens = Math.min(1, smooth(60, 5, Math.hypot(x - FOREST.x, z - FOREST.z)) * 0.55 + smooth(95, 125, Math.hypot(x, z)) + 0.1);
     if (rnd() > dens) continue;
     const s = 0.9 + rnd() * 0.7; (rnd() < 0.6 ? fluffyTree : pine)(x, z, s); placed++;
   }
@@ -330,6 +339,33 @@ const millHub = new THREE.Group();
   const win = new THREE.Mesh(new THREE.BoxGeometry(1, 1.4, 0.2), M.window); win.position.set(HILL.x, y + 4, HILL.z); win.rotation.y = mill.rotation.y; win.translateZ(2.9); scene.add(win);
 }
 
+/* ---------- Obstacles : tremplins, murets de pierre ---------- */
+const ramps = [];
+function ramp(x, z, ang, L = 9, W = 5, h = 1.8) {
+  const sh = new THREE.Shape(); sh.moveTo(0, 0); sh.lineTo(L, 0); sh.lineTo(L, h); sh.lineTo(L - 0.6, h + 0.05); sh.closePath();
+  const geo = new THREE.ExtrudeGeometry(sh, { depth: W, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.08, bevelSegments: 2 }).translate(0, 0, -W / 2);
+  const uv = geo.attributes.uv, ps = geo.attributes.position; for (let i = 0; i < ps.count; i++) uv.setXY(i, ps.getZ(i) / 5 + 0.5, ps.getX(i) / 3);
+  const m = shadowy(new THREE.Mesh(geo, std({ map: TEX.planks, roughness: 0.8 }))); const y = H(x, z);
+  m.position.set(x, y - 0.05, z); m.rotation.y = ang; scene.add(m);
+  const fx = Math.cos(ang), fz = -Math.sin(ang); // sens de montée
+  ramps.push({ x, z, fx, fz, L, W, h, y });
+  // le dos du tremplin est un mur : on ne peut pas monter par l'arrière
+  const bx = x + fx * L, bz = z + fz * L; boxes.push({ x: bx, z: bz, a: ang + Math.PI / 2, hw: W / 2, hd: 0.4, ch: h + 1, below: y + h * 0.5 }); // mur arrière, seulement pour qui arrive par le bas
+}
+function rampHeight(x, z) {
+  let best = 0;
+  for (const r of ramps) { const dx = x - r.x, dz = z - r.z, u = dx * r.fx + dz * r.fz, w = -dx * r.fz + dz * r.fx; if (u > 0 && u < r.L && Math.abs(w) < r.W / 2) best = Math.max(best, r.y - H(x, z) + u / r.L * r.h); }
+  return best;
+}
+const groundAt = (x, z) => H(x, z) + (ramps.length ? rampHeight(x, z) : 0);
+{
+  // tremplins : sur la prairie, autour de la place
+  for (const [x, z, a] of [[26, 14, -0.5], [-24, -8, 2.6], [14, -30, -1.4], [-30, 30, 2.2], [40, 30, 0.9]]) if (free(x, z, 3)) ramp(x, z, a);
+  // murets de pierre texturés
+  const wallMat = std({ map: TEX.bricks, roughness: 0.9 });
+  const wall = (x, z, a, len) => { const y = H(x, z); const t = TEX.bricks.clone(); t.needsUpdate = true; t.repeat.set(len / 3, 1); const m = shadowy(new THREE.Mesh(new RoundedBoxGeometry(len, 1.3, 0.9, 2, 0.12), wallMat.clone())); m.material.map = t; m.position.set(x, y + 0.5, z); m.rotation.y = a; scene.add(m); boxes.push({ x, z, a, hw: len / 2, hd: 0.45, ch: 1.4 }); };
+  for (const [x, z, a, l] of [[32, -6, 0.3, 10], [-14, 32, -0.8, 12], [-38, 8, 1.4, 9], [8, 40, 0.1, 11], [44, -48, -0.6, 10], [-50, -30, 0.9, 12], [58, 46, 2.0, 9]]) if (free(x, z, 1)) wall(x, z, a, l);
+}
 Object.values(P).forEach(p => p.build());
 
 /* ---------- Départ, lettres « BIENVENUE » à bousculer ---------- */
@@ -353,6 +389,8 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
 // caisses en bois empilées
 { const g = new RoundedBoxGeometry(1.6, 1.6, 1.6, 2, 0.08); const bx = PLAZA.x + VIEW.z * 10 - 1.7, bz = PLAZA.z - VIEW.x * 10;
   for (let r = 0; r < 3; r++) for (let c = 0; c < 3 - r; c++) addProp(shadowy(new THREE.Mesh(g, M.wood)), bx + c * 1.7 + r * 0.85, bz, 1.1, 0.6, 0.8 + r * 1.6); }
+{ const bg = new THREE.CylinderGeometry(0.75, 0.75, 1.7, 16), bm = std({ map: TEX.barrel, roughness: 0.7 });
+  for (const [x, z] of [[11, -12], [12.5, -11], [11.6, -13.6], [-16, 20], [-17.4, 21], [30, -18], [-22, -26], [-23.5, -25]]) addProp(shadowy(new THREE.Mesh(bg, bm)), x, z, 1, 0.7, 0.85); }
 for (let k = 0; k < 6; k++) { const a = k * 1.05, x = HILL.x + Math.cos(a) * 10, z = HILL.z + Math.sin(a) * 10; addProp(shadowy(new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 1.6, 14).rotateX(Math.PI / 2), M.hay)), x, z, 1.4, 0.6, 0.9); }
 
 /* ---------- La 2CV, version nocturne ---------- */
@@ -446,6 +484,7 @@ car.add(body); scene.add(car);
     transparent: true, depthWrite: false }));
   blob.position.y = 0.36; car.add(blob);
   car.scale.setScalar(1.6);
+
 }
 
 
@@ -481,8 +520,8 @@ addEventListener('pointerdown', e => { if (e.pointerType !== 'touch' && !isUI(e.
 addEventListener('pointermove', e => { if (drag) { camTurn += (e.clientX - drag.x) * 0.006; drag.x = e.clientX; } });
 addEventListener('pointerup', () => { drag = null; document.body.classList.remove('grabbing'); });
 
-const state = { x: START.x, z: START.z, heading: START.h, speed: 0, steer: 0, roll: 0, pitch: 0, wheelSpin: 0, bounce: 0, y: H(START.x, START.z) };
-const MAX = 26, REV = -9, ACC = 13, BRAKE = 30, DRAG = 0.4, CAR_R = 2.3;
+const state = { x: START.x, z: START.z, heading: START.h, speed: 0, steer: 0, roll: 0, pitch: 0, wheelSpin: 0, bounce: 0, y: H(START.x, START.z), vy: 0, air: false, landV: 0 };
+const MAX = 26, REV = -9, ACC = 13, BRAKE = 30, DRAG = 0.4, CAR_R = 2.3, CAR_HL = 3.3, CAR_HW = 1.65; // demi-longueur / demi-largeur de la 2CV
 let snapCam = false;
 function resetCar() { Object.assign(state, { x: START.x, z: START.z, heading: START.h, speed: 0, steer: 0 }); snapCam = true; }
 let shake = 0; const bump = () => { shake = Math.min(1, shake + 0.45); };
@@ -495,6 +534,7 @@ function pushOut(nx, nz, depth) {
 function collide() {
   for (const c of circles) { const dx = state.x - c.x, dz = state.z - c.z; if (Math.abs(dx) > c.r + CAR_R || Math.abs(dz) > c.r + CAR_R) continue; const d = Math.hypot(dx, dz) || 1e-3, min = c.r + CAR_R; if (d < min) pushOut(dx / d, dz / d, min - d); }
   for (const b of boxes) {
+    if (b.below !== undefined && state.y > b.below) continue;
     const dx = state.x - b.x, dz = state.z - b.z, reach = b.hw + b.hd + CAR_R; if (Math.abs(dx) > reach || Math.abs(dz) > reach) continue;
     const ca = Math.cos(b.a), sa = Math.sin(b.a), lx = dx * ca - dz * sa, lz = dx * sa + dz * ca;
     const qx = Math.max(-b.hw, Math.min(lx, b.hw)), qz = Math.max(-b.hd, Math.min(lz, b.hd));
@@ -516,6 +556,7 @@ const dust = (() => {
 function puff(x, y, z, vx, vz) { const d = dust.items[dust.i = (dust.i + 1) % dust.items.length]; d.life = 0; d.p.set(x, y + 0.3, z); d.v.set(vx + (Math.random() - .5), 0.6 + Math.random(), vz + (Math.random() - .5)); d.s = 0.4 + Math.random() * 0.4; }
 
 /* ---------- Caméra : vue plongeante qui suit la voiture ---------- */
+let camLift = 0;
 const cam = { yaw: Math.atan2(VIEW.z, VIEW.x), pitch: 0.7, dist: LITE ? 38 : 33 };
 const camPos = new THREE.Vector3(), camLook = new THREE.Vector3(), follow = new THREE.Vector3(), look = new THREE.Vector3();
 const intro = { t: 0, dur: reduce ? 0.01 : 3.8, done: false, started: false };
@@ -604,12 +645,23 @@ function tick() {
   }
   // la voiture épouse les collines
   fwd.set(Math.cos(state.heading), 0, -Math.sin(state.heading));
-  const hF = H(state.x + fwd.x * 2.4, state.z + fwd.z * 2.4), hB = H(state.x - fwd.x * 2.4, state.z - fwd.z * 2.4), hL = H(state.x - fwd.z * 1.3, state.z + fwd.x * 1.3), hR = H(state.x + fwd.z * 1.3, state.z - fwd.x * 1.3);
-  state.y += ((hF + hB + hL + hR) / 4 + 0.05 - state.y) * Math.min(1, dt * 12);
+  const hF = groundAt(state.x + fwd.x * 2.4, state.z + fwd.z * 2.4), hB = groundAt(state.x - fwd.x * 2.4, state.z - fwd.z * 2.4), hL = groundAt(state.x - fwd.z * 1.3, state.z + fwd.x * 1.3), hR = groundAt(state.x + fwd.z * 1.3, state.z - fwd.x * 1.3);
+  const gY = Math.max((hF + hB + hL + hR) / 4, groundAt(state.x, state.z)) + 0.05, onRamp = ramps.length && rampHeight(state.x, state.z) > 0.05;
+  const leftRamp = state.wasRamp && !onRamp; state.wasRamp = onRamp;
+  const stick = !state.air && !leftRamp && state.y - gY < 0.3 + Math.abs(state.speed) * dt * 1.2; // en descente, on reste collé au sol
+  if (state.y <= gY + 0.03 || stick) {                       // au sol
+    const climb = (gY - state.y) / Math.max(dt, 1e-3);
+    state.vy = onRamp ? Math.min(14, Math.max(0, climb)) : 0; // en montant un tremplin, on garde l'élan vertical
+    if (state.air && state.landV < -7) bump();
+    state.y = gY; state.air = false;
+  } else {                                          // en l'air
+    state.air = true; state.vy -= 30 * dt; state.y += state.vy * dt; state.landV = state.vy;
+    if (state.y < gY) { state.y = gY; if (state.vy < -7) bump(); state.vy = 0; state.air = false; }
+  }
   car.position.set(state.x, state.y, state.z); car.rotation.set(0, state.heading, 0);
   const targetRoll = -state.steer * Math.min(1, Math.abs(state.speed) / MAX) * 0.22 * Math.sign(state.speed || 1) + Math.atan2(hL - hR, 2.6);
   state.roll += (targetRoll - state.roll) * Math.min(1, dt * 5);
-  state.pitch += (throttle * 0.03 + Math.atan2(hF - hB, 4.8) - state.pitch) * Math.min(1, dt * 5);
+  state.pitch += ((state.air ? -0.12 : throttle * 0.03 + Math.atan2(hF - hB, 4.8)) - state.pitch) * Math.min(1, dt * (state.air ? 1.5 : 5));
   state.bounce += dt * (4 + Math.abs(state.speed) * 0.4);
   body.rotation.set(state.roll, 0, state.pitch); body.position.y = Math.sin(state.bounce) * 0.015 * (0.3 + Math.abs(state.speed) / MAX) + 0.16; // caisse relevée sur les grosses roues
   state.wheelSpin -= state.speed * dt / (0.61 * 1.6);
@@ -622,18 +674,24 @@ function tick() {
   // lettres, caisses, foin : poussés par la voiture, ils basculent et glissent
   for (const c of props) {
     c.cd = Math.max(0, c.cd - dt);
-    const dx = c.g.position.x - state.x, dz = c.g.position.z - state.z, d = Math.hypot(dx, dz) || 1e-3, reach = c.r + CAR_R * 0.75;
-    if (d < reach) {
+    // contact avec la vraie forme de la voiture (rectangle allongé), pas un simple cercle
+    const dx = c.g.position.x - state.x, dz = c.g.position.z - state.z, sx = -fwd.z, sz = fwd.x;
+    const lx = dx * fwd.x + dz * fwd.z, ls = dx * sx + dz * sz;
+    const qx = Math.max(-CAR_HL, Math.min(lx, CAR_HL + 0.2)), qs = Math.max(-CAR_HW, Math.min(ls, CAR_HW));
+    let ex = lx - qx, es = ls - qs, d = Math.hypot(ex, es);
+    if (d < 1e-3) { ex = 1; es = 0; d = 1e-3; }
+    const nx = (ex * fwd.x + es * sx) / d, nz = (ex * fwd.z + es * sz) / d, rr = c.r * 0.75;
+    if (d < rr + 0.35) {
       const sp = Math.abs(state.speed);
       if (sp > 1.2 && c.cd === 0) {
-        const nx = dx / d, nz = dz / d, push = sp * 0.75 * c.k;
-        c.v.set(nx * push * 0.6 + fwd.x * state.speed * 0.7 * c.k, Math.min(5, 1.2 + sp * 0.12) * c.k, nz * push * 0.6 + fwd.z * state.speed * 0.7 * c.k);
-        const hx = c.v.x, hz = c.v.z, hl = Math.hypot(hx, hz) || 1; // bascule dans le sens de la poussée
-        c.w.set(hz / hl * (2 + sp * 0.18), (Math.random() - .5) * 2, -hx / hl * (2 + sp * 0.18));
+        const push = sp * 0.75 * c.k;
+        c.v.set(nx * push * 0.6 + fwd.x * state.speed * 0.75 * c.k, Math.min(5, 1.2 + sp * 0.12) * c.k, nz * push * 0.6 + fwd.z * state.speed * 0.75 * c.k);
+        const hl = Math.hypot(c.v.x, c.v.z) || 1;
+        c.w.set(c.v.z / hl * (2 + sp * 0.18), (Math.random() - .5) * 2, -c.v.x / hl * (2 + sp * 0.18));
         c.cd = 0.35; if (c.still) bump(); c.still = false;
-        state.speed *= 0.88; // la voiture ralentit un peu au choc
+        state.speed *= 0.88;
       }
-      if (c.still) { c.g.position.x += dx / d * (reach - d) * 0.5; c.g.position.z += dz / d * (reach - d) * 0.5; } // poussé doucement à basse vitesse
+      if (d < rr) { c.g.position.x += nx * (rr - d); c.g.position.z += nz * (rr - d); } // jamais à l'intérieur de la carrosserie
     }
     if (!c.still) {
       c.v.y -= 22 * dt; c.g.position.addScaledVector(c.v, dt);
@@ -655,8 +713,16 @@ function tick() {
 
   // caméra
   cam.yaw += camTurn; camTurn = 0;
+  { // si un arbre ou une maison cache la voiture, la caméra monte pour la voir d'au-dessus
+    let hidden = false; const cx = camera.position.x, cy = camera.position.y, cz = camera.position.z;
+    for (let k = 1; k <= 8 && !hidden; k++) { const f = k / 9, px = lerp(car.position.x, cx, f), py = lerp(car.position.y + 1.5, cy, f), pz = lerp(car.position.z, cz, f);
+      for (const c of circles) { if (!c.cr || py > c.ch + H(c.x, c.z)) continue; const dx = px - c.x, dz = pz - c.z; if (dx * dx + dz * dz < c.cr * c.cr) { hidden = true; break; } }
+      if (!hidden) for (const b of boxes) { if (!b.ch || py > H(b.x, b.z) + b.ch) continue; const dx = px - b.x, dz = pz - b.z, ca = Math.cos(b.a), sa = Math.sin(b.a); if (Math.abs(dx * ca - dz * sa) < b.hw && Math.abs(dx * sa + dz * ca) < b.hd) { hidden = true; break; } } }
+    camLift += ((hidden ? 0.55 : 0) - camLift) * Math.min(1, dt * (hidden ? 3 : 1));
+  }
   const speedK = Math.abs(state.speed) / MAX, dist = cam.dist * (camera.aspect < 0.8 ? 1.15 : 1) * (1 + speedK * 0.12);
-  follow.set(Math.cos(cam.pitch) * Math.cos(cam.yaw) * dist, Math.sin(cam.pitch) * dist, Math.cos(cam.pitch) * Math.sin(cam.yaw) * dist).add(car.position);
+  const pitch = Math.min(1.35, cam.pitch + camLift);
+  follow.set(Math.cos(pitch) * Math.cos(cam.yaw) * dist, Math.sin(pitch) * dist, Math.cos(pitch) * Math.sin(cam.yaw) * dist).add(car.position);
   look.set(car.position.x + fwd.x * (4 + speedK * 6), car.position.y + 0.5, car.position.z + fwd.z * (4 + speedK * 6)); // on regarde un peu devant la voiture
   if (intro.started && !intro.done) {
     intro.t += Math.min(rawDt, 0.1) / intro.dur; const e = ease(Math.min(1, intro.t));
@@ -677,4 +743,4 @@ function tick() {
 }
 requestAnimationFrame(tick);
 addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
-window.__atelier = { state, resetCar, cam, finger, props, placeAt: (x, z, h) => { Object.assign(state, { x, z, heading: h, speed: 0 }); state.y = H(x, z); snapCam = true; } };
+window.__atelier = { state, resetCar, cam, finger, props, ramps, placeAt: (x, z, h) => { Object.assign(state, { x, z, heading: h, speed: 0 }); state.y = H(x, z); snapCam = true; } };
