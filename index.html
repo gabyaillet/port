@@ -484,8 +484,10 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 .marquee.plus span::after { content: "+"; width: auto; height: auto; background: none; border-radius: 0; font-size: 0.3em; color: var(--muted); }
 
 /* Stores noir → clair */
-.dark-zone { padding-bottom: 12vh; }
-.blinds { position: absolute; left: 0; right: 0; bottom: 0; height: 135vh; z-index: 3; pointer-events: none; display: flex; flex-direction: column; }
+.dark-zone { padding-bottom: 0; }
+.blinds-pin { position: relative; height: 210vh; }
+.blinds-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; display: grid; align-content: center; }
+.blinds { position: absolute; inset: 0; z-index: 3; pointer-events: none; display: flex; flex-direction: column; }
 .blinds i { flex: 1; background: #dededc; transform-origin: bottom; transform: scaleY(0); will-change: transform; }
 
 /* ===== Chiffres clés ===== */
@@ -751,12 +753,17 @@ body.joke-cursor .cursor { width: 26px; height: 42px; margin: -2px 0 0 -13px; bo
   </section>
 
   <!-- BANDEAU -->
-  <div class="marquee plus" aria-hidden="true">
-    <div class="track" id="marquee-track">
-      <span>Code</span><span>Endurance</span><span>Altitude</span><span>Équipe</span><span>Rigueur</span>
+  <!-- écran figé : le bandeau reste au milieu pendant que les bandes grises le recouvrent -->
+  <div class="blinds-pin" id="blinds-pin">
+    <div class="blinds-sticky">
+      <div class="marquee plus" aria-hidden="true">
+        <div class="track" id="marquee-track">
+          <span>Code</span><span>Endurance</span><span>Altitude</span><span>Équipe</span><span>Rigueur</span>
+        </div>
+      </div>
+      <div class="blinds" id="blinds" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     </div>
   </div>
-  <div class="blinds" id="blinds" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
   </div>
 
   <!-- PROJETS : défilement horizontal épinglé -->
@@ -1517,7 +1524,7 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
 
 
   /* ===== Effets pilotés par le défilement ===== */
-  const blinds = [...document.querySelectorAll('#blinds i')], blindsBox = document.getElementById('blinds');
+  const blinds = [...document.querySelectorAll('#blinds i')], blindsBox = document.getElementById('blinds-pin');
   const tilts = [...document.querySelectorAll('[data-tilt]')];
   const stackSec = document.getElementById('savoirfaire'), stackWords = [...stackSec.querySelectorAll('.stack span')];
   const clamp01 = v => Math.max(0, Math.min(1, v));
@@ -1527,9 +1534,11 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
     // stores : les bandes noires se replient
     // bandes claires qui recouvrent la fin de la zone noire, juste avant les projets
     if (isNear(blindsBox)) {
-      const mq = marqueeEl.getBoundingClientRect(), bk = clamp01((vh * 0.3 - mq.top) / (vh * 0.75)); // démarre quand le bandeau a bien défilé au milieu
-      blinds.forEach((b, i) => b.style.transform = `scaleY(${reduce ? 0 : clamp01(bk * 1.7 - (blinds.length - 1 - i) * 0.07)})`);
-      if (bk > 0.2 && bk < 1) document.body.classList.remove('inverted'); else if (bk > 0 && bk <= 0.2) document.body.classList.add('inverted');
+      // progression dans l'écran figé : 0 quand il se fige, 1 quand il se libère
+      const pr = blindsBox.getBoundingClientRect(), p = clamp01(-pr.top / Math.max(1, pr.height - vh));
+      const bk = reduce ? (p > 0.5 ? 1 : 0) : clamp01((p - 0.1) / 0.82); // un temps sur le bandeau, puis les bandes montent
+      blinds.forEach((b, i) => b.style.transform = `scaleY(${clamp01(bk * 1.7 - (blinds.length - 1 - i) * 0.07)})`);
+      if (bk > 0.5) document.body.classList.remove('inverted'); else if (pr.top <= vh * 0.5 && pr.bottom > 0) document.body.classList.add('inverted');
     }
     // cartes inclinées qui se redressent
     tilts.forEach(c => {
