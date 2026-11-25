@@ -81,6 +81,7 @@ main { position: relative; z-index: 1; }
 .v-go { background: #111; }
 .v-cli { background: #111; color: #cfcfca; font: clamp(0.62rem, 1.1vw, 0.85rem)/1.7 var(--f-mono); padding: clamp(1rem, 3vw, 2rem); white-space: pre; overflow: hidden; }
 .v-cli .d { color: #7f7f7b; } .v-cli .ok { color: #e6e6e3; } .v-cli .r { color: #ff8a7a; }
+.media img.shot { display: block; width: 100%; height: 100%; object-fit: cover; }
 .v-wine { background: #f6efe6; color: #3b1d22; display: grid; grid-template-rows: auto 1fr auto; padding: clamp(1rem, 3vw, 2rem); }
 .v-wine .nav { display: flex; justify-content: space-between; font: 600 0.75rem var(--f-body); }
 .v-wine .bottles { display: flex; justify-content: center; align-items: end; gap: clamp(1.5rem, 5vw, 4rem); }
@@ -151,7 +152,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
   <header class="head wrap">
     <h1 class="reveal-text">Mes projets</h1>
     <p class="reveal-text">Projets d'équipe réalisés à l'IUT de Nantes :<br>moteur en Go, simulation en Python et site web.</p>
-    <span class="label count reveal-text" id="thread-start">03 projets</span>
+    <span class="label count reveal-text" id="thread-start">04 projets</span>
   </header>
 
   <div class="wrap list">
@@ -194,6 +195,15 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
         <span class="label">03 — HTML / CSS · 2025 · équipe de 3</span>
         <div><h3 data-t="Boutique de vins">Boutique de vins</h3><p>Un site de caviste imaginé, maquetté puis intégré, pensé d'abord pour le mobile.</p></div>
         <button class="link-double" type="button" data-sheet="sheet-vin">Explorer le projet →</button>
+      </div>
+    </article>
+
+    <article class="item left" data-speed="-0.04">
+      <div class="media reveal-media"><a href="vitrine/" aria-label="Visiter la ville en 2CV"><img class="shot" src="vitrine/apercu.jpg" alt="La place de la ville en 3D : la 2CV devant les lettres BIENVENUE, un grand panneau et un poteau indicateur" loading="lazy" decoding="async" width="1200" height="750"></a></div>
+      <div class="text reveal-text">
+        <span class="label">04 — Three.js · 2026 · projet personnel</span>
+        <div><h3 data-t="La ville en 2CV">La ville en 2CV</h3><p>Un petit monde en 3D à parcourir en voiture : chaque lieu mène quelque part, des maquettes au portfolio.</p></div>
+        <button class="link-double" type="button" data-sheet="sheet-ville">Explorer le projet →</button>
       </div>
     </article>
   </div>
@@ -254,6 +264,23 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
           </dl>
           <ul class="chips"><li>HTML5</li><li>CSS3</li><li>Responsive</li><li>UI / UX</li></ul>
           <div class="hero-actions"><a class="btn ghost" href="https://github.com/gabyaillet" target="_blank" rel="noopener">Voir sur GitHub ↗</a></div>
+        
+  </div>
+</dialog><dialog class="sheet" id="sheet-ville" aria-label="La ville en 2CV">
+  <div class="sheet-in">
+    <button class="sheet-close" type="button" aria-label="Fermer">Fermer ✕</button>
+    <span class="hs-num">04</span>
+    
+          <div class="meta"><span class="label">2026</span><span class="label">Projet personnel</span><span class="label">3D temps réel</span></div>
+          <h3>La ville en 2CV</h3>
+          <p class="pitch">Un site qu'on visite au volant : une 2CV, une place, des chemins éclairés par des lanternes, et des lieux qui ouvrent chacun une page.</p>
+          <dl>
+            <div><dt>Objectif</dt><dd>Faire d'un site une petite balade : on découvre les pages en conduisant plutôt qu'en cliquant dans un menu.</dd></div>
+            <div><dt>Ce que j'ai fait</dt><dd>Un monde 3D en Three.js (relief, chemins, forêt, lac, moulin), une voiture avec sa physique (collisions, tremplins, sauts), une conduite au clavier ou au doigt sur téléphone, des transitions animées vers chaque page et une version allégée pour mobile.</dd></div>
+            <div><dt>Ce que j'en retiens</dt><dd>En 3D, la performance se décide dès le départ : instancier les objets, limiter les lumières et adapter la résolution à l'appareil.</dd></div>
+          </dl>
+          <ul class="chips"><li>Three.js</li><li>WebGL</li><li>JavaScript</li><li>Physique</li><li>Animations</li></ul>
+          <div class="hero-actions"><a class="btn" href="vitrine/">Visiter la ville →</a></div>
         
   </div>
 </dialog>

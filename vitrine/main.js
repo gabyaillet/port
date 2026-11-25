@@ -394,8 +394,8 @@ const VIEW = new THREE.Vector3(1, 0, 1).normalize();            // côté où se
 const START = { x: PLAZA.x + VIEW.x * 5, z: PLAZA.z + VIEW.z * 5, h: Math.atan2(VIEW.z, -VIEW.x) }; // la voiture s'éloigne de la caméra
 const HOME = { x: START.x, z: START.z }; // départ habituel, fixe : sert à orienter les panneaux quel que soit le point d'arrivée
 const FROM = new URLSearchParams(location.search).get('from'); // on revient d'une page (village, forêt) : on repart sur son chemin, cap vers la place
-const FROM_VILLAGE = FROM === 'village' || FROM === 'forest';
-if (FROM_VILLAGE) { const c = paths[FROM === 'forest' ? 3 : 0], p = c.getPointAt(0.68), tg = c.getTangentAt(0.68); Object.assign(START, { x: p.x, z: p.z, h: Math.atan2(tg.z, -tg.x) }); history.replaceState(null, '', location.pathname); }
+const FROM_VILLAGE = FROM === 'village';
+if (FROM_VILLAGE) { const c = paths[0], p = c.getPointAt(0.68), tg = c.getTangentAt(0.68); Object.assign(START, { x: p.x, z: p.z, h: Math.atan2(tg.z, -tg.x) }); history.replaceState(null, '', location.pathname); }
 const props = [];
 function addProp(mesh, x, z, r, k, lift) { const g = new THREE.Group(); g.add(mesh); g.position.set(x, H(x, z) + lift, z); scene.add(g); props.push({ g, r, k, lift, v: new THREE.Vector3(), w: new THREE.Vector3(), still: true, cd: 0 }); return g; }
 fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(json => {
@@ -428,7 +428,7 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
     x.fillStyle = '#efe6d6'; x.font = 'italic 400 300px "Instrument Serif", Georgia, serif';
     x.fillText('Voyagez', w / 2, 520); x.fillText('pour découvrir.', w / 2, 790);
     x.fillStyle = 'rgba(239,230,214,.8)'; x.font = '400 64px "Inter Tight", Arial, sans-serif';
-    x.fillText('Le Moulin mène au portfolio, la Forêt au contact →', w / 2, 960);
+    x.fillText('Les maquettes au Village, le portfolio au Moulin →', w / 2, 960);
     tex.needsUpdate = true;
   };
   draw(); if (document.fonts) document.fonts.ready.then(draw);
@@ -505,7 +505,8 @@ function signpost(P, rotY, rows, poleH = 6.6) {
     ['LE VILLAGE', D(VILLAGE) + ' m', -1, '#dcd2bf', '#1d1a17', true],
     ['LA FORÊT', D(FOREST) + ' m', 1, '#2a2725', '#ece4d3', false],
     ['LE LAC', D(LAKE) + ' m', 1, '#b9a98f', '#1d1a17', true],
-    ['LE MOULIN', D(HILL) + ' m', -1, '#8a3f2b', '#f1e6d4', false]
+    ['LE MOULIN', D(HILL) + ' m', -1, '#8a3f2b', '#f1e6d4', false],
+    ['LES MAQUETTES', D(VILLAGE) + ' m', 1, '#d4cab6', '#1d1a17', false]
   ];
   signpost(POST, Math.atan2(HOME.x - POST.x, HOME.z - POST.z) - 0.25, rows);
 }
@@ -751,13 +752,13 @@ const ZONES = [
 ];
 const zoneEl = $('zone'), zoneK = $('zone-k'), zoneT = $('zone-t'); let curZone = null, zoneTimer = 0;
 let ignoreZone = FROM_VILLAGE ? FROM : null, leaving = 0, leaveMode = 'village';
-const LINK = { 'La Forêt': 'forest', 'Le Moulin': 'mill' };
-const KICKER = { 'Le Village': 'Halte', 'La Forêt': 'Me contacter', 'Le Moulin': 'Mon portfolio', 'Le Lac': 'Cul-de-sac' };
+const LINK = { 'Le Village': 'village', 'Le Moulin': 'mill' };
+const KICKER = { 'Le Village': 'Les maquettes', 'La Forêt': 'Promenade', 'Le Moulin': 'Mon portfolio', 'Le Lac': 'Cul-de-sac' };
 // trois départs, trois façons de quitter la ville
 function goTo(mode) {
   if (leaving) return; leaving = 0.0001; leaveMode = mode;
   for (const k in keys) keys[k] = false; finger.on = false;
-  if (mode === 'forest') { setTimeout(() => $('blinds').classList.add('in'), 700); setTimeout(() => { location.href = 'contact.html'; }, 1750); }       // caméra au ras du sol, puis des stores se ferment
+  if (mode === 'village') { setTimeout(() => $('portal').classList.add('in'), 750); setTimeout(() => { location.href = 'village.html'; }, 1650); }      // gros zoom puis un cercle de couleur
   if (mode === 'mill') { setTimeout(() => $('curtain').classList.add('in'), 900); setTimeout(() => { location.href = '../index.html'; }, 2500); }      // on s'élève dans le ciel, un rideau clair monte
 }
 function updateZone() {

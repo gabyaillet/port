@@ -409,6 +409,7 @@ img.bw { filter: grayscale(1) contrast(1.12) brightness(0.96); }
 .hs-card { flex: none; width: min(78vw, 980px); display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(1rem, 2.5vw, 2rem); align-items: center; }
 .hs-media { min-width: 0; } .hs-media .visual { margin: 0; }
 .hs-media .cli, .hs-media .wine { min-height: min(46vh, 360px); }
+.hs-media .shot { display: block; width: 100%; height: min(46vh, 360px); object-fit: cover; }
 .hs-media .demo canvas { height: min(46vh, 360px); }
 .hs-info { display: grid; gap: 0.7rem; align-content: start; }
 .hs-num { font: 500 clamp(3.5rem, 8vw, 6.5rem)/0.8 var(--f-display); letter-spacing: -0.06em; color: transparent; -webkit-text-stroke: 1.2px var(--ink); }
@@ -525,6 +526,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 .hs-card { width: min(56vw, 760px); grid-template-columns: 1fr; gap: 1.1rem; align-items: start; transform-origin: center; }
 .hs-media .visual { border-radius: 12px; }
 .hs-media .cli, .hs-media .wine { min-height: min(50vh, 420px); }
+.hs-media .shot { height: min(50vh, 420px); }
 .hs-media .demo canvas { height: min(50vh, 420px); }
 .hs-info { grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 1.5rem; }
 .hs-info h3 { font: 500 clamp(1.5rem, 2.4vw, 2.1rem)/1 var(--f-display); letter-spacing: -0.04em; text-transform: none; }
@@ -617,6 +619,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
   .hs-card { transform: none !important; opacity: 1 !important; }
   .hs-meter, .hs-cut { display: none; }
   .hs-media .cli, .hs-media .wine { min-height: 240px; }
+  .hs-media .shot { height: 240px; }
   .hs-media .demo canvas { height: 240px; }
   .hs-all { width: 100%; min-height: 70svh; border-radius: 14px; }
   .hs-all-in { transform: none !important; opacity: 1 !important; padding: 2rem 1rem; }
@@ -833,21 +836,13 @@ body.joke-cursor .cursor { width: 26px; height: 42px; margin: -2px 0 0 -13px; bo
         </article>
         <article class="hs-card">
           <div class="hs-media"><figure class="visual" style="margin:0">
-          <div class="bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="label">Maquette</span></div>
-          <div class="wine" aria-hidden="true">
-            <div class="nav-m"><b>Le Cellier</b><span>Rouges · Blancs · Rosés</span></div>
-            <div class="banner">Vins de terroir,<br>choisis à la cave</div>
-            <div class="grid-m">
-              <div class="bottle"><i></i>Bordeaux</div>
-              <div class="bottle"><i></i>Chablis</div>
-              <div class="bottle"><i></i>Provence</div>
-            </div>
-          </div>
-          <p class="note mono">Illustration de la mise en page, pas une capture du site.</p>
+          <div class="bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="label">Monde 3D</span></div>
+          <a href="vitrine/" aria-label="Visiter la ville en 2CV"><img class="shot" src="vitrine/apercu.jpg" alt="La place de la ville en 3D : la 2CV devant les lettres BIENVENUE, un grand panneau et un poteau indicateur" loading="lazy" decoding="async" width="1200" height="750"></a>
+          <p class="note mono">Capture du site, à visiter en conduisant.</p>
         </figure></div>
           <div class="hs-info">
-            <div><h3>Boutique de vins</h3><p>Un site de caviste imaginé, maquetté puis intégré, pensé d'abord pour le mobile.</p></div>
-            <div class="hs-act"><span class="label">HTML / CSS · 2025</span><button class="link-arrow" type="button" data-sheet="sheet-vin">Explorer le projet →</button></div>
+            <div><h3>La ville en 2CV</h3><p>Un petit monde en 3D à parcourir en voiture : chaque lieu mène quelque part, des maquettes au portfolio.</p></div>
+            <div class="hs-act"><span class="label">Three.js · 2026</span><button class="link-arrow" type="button" data-sheet="sheet-ville">Explorer le projet →</button></div>
           </div>
         </article>
         <div class="hs-cut" aria-hidden="true"><span class="label">Fin de la sélection</span></div>
@@ -1050,21 +1045,21 @@ body.joke-cursor .cursor { width: 26px; height: 42px; margin: -2px 0 0 -13px; bo
         
   </div>
 </dialog>
-<dialog class="sheet" id="sheet-vin" aria-label="Boutique de vins">
+<dialog class="sheet" id="sheet-ville" aria-label="La ville en 2CV">
   <div class="sheet-in">
     <button class="sheet-close" type="button" aria-label="Fermer">Fermer ✕</button>
     <span class="hs-num">03</span>
     
-          <div class="meta"><span class="label">2025</span><span class="label">Équipe de 3</span><span class="label">Intégration web</span></div>
-          <h3>Boutique de vins</h3>
-          <p class="pitch">Un site de caviste imaginé, maquetté puis intégré en HTML et CSS.</p>
+          <div class="meta"><span class="label">2026</span><span class="label">Projet personnel</span><span class="label">3D temps réel</span></div>
+          <h3>La ville en 2CV</h3>
+          <p class="pitch">Un site qu'on visite au volant : une 2CV, une place, des chemins éclairés par des lanternes, et des lieux qui ouvrent chacun une page.</p>
           <dl>
-            <div><dt>Objectif</dt><dd>Découvrir et maîtriser l'intégration web fondamentale sur un vrai cas de boutique en ligne.</dd></div>
-            <div><dt>Ce que j'ai fait</dt><dd>Une structure HTML5 sémantique et accessible, des feuilles de style CSS3 adaptées à l'univers du terroir, et des menus et grilles de produits responsive pour smartphone et tablette.</dd></div>
-            <div><dt>Ce que j'en retiens</dt><dd>Partir de la maquette avant d'écrire la moindre ligne de CSS fait gagner beaucoup de temps à toute l'équipe.</dd></div>
+            <div><dt>Objectif</dt><dd>Faire d'un site une petite balade : on découvre les pages en conduisant plutôt qu'en cliquant dans un menu.</dd></div>
+            <div><dt>Ce que j'ai fait</dt><dd>Un monde 3D en Three.js (relief, chemins, forêt, lac, moulin), une voiture avec sa physique (collisions, tremplins, sauts), une conduite au clavier ou au doigt sur téléphone, des transitions animées vers chaque page et une version allégée pour mobile.</dd></div>
+            <div><dt>Ce que j'en retiens</dt><dd>En 3D, la performance se décide dès le départ : instancier les objets, limiter les lumières et adapter la résolution à l'appareil.</dd></div>
           </dl>
-          <ul class="chips"><li>HTML5</li><li>CSS3</li><li>Responsive</li><li>UI / UX</li></ul>
-          <div class="hero-actions"><a class="btn ghost" href="https://github.com/gabyaillet" target="_blank" rel="noopener">Voir sur GitHub ↗</a></div>
+          <ul class="chips"><li>Three.js</li><li>WebGL</li><li>JavaScript</li><li>Physique</li><li>Animations</li></ul>
+          <div class="hero-actions"><a class="btn" href="vitrine/">Visiter la ville →</a></div>
         
   </div>
 </dialog>
