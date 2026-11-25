@@ -22,7 +22,8 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--sky); color: var(--ink); font-family: var(--f-display); -webkit-font-smoothing: antialiased; }
-canvas#world { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+canvas#world { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+body.grabbing canvas#world { cursor: grabbing; }
 .label { font: 500 0.72rem var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; }
 
 /* ---------- Écran de chargement : deux volets qui s'ouvrent ---------- */
@@ -44,7 +45,7 @@ canvas#world { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
 /* ---------- Interface par-dessus la ville ---------- */
 .ui { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
 .ui > * { pointer-events: auto; }
-.top { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+.top { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: flex-end; align-items: center; gap: 1rem;
   padding: calc(env(safe-area-inset-top, 0px) + 1.1rem) max(22px, env(safe-area-inset-right, 0px)) 0 max(22px, env(safe-area-inset-left, 0px)); pointer-events: none; }
 .top > * { pointer-events: auto; }
 .logo { display: flex; align-items: center; gap: .6rem; font: 800 1.25rem var(--f-display); letter-spacing: -0.03em; text-decoration: none; color: var(--ink); }
@@ -108,7 +109,7 @@ canvas#world { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
 @media (prefers-reduced-motion: reduce) { .hero h1 .ch, .hero p, .hero, .loader .panel { transition: none !important; } }
 :focus-visible { outline: 2px solid var(--bordeaux); outline-offset: 3px; }
 </style>
-<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js", "three/addons/": "./vendor/addons/" } }</script>
 </head>
 <body>
 <canvas id="world" aria-label="Mini-ville en 3D : conduisez la 2CV avec les flèches du clavier"></canvas>
@@ -125,7 +126,6 @@ canvas#world { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
 
 <div class="ui">
   <header class="top">
-    <a class="logo" href="./"><i aria-hidden="true"></i>Atelier Folio</a>
     <nav class="pills" aria-label="Navigation">
       <a class="pill" href="../">Exemple de portfolio ↗</a>
       <a class="pill solid" href="#modeles">Voir les modèles</a>
@@ -140,7 +140,7 @@ canvas#world { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
 
   <div class="hint" id="hint" aria-hidden="true">
     <div class="keys"><kbd data-k="up">↑</kbd><kbd data-k="left">←</kbd><kbd data-k="down">↓</kbd><kbd data-k="right">→</kbd></div>
-    <span class="label">Conduire<br>Espace : frein</span>
+    <span class="label">Conduire · Espace : frein<br>Glisser la souris : regarder</span>
   </div>
 
   <div class="zone" id="zone" aria-live="polite"><span class="label" id="zone-k"></span><b id="zone-t"></b></div>
