@@ -381,6 +381,8 @@ Object.values(P).forEach(p => p.build());
 /* ---------- Départ, lettres « BIENVENUE » à bousculer ---------- */
 const VIEW = new THREE.Vector3(1, 0, 1).normalize();            // côté où se tient la caméra
 const START = { x: PLAZA.x + VIEW.x * 5, z: PLAZA.z + VIEW.z * 5, h: Math.atan2(VIEW.z, -VIEW.x) }; // la voiture s'éloigne de la caméra
+const FROM_VILLAGE = new URLSearchParams(location.search).get('from') === 'village';
+if (FROM_VILLAGE) { const p = paths[0].getPointAt(0.68), tg = paths[0].getTangentAt(0.68); Object.assign(START, { x: p.x, z: p.z, h: Math.atan2(tg.z, -tg.x) }); history.replaceState(null, '', location.pathname); } // on ressort du village, cap vers la place
 const props = [];
 function addProp(mesh, x, z, r, k, lift) { const g = new THREE.Group(); g.add(mesh); g.position.set(x, H(x, z) + lift, z); scene.add(g); props.push({ g, r, k, lift, v: new THREE.Vector3(), w: new THREE.Vector3(), still: true, cd: 0 }); return g; }
 fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(json => {
@@ -569,8 +571,8 @@ function puff(x, y, z, vx, vz) { const d = dust.items[dust.i = (dust.i + 1) % du
 let camLift = 0;
 const cam = { yaw: Math.atan2(VIEW.z, VIEW.x), pitch: 0.7, dist: LITE ? 38 : 33 };
 const camPos = new THREE.Vector3(), camLook = new THREE.Vector3(), follow = new THREE.Vector3(), look = new THREE.Vector3();
-const intro = { t: 0, dur: reduce ? 0.01 : 3.8, done: false, started: false };
-const INTRO_FROM = new THREE.Vector3(START.x + 70, 80, START.z + 70);
+const intro = { t: 0, dur: reduce || FROM_VILLAGE ? 1.2 : 3.8, done: false, started: false };
+const INTRO_FROM = FROM_VILLAGE ? new THREE.Vector3(START.x + 4, 8, START.z + 4) : new THREE.Vector3(START.x + 70, 80, START.z + 70);
 camera.position.copy(INTRO_FROM); camera.lookAt(START.x, 0, START.z);
 const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
@@ -598,7 +600,7 @@ let driving = false;
 function startDriving() { if (driving || !intro.done) return; driving = true; hint && hint.classList.add('gone'); wipe.classList.add('on'); setTimeout(() => wipe.classList.remove('on'), 160); }
 function introFinished() { speedo.classList.add('show'); hint && hint.classList.add('show'); $('reset') && $('reset').classList.add('show'); }
 (() => {
-  const loader = $('loader'), count = $('count'), bar = $('bar'), t0 = performance.now(), dur = reduce ? 10 : 2200;
+  const loader = $('loader'), count = $('count'), bar = $('bar'), t0 = performance.now(), dur = reduce || FROM_VILLAGE ? 10 : 2200;
   const step = t => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); count.textContent = String(Math.round(e * 100)).padStart(2, '0'); bar.style.width = e * 100 + '%';
     if (k < 1) requestAnimationFrame(step); else { loader.classList.add('open'); intro.started = true; setTimeout(() => loader.remove(), 1700); } };
   requestAnimationFrame(step);
@@ -608,12 +610,21 @@ const ZONES = [
   { x: LAKE.x, z: LAKE.z, r: LAKE.r + 16, t: 'Le Lac' }, { x: HILL.x, z: HILL.z, r: 26, t: 'Le Moulin' }
 ];
 const zoneEl = $('zone'), zoneK = $('zone-k'), zoneT = $('zone-t'); let curZone = null, zoneTimer = 0;
+let ignoreVillage = FROM_VILLAGE, leaving = 0;
+function goVillage() {
+  if (leaving) return; leaving = 0.0001;
+  for (const k in keys) keys[k] = false; finger.on = false;
+  setTimeout(() => $('portal').classList.add('in'), 750);   // un cercle de couleur recouvre l'écran
+  setTimeout(() => { location.href = 'village.html'; }, 1650);
+}
 function updateZone() {
   if (!intro.done) return;
   const z = ZONES.find(z => Math.hypot(state.x - z.x, state.z - z.z) < z.r) || null;
+  if (z && z.t === 'Le Village' && !ignoreVillage && driving) goVillage();
+  if (!z || z.t !== 'Le Village') ignoreVillage = false;
   if (z === curZone) return; curZone = z; clearTimeout(zoneTimer);
   zoneEl.classList.remove('on'); zoneEl.classList.add('off');
-  if (z) zoneTimer = setTimeout(() => { zoneK.textContent = 'Modèle à venir'; zoneT.textContent = z.t; zoneEl.classList.remove('off'); void zoneEl.offsetWidth; zoneEl.classList.add('on'); }, 350);
+  if (z) zoneTimer = setTimeout(() => { zoneK.textContent = z.t === 'Le Village' ? 'Les modèles de portfolio' : 'Modèle à venir'; zoneT.textContent = z.t; zoneEl.classList.remove('off'); void zoneEl.offsetWidth; zoneEl.classList.add('on'); }, 350);
 }
 const showErr = msg => { if (document.querySelector('.glerr')) return; const d = document.createElement('div'); d.className = 'glerr'; d.innerHTML = msg + '<br><button type="button">Recharger</button>'; d.querySelector('button').onclick = () => location.reload(); document.body.appendChild(d); };
 canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); showErr('La 3D a été interrompue par l’appareil (mémoire).'); });
@@ -628,6 +639,7 @@ function tick() {
 
   // commandes : clavier, ou doigt sur l'écran
   let throttle = (keys.up ? 1 : 0) - (keys.down ? 1 : 0), steerIn = (keys.left ? 1 : 0) - (keys.right ? 1 : 0);
+  if (leaving) { leaving = Math.min(1, leaving + rawDt / 1.4); state.speed *= Math.pow(0.15, dt); }
   if (finger.on && intro.done) {
     ndc.set(finger.x / innerWidth * 2 - 1, -(finger.y / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera);
     groundPlane.constant = -state.y;
@@ -730,8 +742,8 @@ function tick() {
       if (!hidden) for (const b of boxes) { if (!b.ch || py > H(b.x, b.z) + b.ch) continue; const dx = px - b.x, dz = pz - b.z, ca = Math.cos(b.a), sa = Math.sin(b.a); if (Math.abs(dx * ca - dz * sa) < b.hw && Math.abs(dx * sa + dz * ca) < b.hd) { hidden = true; break; } } }
     camLift += ((hidden ? 0.55 : 0) - camLift) * Math.min(1, dt * (hidden ? 3 : 1));
   }
-  const speedK = Math.abs(state.speed) / MAX, dist = cam.dist * (camera.aspect < 0.8 ? 1.15 : 1) * (1 + speedK * 0.12);
-  const pitch = Math.min(1.35, cam.pitch + camLift);
+  const speedK = Math.abs(state.speed) / MAX, dist = lerp(cam.dist * (camera.aspect < 0.8 ? 1.15 : 1) * (1 + speedK * 0.12), 7, leaving ? 1 - Math.pow(1 - leaving, 3) : 0); // gros zoom en entrant au village
+  const zk = leaving ? 1 - Math.pow(1 - leaving, 3) : 0, pitch = lerp(Math.min(1.35, cam.pitch + camLift), 0.32, zk);
   follow.set(Math.cos(pitch) * Math.cos(cam.yaw) * dist, Math.sin(pitch) * dist, Math.cos(pitch) * Math.sin(cam.yaw) * dist).add(car.position);
   look.set(car.position.x + fwd.x * (4 + speedK * 6), car.position.y + 0.5, car.position.z + fwd.z * (4 + speedK * 6)); // on regarde un peu devant la voiture
   if (intro.started && !intro.done) {
@@ -739,7 +751,7 @@ function tick() {
     camPos.lerpVectors(INTRO_FROM, follow, e); camLook.lerpVectors(tmp.set(START.x, 0, START.z), look, e);
     if (intro.t >= 1) { intro.done = true; introFinished(); }
   } else if (snapCam) { camPos.copy(follow); camLook.copy(look); snapCam = false; }
-  else if (intro.done) { camPos.lerp(follow, Math.min(1, dt * 4)); camLook.lerp(look, Math.min(1, dt * 6)); }
+  else if (intro.done) { camPos.lerp(follow, Math.min(1, dt * (leaving ? 7 : 4))); camLook.lerp(look, Math.min(1, dt * 6)); }
   camera.position.copy(camPos);
   if (shake > 0) { camera.position.x += (Math.random() - .5) * shake * 0.4; camera.position.y += (Math.random() - .5) * shake * 0.4; shake = Math.max(0, shake - dt * 2.5); }
   camera.lookAt(camLook);
