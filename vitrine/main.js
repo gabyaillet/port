@@ -512,7 +512,7 @@ document.querySelectorAll('#headline .ln').forEach((ln, li) => {
 const cam = { yaw: Math.atan2(18, -12), pitch: 1.03, dist: 46 };
 cam.tYaw = cam.yaw; cam.tPitch = cam.pitch;
 let drag = null;
-canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, id: e.pointerId }; canvas.setPointerCapture(e.pointerId); document.body.classList.add('grabbing'); });
+canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, id: e.pointerId }; try { canvas.setPointerCapture(e.pointerId); } catch (err) {} document.body.classList.add('grabbing'); });
 canvas.addEventListener('pointermove', e => {
   if (!drag || e.pointerId !== drag.id) return;
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
@@ -646,7 +646,8 @@ function tick() {
 
   // caméra : suit la voiture, orientable en glissant (sans s'éloigner)
   cam.yaw += (cam.tYaw - cam.yaw) * Math.min(1, dt * 6); cam.pitch += (cam.tPitch - cam.pitch) * Math.min(1, dt * 6);
-  const speedK = Math.abs(state.speed) / MAX, dist = cam.dist * (1 + speedK * 0.15);
+  const portrait = camera.aspect < 0.8 ? 1.3 : 1; // écran en hauteur : on recule un peu pour voir la ville
+  const speedK = Math.abs(state.speed) / MAX, dist = cam.dist * portrait * (1 + speedK * 0.15);
   follow.set(Math.cos(cam.pitch) * Math.cos(cam.yaw) * dist, Math.max(2.2, Math.sin(cam.pitch) * dist), Math.cos(cam.pitch) * Math.sin(cam.yaw) * dist).add(car.position);
   const lowK = 1 - Math.min(1, cam.pitch / 0.7); // caméra basse : on regarde plus haut, vers le ciel
   look.set(car.position.x, 1.5 + lowK * 10, car.position.z);
