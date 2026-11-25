@@ -26,8 +26,8 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
-const SKY_TOP = new THREE.Color('#7fb2d6'), SKY_BOTTOM = new THREE.Color('#f3cfa1');
-scene.fog = new THREE.Fog('#efcfa6', 110, 270);
+const SKY_TOP = new THREE.Color('#8fa9bc'), SKY_BOTTOM = new THREE.Color('#e6dccd');
+scene.fog = new THREE.Fog('#e3d9ca', 90, 240);
 const camera = new THREE.PerspectiveCamera(34, innerWidth / innerHeight, 0.5, 700);
 
 /* Ciel en dégradé, avec un halo de soleil */
@@ -44,7 +44,7 @@ scene.add(skyMesh);
 
 /* Lumières : soleil chaud et lumière de remplissage froide (rendu « jeu vidéo ») */
 scene.add(new THREE.HemisphereLight('#ffeedd', '#8a6d5c', 1.15));
-const sun = new THREE.DirectionalLight('#ffd9a8', 2.6);
+const sun = new THREE.DirectionalLight('#fbe6cc', 2.4);
 sun.castShadow = true;
 sun.shadow.mapSize.set(isTouch ? 1024 : 2048, isTouch ? 1024 : 2048);
 const SC = 55; Object.assign(sun.shadow.camera, { left: -SC, right: SC, top: SC, bottom: -SC, near: 1, far: 240 });
@@ -82,7 +82,7 @@ const TEX = {
 /* ---------- Matériaux ---------- */
 const std = (o) => new THREE.MeshStandardMaterial({ roughness: 0.82, metalness: 0, ...o });
 const M = {
-  grass: std({ color: '#a7bd7c', map: TEX.grass }),
+  grass: std({ color: '#98a581', map: TEX.grass }),
   road: std({ color: '#5d5862', map: TEX.asphalt, roughness: 0.92 }),
   line: std({ color: '#f3ecdc' }),
   curb: std({ color: '#cdbfa8' }),
@@ -102,10 +102,10 @@ const M = {
   awning: std({ color: '#ffffff', map: TEX.stripes }), awningB: std({ color: '#ffffff', map: TEX.stripesB }),
   flower: std({ color: '#ffffff' })
 };
-const WALL_COLORS = ['#f4e4c8', '#efb18a', '#b9d0e0', '#c6dcbf', '#f6cba6', '#f8f2e6', '#ebc0b6', '#e2d5aa', '#d9c7e0'].map(c => new THREE.Color(c));
-const ROOF_COLORS = ['#c9663f', '#b4553a', '#6f7a84', '#8e5a45', '#d07a4d'].map(c => new THREE.Color(c));
-const SHUTTER_COLORS = ['#4f7d8f', '#6d8b5a', '#9c3d36', '#3f5568', '#c9a24a', '#f2efe6'].map(c => new THREE.Color(c));
-const LEAF_COLORS = ['#6e9d55', '#86b35f', '#5d8a4c', '#9cc06a'].map(c => new THREE.Color(c));
+const WALL_COLORS = ['#e9e2d6', '#d8cfc0', '#c9c4bb', '#e2d8c6', '#b8bfc2', '#d6d1c4', '#c7bba8', '#ece8e0', '#bfc4b6'].map(c => new THREE.Color(c));
+const ROOF_COLORS = ['#5e6469', '#4f5559', '#6d7378', '#8a5e4c', '#73665d'].map(c => new THREE.Color(c));
+const SHUTTER_COLORS = ['#3f4a52', '#56605a', '#6b4a44', '#2f3a44', '#8a8478', '#e6e1d6'].map(c => new THREE.Color(c));
+const LEAF_COLORS = ['#5f7a54', '#6b8660', '#566e4c', '#7a8f68'].map(c => new THREE.Color(c));
 const shadowy = (m, cast = true, receive = true) => { m.castShadow = cast; m.receiveShadow = receive; return m; };
 
 /* Fusionne plusieurs géométries (avec une couleur par morceau) en une seule : beaucoup moins d'appels de rendu */
@@ -238,13 +238,13 @@ function addHouse(x, z, w, d, h, face) {
         continue;
       }
       P.frame.add(at(lx, ly, zf + side * 0.02, ry, 1.15, 1.55, 1));
-      P.glass.add(at(lx, ly, zf + side * 0.03, ry, 1.05, 1.6, 1), new THREE.Color(rnd() < 0.18 ? '#ffd88a' : '#3f5a72'));
+      P.glass.add(at(lx, ly, zf + side * 0.03, ry, 1.05, 1.6, 1), new THREE.Color(rnd() < 0.12 ? '#f1d49a' : '#3a4650'));
       P.mullion.add(at(lx, ly, zf + side * 0.05, ry, 1, 1.25, 1));
       P.sill.add(at(lx, ly - 0.86, zf + side * 0.14, ry));
       if (rnd() < 0.65) for (const sx of [-1, 1]) P.shutter.add(at(lx + sx * 0.88 * side, ly, zf + side * 0.06, ry, 1, 1.45, 1), shutC);
       if (f > 0 && rnd() < 0.35) {
         P.flowerbox.add(at(lx, ly - 0.66, zf + side * 0.32, ry));
-        for (let k = 0; k < 4; k++) P.flower.add(at(lx - 0.38 + k * 0.25, ly - 0.42, zf + side * 0.32, ry), new THREE.Color(pick(['#e2525c', '#f3c03d', '#f28fb3', '#ffffff', '#b06ad9'])));
+        for (let k = 0; k < 4; k++) P.flower.add(at(lx - 0.38 + k * 0.25, ly - 0.42, zf + side * 0.32, ry), new THREE.Color(pick(['#b4524f', '#e8e2d4', '#c9a65a'])));
       }
     }
     if (floors > 1 && side > 0 && rnd() < 0.45) { // balcon
@@ -497,29 +497,62 @@ const dust = (() => {
 })();
 function puff(x, z, vx, vz) { const d = dust.items[dust.i = (dust.i + 1) % dust.items.length]; d.life = 0; d.p.set(x, 0.5, z); d.v.set(vx + (Math.random() - .5), 0.8 + Math.random(), vz + (Math.random() - .5)); d.s = 0.4 + Math.random() * 0.5; }
 
+/* ---------- Grand panneau de bienvenue ---------- */
+const signboard = new THREE.Group(); scene.add(signboard);
+{
+  const W = 11, H = 6.4, sx = 43, sz = -10, ry = -1.15, POST = 5.6;
+  const wood = std({ color: '#3a302a', roughness: 0.7 });
+  const board = document.createElement('canvas'); board.width = 2200; board.height = Math.round(2200 * H / W);
+  const tex = new THREE.CanvasTexture(board); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const draw = () => {
+    const g = board.getContext('2d'), w = board.width, h = board.height, F = '"Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif', MONO = '"DM Mono", ui-monospace, monospace';
+    g.fillStyle = '#f3ede2'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 4000; i++) { g.fillStyle = `rgba(0,0,0,${Math.random() * 0.04})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
+    g.strokeStyle = '#2b2522'; g.lineWidth = 6; g.strokeRect(60, 60, w - 120, h - 120);
+    const pad = 150;
+    g.fillStyle = '#7a1f2b'; g.font = `500 46px ${MONO}`; g.textBaseline = 'alphabetic'; g.fillText('ATELIER FOLIO  ·  PORTFOLIOS À PERSONNALISER', pad, pad + 40);
+    g.fillStyle = '#211c19'; g.font = `800 230px ${F}`; g.fillText('Bienvenue.', pad - 8, pad + 300);
+    g.font = `500 72px ${F}`; g.fillStyle = '#3b3430';
+    const lines = ['Des portfolios animés, prêts à recevoir vos infos.', 'Chaque quartier de la ville présente un modèle :', 'prenez le volant et allez les visiter.'];
+    lines.forEach((l, i) => g.fillText(l, pad, pad + 470 + i * 96));
+    g.fillStyle = '#211c19'; g.fillRect(pad, h - pad - 120, w - pad * 2, 3);
+    g.font = `500 50px ${MONO}`; g.fillStyle = '#211c19';
+    g.fillText(isTouch ? 'BOUTONS EN BAS : CONDUIRE   ·   GLISSER UN DOIGT : REGARDER' : '↑ ← ↓ →  CONDUIRE   ·   ESPACE  FREINER   ·   GLISSER  REGARDER', pad, h - pad - 30);
+    tex.needsUpdate = true;
+  };
+  draw(); if (document.fonts) document.fonts.load('800 100px "Bricolage Grotesque"').then(() => document.fonts.load('500 40px "DM Mono"')).then(draw).catch(() => {});
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(W, H), std({ map: tex, roughness: 0.85 })); face.position.set(0, POST + H / 2, 0.16);
+  const back = shadowy(new THREE.Mesh(new RoundedBoxGeometry(W + 0.6, H + 0.6, 0.28, 3, 0.12), wood)); back.position.set(0, POST + H / 2, 0);
+  const cap = shadowy(new THREE.Mesh(new RoundedBoxGeometry(W + 1.2, 0.3, 0.7, 2, 0.1), wood)); cap.position.set(0, POST + H + 0.45, 0);
+  signboard.add(face, back, cap);
+  for (const px of [-W / 2 + 1, W / 2 - 1]) { const post = shadowy(new THREE.Mesh(new RoundedBoxGeometry(0.5, POST + 0.4, 0.5, 2, 0.08), wood)); post.position.set(px, (POST + 0.4) / 2, 0); signboard.add(post); }
+  for (const px of [-W / 2 + 2.4, 0, W / 2 - 2.4]) { const spot = new THREE.Mesh(new THREE.CapsuleGeometry(0.12, 0.3, 4, 8).rotateX(Math.PI / 2), M.lantern); spot.position.set(px, POST + H + 0.45, 0.55); signboard.add(spot); }
+  signboard.position.set(sx, 0, sz); signboard.rotation.y = ry; signboard.scale.setScalar(0.001);
+  for (const px of [-W / 2 + 1, W / 2 - 1]) { const k = px * 1.15, cx = sx + Math.cos(ry) * k, cz = sz - Math.sin(ry) * k; colliders.push({ x0: cx - 0.5, x1: cx + 0.5, z0: cz - 0.5, z1: cz + 0.5 }); }
+}
+let signT = -1, welcomeK = 1;
+const SIGN_CENTER = new THREE.Vector3(43, 7, -10); // animation d'apparition du panneau
+
 /* ---------- Interface ---------- */
-const hero = $('hero'), hint = $('hint'), speedo = $('speedo'), kmh = $('kmh'), touchUI = $('touch'), wipe = $('wipe');
-document.querySelectorAll('#headline .ln').forEach((ln, li) => {
-  const walk = (node, out) => [...node.childNodes].forEach(n => {
-    if (n.nodeType === 3) for (const ch of n.textContent) { const s = document.createElement('span'); s.className = 'ch'; s.textContent = ch === ' ' ? ' ' : ch; out.appendChild(s); }
-    else { const c = n.cloneNode(false); walk(n, c); out.appendChild(c); }
-  });
-  const frag = document.createElement('span'); walk(ln, frag); ln.replaceChildren(...frag.childNodes);
-  ln.querySelectorAll('.ch').forEach((c, i) => c.style.transitionDelay = (0.25 + li * 0.18 + i * 0.028) + 's');
-});
+const hint = $('hint'), speedo = $('speedo'), kmh = $('kmh'), touchUI = $('touch'), wipe = $('wipe');
 
 /* ---------- Caméra libre autour de la voiture (glisser pour regarder) ---------- */
-const cam = { yaw: Math.atan2(18, -12), pitch: 1.03, dist: 46 };
+const cam = { yaw: Math.PI - 0.22, pitch: 0.5, dist: 19 }; // derrière la voiture, dans l'axe de la rue
 cam.tYaw = cam.yaw; cam.tPitch = cam.pitch;
 let drag = null;
-canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, id: e.pointerId }; try { canvas.setPointerCapture(e.pointerId); } catch (err) {} document.body.classList.add('grabbing'); });
-canvas.addEventListener('pointermove', e => {
-  if (!drag || e.pointerId !== drag.id) return;
-  const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
-  cam.tYaw += dx * 0.006; cam.tPitch = Math.max(0.08, Math.min(1.45, cam.tPitch + dy * 0.005));
-});
-const endDrag = e => { if (drag && e.pointerId === drag.id) { drag = null; document.body.classList.remove('grabbing'); } };
-canvas.addEventListener('pointerup', endDrag); canvas.addEventListener('pointercancel', endDrag);
+const isUI = t => t && t.closest && t.closest('button, a, .touch');
+const look0 = (x, y, id) => { drag = { x, y, id }; document.body.classList.add('grabbing'); };
+const lookMove = (x, y) => { const dx = x - drag.x, dy = y - drag.y; drag.x = x; drag.y = y; cam.tYaw += dx * 0.006; cam.tPitch = Math.max(0.08, Math.min(1.45, cam.tPitch + dy * 0.005)); };
+const lookEnd = () => { drag = null; document.body.classList.remove('grabbing'); };
+// souris / stylet
+addEventListener('pointerdown', e => { if (e.pointerType === 'touch' || isUI(e.target)) return; look0(e.clientX, e.clientY, 'm'); });
+addEventListener('pointermove', e => { if (drag && drag.id === 'm') lookMove(e.clientX, e.clientY); });
+addEventListener('pointerup', e => { if (drag && drag.id === 'm') lookEnd(); });
+// doigts : un doigt posé hors des boutons fait tourner la caméra, même si un autre doigt conduit
+addEventListener('touchstart', e => { for (const t of e.changedTouches) if (!drag && !isUI(t.target)) look0(t.clientX, t.clientY, t.identifier); }, { passive: true });
+addEventListener('touchmove', e => { if (!drag) return; for (const t of e.changedTouches) if (t.identifier === drag.id) { lookMove(t.clientX, t.clientY); e.preventDefault(); } }, { passive: false });
+const touchEnd = e => { if (!drag) return; for (const t of e.changedTouches) if (t.identifier === drag.id) lookEnd(); };
+addEventListener('touchend', touchEnd); addEventListener('touchcancel', touchEnd);
 
 const camPos = new THREE.Vector3(), camLook = new THREE.Vector3(), follow = new THREE.Vector3(), look = new THREE.Vector3();
 const intro = { t: 0, dur: reduce ? 0.01 : 3.8, done: false, started: false };
@@ -538,8 +571,8 @@ const grade = new ShaderPass({
   fragmentShader: `uniform sampler2D tDiffuse; uniform float time; varying vec2 vUv;
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233))) * 43758.5453); }
     void main(){ vec3 c = texture2D(tDiffuse, vUv).rgb;
-      c = mix(c, c * vec3(1.04, 1.0, 0.94), 0.6);
-      c = mix(vec3(dot(c, vec3(.299,.587,.114))), c, 1.08);
+      c = mix(c, c * vec3(1.02, 1.0, 0.97), 0.6);
+      c = mix(vec3(dot(c, vec3(.299,.587,.114))), c, 0.9);
       float v = smoothstep(0.95, 0.35, length(vUv - .5)); c *= mix(0.82, 1.0, v);
       c += (h(vUv * 1000. + time) - .5) * 0.035;
       gl_FragColor = vec4(c, 1.); }`
@@ -549,10 +582,10 @@ composer.addPass(grade);
 let driving = false;
 function startDriving() {
   if (driving || !intro.done) return; driving = true;
-  hero.classList.add('away'); hint.classList.add('gone');
+  hint.classList.add('gone');
   wipe.classList.add('on'); setTimeout(() => wipe.classList.remove('on'), 160);
 }
-function introFinished() { hero.classList.add('show'); speedo.classList.add('show'); touchUI.classList.add('show'); setTimeout(() => !driving && hint.classList.add('show'), 1400); }
+function introFinished() { speedo.classList.add('show'); touchUI.classList.add('show'); signT = 0; }
 (() => {
   const loader = $('loader'), count = $('count'), bar = $('bar'), t0 = performance.now(), dur = reduce ? 10 : 2000;
   const step = t => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); count.textContent = Math.round(e * 100); bar.style.width = e * 100 + '%';
@@ -646,11 +679,14 @@ function tick() {
 
   // caméra : suit la voiture, orientable en glissant (sans s'éloigner)
   cam.yaw += (cam.tYaw - cam.yaw) * Math.min(1, dt * 6); cam.pitch += (cam.tPitch - cam.pitch) * Math.min(1, dt * 6);
-  const portrait = camera.aspect < 0.8 ? 1.3 : 1; // écran en hauteur : on recule un peu pour voir la ville
+  const portrait = camera.aspect < 0.8 ? 1.2 : 1; // écran en hauteur : on recule un peu pour voir la ville
   const speedK = Math.abs(state.speed) / MAX, dist = cam.dist * portrait * (1 + speedK * 0.15);
   follow.set(Math.cos(cam.pitch) * Math.cos(cam.yaw) * dist, Math.max(2.2, Math.sin(cam.pitch) * dist), Math.cos(cam.pitch) * Math.sin(cam.yaw) * dist).add(car.position);
   const lowK = 1 - Math.min(1, cam.pitch / 0.7); // caméra basse : on regarde plus haut, vers le ciel
   look.set(car.position.x, 1.5 + lowK * 10, car.position.z);
+  // tant qu'on n'a pas démarré, on cadre la voiture ET le panneau de bienvenue
+  welcomeK += ((driving ? 0 : 1) - welcomeK) * Math.min(1, dt * 1.5);
+  look.lerp(SIGN_CENTER, welcomeK * (camera.aspect < 0.8 ? 0.36 : 0.18));
   if (intro.started && !intro.done) {
     intro.t += Math.min(rawDt, 0.1) / intro.dur; const e = ease(Math.min(1, intro.t));
     camPos.lerpVectors(INTRO_FROM, follow, e); camLook.lerpVectors(INTRO_LOOK, look, e);
@@ -664,6 +700,8 @@ function tick() {
   skyMesh.position.copy(camera.position);
   sun.position.set(car.position.x + 45, 75, car.position.z + 35); sun.target.position.copy(car.position);
 
+  // panneau : surgit avec un rebond à l'arrivée
+  if (signT >= 0 && signT < 1) { signT = Math.min(1, signT + dt / 1.1); const k = signT, e = 1 + 2.2 * Math.pow(k - 1, 3) + 1.2 * Math.pow(k - 1, 2); signboard.scale.setScalar(Math.max(0.001, e) * 1.15); signboard.position.y = (1 - Math.min(1, k * 1.6)) * -3; }
   updateZone();
   kmh.textContent = Math.round(Math.abs(state.speed) * 3.2);
   grade.uniforms.time.value = (grade.uniforms.time.value + 1) % 1000;
