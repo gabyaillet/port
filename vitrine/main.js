@@ -269,7 +269,7 @@ const grassUniforms = { uTime: { value: 0 } };
 const lampLights = [];
 function lantern(x, z, light = false) {
   if (nearest(x, z) < PATH_W / 2 + 1.2 || Math.hypot(x - PLAZA.x, z - PLAZA.z) < PLAZA.r + 0.8) return; // pas sur la route
-  if (Math.hypot(x - SIGN.x, z - SIGN.z) < 13 || Math.hypot(x - POST.x, z - POST.z) < 5) return; // rien devant les panneaux
+  if (Math.hypot(x - SIGN.x, z - SIGN.z) < 20 || Math.hypot(x - POST.x, z - POST.z) < 5) return; // rien devant les panneaux
   const y = H(x, z);
   P.post.add(mtx(x, y + 1.8, z, 0, 0, 0, 1, 3.6, 1)); P.post.add(mtx(x, y + 0.2, z, 0, 0, 0, 2.6, 0.4, 2.6));
   P.lampHead.add(mtx(x, y + 4, z)); P.lampCap.add(mtx(x, y + 4.55, z));
@@ -647,7 +647,7 @@ addEventListener('pointerup', () => { drag = null; document.body.classList.remov
 const state = { x: START.x, z: START.z, heading: START.h, speed: 0, steer: 0, roll: 0, pitch: 0, wheelSpin: 0, bounce: 0, y: H(START.x, START.z), vy: 0, air: false, landV: 0 };
 const MAX = 26, REV = -9, ACC = 13, BRAKE = 30, DRAG = 0.4, CAR_R = 2.3, CAR_HL = 3.3, CAR_HW = 1.65; // demi-longueur / demi-largeur de la 2CV
 let snapCam = false;
-function resetCar() { Object.assign(state, { x: START.x, z: START.z, heading: START.h, speed: 0, steer: 0 }); snapCam = true; }
+function resetCar() { Object.assign(state, { x: START.x, z: START.z, heading: START.h, speed: 0, steer: 0, vy: 0, air: false }); state.y = groundAt(START.x, START.z); snapCam = true; }
 let shake = 0; const bump = () => { shake = Math.min(1, shake + 0.45); };
 let stuckT = 0; const stuckP = { x: 0, z: 0 };
 function pushOut(nx, nz, depth) {
@@ -655,20 +655,31 @@ function pushOut(nx, nz, depth) {
   const vn = Math.cos(state.heading) * state.speed * nx - Math.sin(state.heading) * state.speed * nz;
   if (vn < 0) { state.speed *= -vn > 12 ? -0.3 : 0.55; if (-vn > 4) bump(); }
 }
+// la 2CV est longue : trois cercles le long de la caisse (arrière, milieu, avant) au lieu d'un seul gros
+const CAR_PTS = [-1.7, 0, 1.7], CAR_CR = 1.7;
 function collide() {
-  for (const c of circles) { const dx = state.x - c.x, dz = state.z - c.z; if (Math.abs(dx) > c.r + CAR_R || Math.abs(dz) > c.r + CAR_R) continue; const d = Math.hypot(dx, dz) || 1e-3, min = c.r + CAR_R; if (d < min) pushOut(dx / d, dz / d, min - d); }
-  for (const b of boxes) {
-    if (b.below !== undefined && state.y > b.below) continue;
-    const dx = state.x - b.x, dz = state.z - b.z, reach = b.hw + b.hd + CAR_R; if (Math.abs(dx) > reach || Math.abs(dz) > reach) continue;
-    const ca = Math.cos(b.a), sa = Math.sin(b.a), lx = dx * ca - dz * sa, lz = dx * sa + dz * ca;
-    const qx = Math.max(-b.hw, Math.min(lx, b.hw)), qz = Math.max(-b.hd, Math.min(lz, b.hd));
-    let ex = lx - qx, ez = lz - qz, d = Math.hypot(ex, ez), depth;
-    if (d < 1e-4) { const ox = b.hw - Math.abs(lx), oz = b.hd - Math.abs(lz); if (ox < oz) { ex = Math.sign(lx) || 1; ez = 0; depth = ox + CAR_R; } else { ex = 0; ez = Math.sign(lz) || 1; depth = oz + CAR_R; } d = 1; }
-    else { if (d >= CAR_R) continue; depth = CAR_R - d; }
-    const nlx = ex / d, nlz = ez / d; pushOut(nlx * ca + nlz * sa, -nlx * sa + nlz * ca, depth);
+  for (const o of CAR_PTS) {
+    const fx = Math.cos(state.heading), fz = -Math.sin(state.heading);
+    const px = () => state.x + fx * o, pz = () => state.z + fz * o;
+    for (const c of circles) {
+      if (c.ch && state.air && state.y > H(c.x, c.z) + c.ch) continue;            // on passe au-dessus en sautant
+      const dx = px() - c.x, dz = pz() - c.z; if (Math.abs(dx) > c.r + CAR_CR || Math.abs(dz) > c.r + CAR_CR) continue;
+      const d = Math.hypot(dx, dz) || 1e-3, min = c.r + CAR_CR; if (d < min) pushOut(dx / d, dz / d, min - d);
+    }
+    for (const b of boxes) {
+      if (b.below !== undefined && state.y > b.below) continue;
+      if (b.ch && state.air && state.y > H(b.x, b.z) + b.ch * 0.7) continue;     // muret survolé
+      const dx = px() - b.x, dz = pz() - b.z, reach = b.hw + b.hd + CAR_CR; if (Math.abs(dx) > reach || Math.abs(dz) > reach) continue;
+      const ca = Math.cos(b.a), sa = Math.sin(b.a), lx = dx * ca - dz * sa, lz = dx * sa + dz * ca;
+      const qx = Math.max(-b.hw, Math.min(lx, b.hw)), qz = Math.max(-b.hd, Math.min(lz, b.hd));
+      let ex = lx - qx, ez = lz - qz, d = Math.hypot(ex, ez), depth;
+      if (d < 1e-4) { const ox = b.hw - Math.abs(lx), oz = b.hd - Math.abs(lz); if (ox < oz) { ex = Math.sign(lx) || 1; ez = 0; depth = ox + CAR_CR; } else { ex = 0; ez = Math.sign(lz) || 1; depth = oz + CAR_CR; } d = 1; }
+      else { if (d >= CAR_CR) continue; depth = CAR_CR - d; }
+      const nlx = ex / d, nlz = ez / d; pushOut(nlx * ca + nlz * sa, -nlx * sa + nlz * ca, depth);
+    }
   }
   const r = Math.hypot(state.x, state.z), L = 128; if (r > L) pushOut(-state.x / r, -state.z / r, r - L);
-  if (!Number.isFinite(state.x + state.z + state.speed)) resetCar();
+  if (!Number.isFinite(state.x + state.z + state.speed + state.y)) resetCar();
 }
 
 /* Poussière */
@@ -762,8 +773,9 @@ function tick() {
     if (ray.ray.intersectPlane(groundPlane, hit)) {
       const dx = hit.x - state.x, dz = hit.z - state.z, dist = Math.hypot(dx, dz);
       let diff = Math.atan2(-dz, dx) - state.heading; diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-      steerIn = Math.max(-1, Math.min(1, diff * 1.8));
-      throttle = dist < 3 ? 0 : Math.abs(diff) > 2.4 ? -0.6 : Math.min(1, dist / 10);
+      const back = dist >= 3 && Math.abs(diff) > 2.4 && dist < 14;        // doigt juste derrière : on recule en braquant pour se retourner
+      steerIn = Math.max(-1, Math.min(1, diff * 1.8)) * (back ? -1 : 1);
+      throttle = dist < 3 ? 0 : back ? -0.6 : Math.min(1, dist / 10) * (Math.abs(diff) > 1.6 ? 0.55 : 1); // loin derrière : demi-tour en avançant
       if (dist < 3) state.speed *= Math.pow(0.1, dt);
     }
   }
@@ -779,7 +791,7 @@ function tick() {
     state.heading += state.steer * grip * (Math.sign(state.speed) || Math.sign(throttle) || 1) * dt * 2.3;
     state.x += Math.cos(state.heading) * state.speed * dt; state.z -= Math.sin(state.heading) * state.speed * dt;
     collide();
-    if (throttle) { stuckT += dt; if (Math.hypot(state.x - stuckP.x, state.z - stuckP.z) > 3) { stuckT = 0; stuckP.x = state.x; stuckP.z = state.z; } if (stuckT > 4) { resetCar(); stuckT = 0; } } else { stuckT = 0; stuckP.x = state.x; stuckP.z = state.z; }
+    if (throttle) { stuckT += dt; if (Math.hypot(state.x - stuckP.x, state.z - stuckP.z) > 1.2) { stuckT = 0; stuckP.x = state.x; stuckP.z = state.z; } if (stuckT > 7) { resetCar(); stuckT = 0; } } else { stuckT = 0; stuckP.x = state.x; stuckP.z = state.z; }
   }
   // la voiture épouse les collines
   fwd.set(Math.cos(state.heading), 0, -Math.sin(state.heading));
@@ -835,7 +847,7 @@ function tick() {
       c.v.y -= 22 * dt; c.g.position.addScaledVector(c.v, dt);
       c.g.rotation.x += c.w.x * dt; c.g.rotation.y += c.w.y * dt; c.g.rotation.z += c.w.z * dt;
       propBox.setFromObject(c.g, false);
-      const ground = H(c.g.position.x, c.g.position.z) + 0.1;
+      const ground = groundAt(c.g.position.x, c.g.position.z) + 0.1;
       if (propBox.min.y < ground) {
         c.g.position.y += ground - propBox.min.y;               // ne s'enfonce jamais dans le sol
         if (c.v.y < 0) c.v.y *= -0.25;
