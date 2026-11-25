@@ -658,6 +658,20 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px)
 body.joke-cursor .cursor { width: 26px; height: 42px; margin: -2px 0 0 -13px; border-radius: 0; box-shadow: none; background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 64'><g fill='%23f3d2bd' stroke='%23111' stroke-width='2.5' stroke-linejoin='round'><circle cx='12' cy='51' r='10'/><circle cx='28' cy='51' r='10'/><rect x='12' y='10' width='16' height='42' rx='8'/><path d='M11 14 Q20 -2 29 14 Q20 19 11 14 Z' fill='%23e9a6a0'/></g><path d='M20 5 V9' stroke='%23111' stroke-width='2' stroke-linecap='round'/></svg>") center / contain no-repeat; filter: drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
 
 .confetti { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 140; pointer-events: none; }
+
+/* Projets : le contenu démarre plus haut, moins de vide après la transition */
+@media (min-width: 761px) {
+  .hs-sticky { justify-content: flex-start; padding-top: calc(4rem + 7vh); }
+  .hs-track { align-items: flex-start; }
+  .hs-intro, .hs-card { margin-top: 0; }
+  .hs-intro { padding-top: 6vh; }
+}
+
+/* La section projets remonte sous la fin de la transition : la suite arrive tout de suite */
+.dark-zone { z-index: 2; }
+#projets { position: relative; z-index: 1; }
+@media (min-width: 761px) { #projets { margin-top: calc(-1 * (2.5rem + 13vh)); } }
+@media (max-width: 760px) { #projets { margin-top: -3rem; } }
 </style>
 </head>
 <body>
@@ -1536,7 +1550,7 @@ GitHub : <a href="https://github.com/gabyaillet" target="_blank" rel="noopener">
     if (isNear(blindsBox)) {
       // progression dans l'écran figé : 0 quand il se fige, 1 quand il se libère
       const pr = blindsBox.getBoundingClientRect(), p = clamp01(-pr.top / Math.max(1, pr.height - vh));
-      const bk = reduce ? (p > 0.5 ? 1 : 0) : clamp01((p - 0.1) / 0.82); // un temps sur le bandeau, puis les bandes montent
+      const bk = reduce ? (p > 0.5 ? 1 : 0) : clamp01((p - 0.08) / 0.92); // un temps sur le bandeau, puis les bandes montent
       blinds.forEach((b, i) => b.style.transform = `scaleY(${clamp01(bk * 1.7 - (blinds.length - 1 - i) * 0.07)})`);
       if (bk > 0.5) document.body.classList.remove('inverted'); else if (pr.top <= vh * 0.5 && pr.bottom > 0) document.body.classList.add('inverted');
     }
