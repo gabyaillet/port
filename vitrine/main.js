@@ -778,7 +778,7 @@ addEventListener('error', e => showErr('Erreur : ' + (e.message || 'inconnue')))
 const propBox = new THREE.Box3();
 const clock = new THREE.Clock(), fwd = new THREE.Vector3(), tmp = new THREE.Vector3(), Om = new THREE.Object3D();
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
-let lastKmh = -1;
+let lastKmh = -1; const wheelTmp = new THREE.Vector3();
 function tick() {
   const rawDt = clock.getDelta(), dt = Math.min(rawDt, 1 / 30), t = clock.elapsedTime;
 
@@ -832,6 +832,14 @@ function tick() {
   state.roll += (slopeRoll - state.roll) * Math.min(1, dt * 5);
   state.pitch += (slopePitch - state.pitch) * Math.min(1, dt * (state.air ? 1.5 : 5));
   chassis.rotation.set(state.roll, 0, state.pitch);
+  // aucune roue sous le sol : on mesure le sol sous chacune des 4 roues (après inclinaison) et on remonte la voiture si besoin
+  { const ch = Math.cos(state.heading), sh = Math.sin(state.heading); let need = -Infinity;
+    for (const w of wheels) {
+      wheelTmp.set(w.pivot.position.x, 0, w.pivot.position.z).applyEuler(chassis.rotation);
+      const wx = state.x + wheelTmp.x * ch + wheelTmp.z * sh, wz = state.z - wheelTmp.x * sh + wheelTmp.z * ch;
+      need = Math.max(need, groundAt(wx, wz) + 0.02 - wheelTmp.y);
+    }
+    if (state.y < need) { if (state.air && state.vy < -7) bump(); state.y = need; if (state.vy < 0) state.vy = 0; state.air = false; car.position.y = state.y; } }
   const lean = Math.max(-0.06, Math.min(0.06, -state.steer * Math.min(1, Math.abs(state.speed) / MAX) * 0.2 * Math.sign(state.speed || 1)));
   const squat = state.air ? 0 : Math.max(-0.025, Math.min(0.025, throttle * 0.025));
   state.lean = (state.lean || 0) + (lean - (state.lean || 0)) * Math.min(1, dt * 5); state.squat = (state.squat || 0) + (squat - (state.squat || 0)) * Math.min(1, dt * 5);
@@ -919,4 +927,4 @@ function tick() {
 }
 requestAnimationFrame(tick);
 addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
-window.__atelier = { state, resetCar, cam, finger, props, ramps, boxes, placeAt: (x, z, h) => { Object.assign(state, { x, z, heading: h, speed: 0 }); state.y = H(x, z); snapCam = true; } };
+window.__atelier = { state, resetCar, cam, finger, props, ramps, boxes, wheels, ground: groundAt, placeAt: (x, z, h) => { Object.assign(state, { x, z, heading: h, speed: 0 }); state.y = H(x, z); snapCam = true; } };
