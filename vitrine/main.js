@@ -384,8 +384,9 @@ Object.values(P).forEach(p => p.build());
 /* ---------- Départ, lettres « BIENVENUE » à bousculer ---------- */
 const VIEW = new THREE.Vector3(1, 0, 1).normalize();            // côté où se tient la caméra
 const START = { x: PLAZA.x + VIEW.x * 5, z: PLAZA.z + VIEW.z * 5, h: Math.atan2(VIEW.z, -VIEW.x) }; // la voiture s'éloigne de la caméra
-const FROM_VILLAGE = new URLSearchParams(location.search).get('from') === 'village';
-if (FROM_VILLAGE) { const p = paths[0].getPointAt(0.68), tg = paths[0].getTangentAt(0.68); Object.assign(START, { x: p.x, z: p.z, h: Math.atan2(tg.z, -tg.x) }); history.replaceState(null, '', location.pathname); } // on ressort du village, cap vers la place
+const FROM = new URLSearchParams(location.search).get('from'); // on revient d'une page (village, forêt) : on repart sur son chemin, cap vers la place
+const FROM_VILLAGE = FROM === 'village' || FROM === 'forest';
+if (FROM_VILLAGE) { const c = paths[FROM === 'forest' ? 3 : 0], p = c.getPointAt(0.68), tg = c.getTangentAt(0.68); Object.assign(START, { x: p.x, z: p.z, h: Math.atan2(tg.z, -tg.x) }); history.replaceState(null, '', location.pathname); }
 const props = [];
 function addProp(mesh, x, z, r, k, lift) { const g = new THREE.Group(); g.add(mesh); g.position.set(x, H(x, z) + lift, z); scene.add(g); props.push({ g, r, k, lift, v: new THREE.Vector3(), w: new THREE.Vector3(), still: true, cd: 0 }); return g; }
 fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(json => {
@@ -433,26 +434,16 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
   boxes.push({ x: SIGN.x, z: SIGN.z, a: rot, hw: W / 2 + 0.4, hd: 0.6, ch: lift + Hh + 1 });
 }
 /* ---------- Panneau directionnel : planches de récup peintes, flèches à gauche et à droite, lettres au pochoir ---------- */
-{
-  const y = H(POST.x, POST.z), g = new THREE.Group(); g.position.set(POST.x, y, POST.z);
-  g.rotation.y = Math.atan2(START.x - POST.x, START.z - POST.z) - 0.25; scene.add(g);
+function signpost(P, rotY, rows, poleH = 6.6) {
+  const y = H(P.x, P.z), g = new THREE.Group(); g.position.set(P.x, y, P.z);
+  g.rotation.y = rotY; scene.add(g);
   const woodCanvas = (w, h, base) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
     x.fillStyle = base; x.fillRect(0, 0, w, h);
     for (let k = 0; k < 40; k++) { x.strokeStyle = `rgba(50,28,12,${0.08 + Math.random() * 0.16})`; x.lineWidth = 1 + Math.random() * 2; const yy = Math.random() * h; x.beginPath(); x.moveTo(0, yy); x.bezierCurveTo(w * .3, yy + (Math.random() - .5) * 8, w * .7, yy + (Math.random() - .5) * 8, w, yy + (Math.random() - .5) * 5); x.stroke(); }
     return { c, x }; };
   const pTex = new THREE.CanvasTexture(woodCanvas(64, 512, '#a7713f').c); pTex.colorSpace = THREE.SRGBColorSpace;
   const poleMat = std({ map: pTex, roughness: 0.9 });
-  const pole = shadowy(new THREE.Mesh(new RoundedBoxGeometry(0.5, 6.6, 0.3, 2, 0.04), poleMat)); pole.position.set(0, 3.3, -0.2); g.add(pole);
-  // [texte, distance, sens (1 = pointe à droite, -1 = à gauche, 0 = écriteau), peinture, encre, police large]
-  const D = (o) => Math.round(Math.hypot(o.x - POST.x, o.z - POST.z) * 2) * 5;
-  const rows = [
-    ['ATELIER FOLIO', '', 0, '#cfc6b4', '#1d1a17', true],
-    ['LE VILLAGE', D(VILLAGE) + ' m', -1, '#dcd2bf', '#1d1a17', true],
-    ['LA FORÊT', D(FOREST) + ' m', 1, '#2a2725', '#ece4d3', false],
-    ['LE LAC', D(LAKE) + ' m', 1, '#b9a98f', '#1d1a17', true],
-    ['LE MOULIN', D(HILL) + ' m', -1, '#8a3f2b', '#f1e6d4', false],
-    ['LES MAQUETTES', D(VILLAGE) + ' m', 1, '#d4cab6', '#1d1a17', false]
-  ];
+  const pole = shadowy(new THREE.Mesh(new RoundedBoxGeometry(0.5, poleH, 0.3, 2, 0.04), poleMat)); pole.position.set(0, poleH / 2, -0.2); g.add(pole);
   const T = 0.6, sideMat = std({ color: '#6b4a2e', roughness: 0.95 });
   const fontsReady = document.fonts ? document.fonts.load('400 80px "Stardos Stencil"').catch(() => {}) : Promise.resolve();
   rows.forEach(([name, dist, dir, paint, ink, bold], i) => {
@@ -477,7 +468,7 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
       const fs = sign ? H2 * 0.36 : H2 * (bold ? 0.5 : 0.44);
       x.fillStyle = ink; x.textBaseline = 'middle';
       x.font = `400 ${fs}px "Stardos Stencil", "Courier New", monospace`;
-      if (sign) { x.textAlign = 'center'; x.fillText('ATELIER', W2 / 2, H2 * 0.32); x.fillText('FOLIO', W2 / 2, H2 * 0.7); }
+      if (sign) { x.textAlign = 'center'; const parts = name.split(' '); if (parts.length > 1) { x.fillText(parts[0], W2 / 2, H2 * 0.32); x.fillText(parts.slice(1).join(' '), W2 / 2, H2 * 0.7); } else { x.font = `400 ${fs * 1.35}px "Stardos Stencil", "Courier New", monospace`; x.fillText(name, W2 / 2, H2 * 0.54); } }
       else {
         const pad = W2 * 0.07, tipPad = W2 * (tip / L) + W2 * 0.03; // le côté de la pointe est à droite sur la texture si dir > 0
         const nameRight = (i % 2 === 0); // comme sur les vrais panneaux : nom et distance changent de côté
@@ -490,12 +481,34 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
     paintIt(); fontsReady.then(paintIt);
     const mat = new THREE.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: '#ffffff', emissiveIntensity: 0.05, roughness: 0.9 });
     const m = shadowy(new THREE.Mesh(geo, [mat, sideMat]));
-    m.position.set((i % 2 ? 0.12 : -0.1) + (sign ? 0 : dir * 0.25), 6.0 - i * 0.74 - (sign ? 0 : 0.12), 0.02 * (i % 2));
+    m.position.set((i % 2 ? 0.12 : -0.1) + (sign ? 0 : dir * 0.25), poleH - 0.6 - i * 0.74 - (sign ? 0 : 0.12), 0.02 * (i % 2));
     m.rotation.set(0, (i % 3 - 1) * 0.05, (i % 2 ? 1 : -1) * (0.02 + (i % 3) * 0.012));
     g.add(m);
   });
-  if (!LITE) { const l = new THREE.PointLight('#ffcf9a', 6, 9, 1.6); l.position.set(0, 4.6, 2.6); g.add(l); }
-  circles.push({ x: POST.x, z: POST.z, r: 0.5 });
+  if (!LITE) { const l = new THREE.PointLight('#ffcf9a', 6, 9, 1.6); l.position.set(0, poleH - 2, 2.6); g.add(l); }
+  circles.push({ x: P.x, z: P.z, r: 0.5 });
+}
+{
+  // [texte, distance, sens (1 = pointe à droite, -1 = à gauche, 0 = écriteau), peinture, encre, police large]
+  const D = (o) => Math.round(Math.hypot(o.x - POST.x, o.z - POST.z) * 2) * 5;
+  const rows = [
+    ['ATELIER FOLIO', '', 0, '#cfc6b4', '#1d1a17', true],
+    ['LE VILLAGE', D(VILLAGE) + ' m', -1, '#dcd2bf', '#1d1a17', true],
+    ['LA FORÊT', D(FOREST) + ' m', 1, '#2a2725', '#ece4d3', false],
+    ['LE LAC', D(LAKE) + ' m', 1, '#b9a98f', '#1d1a17', true],
+    ['LE MOULIN', D(HILL) + ' m', -1, '#8a3f2b', '#f1e6d4', false],
+    ['LES MAQUETTES', D(VILLAGE) + ' m', 1, '#d4cab6', '#1d1a17', false]
+  ];
+  signpost(POST, Math.atan2(START.x - POST.x, START.z - POST.z) - 0.25, rows);
+}
+// au bout du chemin du lac : cul-de-sac
+{
+  const c = paths[2], e = c.getPointAt(1), tg = c.getTangentAt(1), at = { x: e.x + tg.x * 3.5, z: e.z + tg.z * 3.5 };
+  signpost(at, Math.atan2(-tg.x, -tg.z), [
+    ['CUL-DE-SAC', '', 0, '#e2d9c6', '#1d1a17', true],
+    ['LE LAC', 'IMPASSE', 1, '#2f4a5c', '#ece4d3', false]
+  ], 4.6);
+  boxes.push({ x: at.x, z: at.z, a: Math.atan2(-tg.x, -tg.z), hw: 1.7, hd: 0.5, ch: 5 });
 }
 // caisses en bois empilées
 { const g = new RoundedBoxGeometry(1.6, 1.6, 1.6, 2, 0.08); const bx = PLAZA.x + VIEW.z * 10 - 1.7, bz = PLAZA.z - VIEW.x * 10;
@@ -709,21 +722,25 @@ const ZONES = [
   { x: LAKE.x, z: LAKE.z, r: LAKE.r + 16, t: 'Le Lac' }, { x: HILL.x, z: HILL.z, r: 26, t: 'Le Moulin' }
 ];
 const zoneEl = $('zone'), zoneK = $('zone-k'), zoneT = $('zone-t'); let curZone = null, zoneTimer = 0;
-let ignoreVillage = FROM_VILLAGE, leaving = 0;
-function goVillage() {
-  if (leaving) return; leaving = 0.0001;
+let ignoreZone = FROM_VILLAGE ? FROM : null, leaving = 0, leaveMode = 'village';
+const LINK = { 'Le Village': 'village', 'La Forêt': 'forest', 'Le Moulin': 'mill' };
+const KICKER = { 'Le Village': 'Les maquettes', 'La Forêt': 'Me contacter', 'Le Moulin': 'Mon portfolio', 'Le Lac': 'Cul-de-sac' };
+// trois départs, trois façons de quitter la ville
+function goTo(mode) {
+  if (leaving) return; leaving = 0.0001; leaveMode = mode;
   for (const k in keys) keys[k] = false; finger.on = false;
-  setTimeout(() => $('portal').classList.add('in'), 750);   // un cercle de couleur recouvre l'écran
-  setTimeout(() => { location.href = 'village.html'; }, 1650);
+  if (mode === 'village') { setTimeout(() => $('portal').classList.add('in'), 750); setTimeout(() => { location.href = 'village.html'; }, 1650); }      // gros zoom puis un cercle de couleur
+  if (mode === 'forest') { setTimeout(() => $('blinds').classList.add('in'), 700); setTimeout(() => { location.href = 'contact.html'; }, 1750); }       // caméra au ras du sol, puis des stores se ferment
+  if (mode === 'mill') { setTimeout(() => $('curtain').classList.add('in'), 900); setTimeout(() => { location.href = '../index.html'; }, 2500); }      // on s'élève dans le ciel, un rideau clair monte
 }
 function updateZone() {
   if (!intro.done) return;
   const z = ZONES.find(z => Math.hypot(state.x - z.x, state.z - z.z) < z.r) || null;
-  if (z && z.t === 'Le Village' && !ignoreVillage && driving) goVillage();
-  if (!z || z.t !== 'Le Village') ignoreVillage = false;
+  if (z && LINK[z.t] && LINK[z.t] !== ignoreZone && driving) goTo(LINK[z.t]);
+  if (!z || LINK[z.t] !== ignoreZone) ignoreZone = null;
   if (z === curZone) return; curZone = z; clearTimeout(zoneTimer);
   zoneEl.classList.remove('on'); zoneEl.classList.add('off');
-  if (z) zoneTimer = setTimeout(() => { zoneK.textContent = z.t === 'Le Village' ? 'Les modèles de portfolio' : 'Modèle à venir'; zoneT.textContent = z.t; zoneEl.classList.remove('off'); void zoneEl.offsetWidth; zoneEl.classList.add('on'); }, 350);
+  if (z) zoneTimer = setTimeout(() => { zoneK.textContent = KICKER[z.t] || ''; zoneT.textContent = z.t; zoneEl.classList.remove('off'); void zoneEl.offsetWidth; zoneEl.classList.add('on'); }, 350);
 }
 const showErr = msg => { if (document.querySelector('.glerr')) return; const d = document.createElement('div'); d.className = 'glerr'; d.innerHTML = msg + '<br><button type="button">Recharger</button>'; d.querySelector('button').onclick = () => location.reload(); document.body.appendChild(d); };
 canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); showErr('La 3D a été interrompue par l’appareil (mémoire).'); });
@@ -738,7 +755,7 @@ function tick() {
 
   // commandes : clavier, ou doigt sur l'écran
   let throttle = (keys.up ? 1 : 0) - (keys.down ? 1 : 0), steerIn = (keys.left ? 1 : 0) - (keys.right ? 1 : 0);
-  if (leaving) { leaving = Math.min(1, leaving + rawDt / 1.4); state.speed *= Math.pow(0.15, dt); }
+  if (leaving) { leaving = Math.min(1, leaving + rawDt / (leaveMode === 'mill' ? 2.2 : 1.4)); state.speed *= Math.pow(0.15, dt); }
   if (finger.on && intro.done) {
     ndc.set(finger.x / innerWidth * 2 - 1, -(finger.y / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera);
     groundPlane.constant = -state.y;
@@ -841,9 +858,10 @@ function tick() {
       if (!hidden) for (const b of boxes) { if (!b.ch || py > H(b.x, b.z) + b.ch) continue; const dx = px - b.x, dz = pz - b.z, ca = Math.cos(b.a), sa = Math.sin(b.a); if (Math.abs(dx * ca - dz * sa) < b.hw && Math.abs(dx * sa + dz * ca) < b.hd) { hidden = true; break; } } }
     camLift += ((hidden ? 0.55 : 0) - camLift) * Math.min(1, dt * (hidden ? 3 : 1));
   }
-  const speedK = Math.abs(state.speed) / MAX, dist = lerp(cam.dist * (camera.aspect < 0.8 ? 1.15 : 1) * (1 + speedK * 0.12), 7, leaving ? 1 - Math.pow(1 - leaving, 3) : 0); // gros zoom en entrant au village
-  const zk = leaving ? 1 - Math.pow(1 - leaving, 3) : 0, pitch = lerp(Math.min(1.35, cam.pitch + camLift), 0.32, zk);
-  follow.set(Math.cos(pitch) * Math.cos(cam.yaw) * dist, Math.sin(pitch) * dist, Math.cos(pitch) * Math.sin(cam.yaw) * dist).add(car.position);
+  const zk = leaving ? 1 - Math.pow(1 - leaving, 3) : 0, LV = { village: [7, 0.32, 0], forest: [9, 0.1, 1.3], mill: [cam.dist * 3, 1.42, -0.5] }[leaveMode]; // [distance, inclinaison, rotation] visées en partant
+  const speedK = Math.abs(state.speed) / MAX, dist = lerp(cam.dist * (camera.aspect < 0.8 ? 1.15 : 1) * (1 + speedK * 0.12), LV[0], zk);
+  const pitch = lerp(Math.min(1.35, cam.pitch + camLift), LV[1], zk), yaw = cam.yaw + LV[2] * zk;
+  follow.set(Math.cos(pitch) * Math.cos(yaw) * dist, Math.sin(pitch) * dist, Math.cos(pitch) * Math.sin(yaw) * dist).add(car.position);
   look.set(car.position.x + fwd.x * (4 + speedK * 6), car.position.y + 0.5, car.position.z + fwd.z * (4 + speedK * 6)); // on regarde un peu devant la voiture
   if (intro.started && !intro.done) {
     intro.t += Math.min(rawDt, 0.1) / intro.dur; const e = ease(Math.min(1, intro.t));
