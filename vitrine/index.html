@@ -11,10 +11,10 @@
 <style>
 /* Vitrine : un petit monde en 3D à la tombée du jour ; interface fine, sombre et crème par-dessus. */
 :root {
-  --night: #15130f;      /* encre presque noire */
+  --night: #1a1638;      /* encre presque noire */
   --cream: #efe6d6;      /* crème papier */
-  --amber: #e7b77c;      /* lumière de lanterne */
-  --glass: rgba(21, 19, 15, .42);
+  --amber: #ffb066;      /* lumière de lanterne */
+  --glass: rgba(26, 22, 56, .5);
   --f-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
   --f-sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
   --f-mono: "DM Mono", ui-monospace, Menlo, monospace;
@@ -78,6 +78,10 @@ body.grabbing canvas#world { cursor: grabbing; }
 @media (max-width: 640px) { .pills .pill:not(.solid) { display: none; } }
 @media (prefers-reduced-motion: reduce) { .loader .panel, .zone .label, .zone b { transition: none !important; } }
 :focus-visible { outline: 1px solid var(--amber); outline-offset: 3px; }
+.reset { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem); width: 2.9rem; height: 2.9rem; border-radius: 50%; border: 1px solid rgba(239,230,214,.35); background: var(--glass); color: var(--cream); font: 400 1rem var(--f-sans); pointer-events: auto; display: none; opacity: 0; transition: opacity 1s; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.reset.show { opacity: 1; }
+.hint .mob { display: none; }
+@media (hover: none) and (pointer: coarse) { .reset { display: block; } .hint { display: block !important; left: 50%; transform: translate(-50%, 14px); } .hint.show { transform: translate(-50%, 0); } .hint .desk { display: none; } .hint .mob { display: inline; } }
 </style>
 <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js", "three/addons/": "./vendor/addons/" } }</script>
 </head>
@@ -102,14 +106,11 @@ body.grabbing canvas#world { cursor: grabbing; }
 
   <div class="zone" id="zone" aria-live="polite"><span class="label" id="zone-k"></span><b id="zone-t"></b></div>
 
-  <p class="hint label" id="hint">↑ ← ↓ → conduire &nbsp;·&nbsp; glisser pour regarder</p>
+  <p class="hint label" id="hint"><span class="desk">↑ ← ↓ → conduire &nbsp;·&nbsp; glisser pour tourner la vue</span><span class="mob">Posez le doigt : la voiture le suit</span></p>
 
   <div class="speed" id="speedo" aria-hidden="true"><b id="kmh">0</b><span class="label">km/h</span></div>
 
-  <div class="touch" id="touch">
-    <div class="grp"><button data-k="left" aria-label="Tourner à gauche">←</button><button data-k="right" aria-label="Tourner à droite">→</button></div>
-    <div class="grp"><button id="reset" class="small" type="button" aria-label="Remettre la voiture au départ">⟲</button><button data-k="down" aria-label="Freiner, reculer">↓</button><button data-k="up" aria-label="Accélérer">↑</button></div>
-  </div>
+  <button id="reset" class="reset" type="button" aria-label="Remettre la voiture au départ">⟲</button>
 </div>
 
 <script type="module" src="./main.js"></script>
