@@ -359,6 +359,13 @@ function rampHeight(x, z) {
   for (const r of ramps) { const dx = x - r.x, dz = z - r.z, u = dx * r.fx + dz * r.fz, w = -dx * r.fz + dz * r.fx; if (u > 0 && u < r.L && Math.abs(w) < r.W / 2) best = Math.max(best, r.y - H(x, z) + u / r.L * r.h); }
   return best;
 }
+// une place est-elle déjà prise (tremplin, arbre, rocher, maison, muret) ?
+function occupied(x, z, m) {
+  for (const r of ramps) { const dx = x - r.x, dz = z - r.z, u = dx * r.fx + dz * r.fz, w = -dx * r.fz + dz * r.fx; if (u > -m && u < r.L + m && Math.abs(w) < r.W / 2 + m) return true; }
+  for (const c of circles) if (Math.hypot(x - c.x, z - c.z) < c.r + m) return true;
+  for (const b of boxes) { const dx = x - b.x, dz = z - b.z, ca = Math.cos(b.a), sa = Math.sin(b.a); if (Math.abs(dx * ca - dz * sa) < b.hw + m && Math.abs(dx * sa + dz * ca) < b.hd + m) return true; }
+  return false;
+}
 const groundAt = (x, z) => H(x, z) + (ramps.length ? rampHeight(x, z) : 0);
 {
   // tremplins : sur la prairie, autour de la place
@@ -367,7 +374,7 @@ const groundAt = (x, z) => H(x, z) + (ramps.length ? rampHeight(x, z) : 0);
   // murets de pierre texturés
   const wallMat = std({ map: TEX.bricks, roughness: 0.9 });
   const wall = (x, z, a, len) => { const y = H(x, z); const t = TEX.bricks.clone(); t.needsUpdate = true; t.repeat.set(len / 3, 1); const m = shadowy(new THREE.Mesh(new RoundedBoxGeometry(len, 1.3, 0.9, 2, 0.12), wallMat.clone())); m.material.map = t; m.position.set(x, y + 0.5, z); m.rotation.y = a; scene.add(m); boxes.push({ x, z, a, hw: len / 2, hd: 0.45, ch: 1.4 }); };
-  for (const [x, z, a, l] of [[32, -6, 0.3, 10], [-14, 32, -0.8, 12], [-38, 8, 1.4, 9], [8, 40, 0.1, 11], [44, -48, -0.6, 10], [-50, -30, 0.9, 12], [58, 46, 2.0, 9]]) if ([-0.5, 0, 0.5].every(f => free(x + Math.cos(a) * l * f, z - Math.sin(a) * l * f, 2.5))) wall(x, z, a, l);
+  for (const [x, z, a, l] of [[32, -6, 0.3, 10], [-14, 32, -0.8, 12], [-38, 8, 1.4, 9], [8, 40, 0.1, 11], [44, -48, -0.6, 10], [-50, -30, 0.9, 12], [58, 46, 2.0, 9]]) if ([-0.5, -0.25, 0, 0.25, 0.5].every(f => { const px = x + Math.cos(a) * l * f, pz = z - Math.sin(a) * l * f; return free(px, pz, 2.5) && !occupied(px, pz, 3); })) wall(x, z, a, l);
 }
 Object.values(P).forEach(p => p.build());
 
@@ -746,4 +753,4 @@ function tick() {
 }
 requestAnimationFrame(tick);
 addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
-window.__atelier = { state, resetCar, cam, finger, props, ramps, placeAt: (x, z, h) => { Object.assign(state, { x, z, heading: h, speed: 0 }); state.y = H(x, z); snapCam = true; } };
+window.__atelier = { state, resetCar, cam, finger, props, ramps, boxes, placeAt: (x, z, h) => { Object.assign(state, { x, z, heading: h, speed: 0 }); state.y = H(x, z); snapCam = true; } };
