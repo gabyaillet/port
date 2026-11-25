@@ -105,7 +105,7 @@ const M = {
   roof: flat({ vertexColors: true, roughness: 0.7 }),
   trim: std({ color: '#262046' }),
   water: new THREE.MeshPhysicalMaterial({ color: '#241f5c', roughness: 0.05, metalness: 0.2, clearcoat: 1 }),
-  leafBit: std({ color: '#1c1838', roughness: 1, side: THREE.DoubleSide }),
+  leafBit: std({ color: '#6e4a63', roughness: 1, side: THREE.DoubleSide }), // feuilles mortes : prune sourd, plus des « trous » noirs
   letters: std({ color: '#8d8bff', roughness: 0.45, metalness: 0.05, emissive: '#3a33c9', emissiveIntensity: 0.35 }),
   stone: flat({ color: '#8f8bd0' }),
   sail: std({ color: '#d8d4ff', side: THREE.DoubleSide }),
@@ -188,7 +188,7 @@ const P = {
   pine: new Pool(new THREE.ConeGeometry(1, 1, 7), M.leaf),
   pineTrunk: new Pool(new THREE.CylinderGeometry(0.2, 0.35, 1, 6), M.barkDark),
   rock: new Pool(new THREE.DodecahedronGeometry(1, 0), M.rock),
-  bit: new Pool(new THREE.PlaneGeometry(0.35, 0.35).rotateX(-Math.PI / 2), M.leafBit, { cast: false }),
+  bit: new Pool(new THREE.CircleGeometry(0.2, 5).scale(1.6, 0.8, 1).rotateX(-Math.PI / 2), M.leafBit, { cast: false }),
   post: new Pool(new THREE.CylinderGeometry(0.1, 0.13, 1, 8), M.metal),
   lampHead: new Pool(new RoundedBoxGeometry(0.55, 0.75, 0.55, 2, 0.06), M.lamp, { cast: false }),
   lampCap: new Pool(new THREE.ConeGeometry(0.5, 0.4, 4).rotateY(Math.PI / 4), M.metal),
@@ -229,7 +229,7 @@ function rock(x, z, s) { P.rock.add(mtx(x, H(x, z) + 0.3 * s, z, rnd() * 3, rnd(
   for (let k = 0; k < (LITE ? 250 : 600); k++) {
     const c = pick(paths), p = c.getPointAt(rnd()), a = rnd() * 6.28, r = rnd() * (PATH_W / 2 + 1);
     const x = k % 4 === 0 ? PLAZA.x + Math.cos(a) * rnd() * PLAZA.r : p.x + Math.cos(a) * r, z = k % 4 === 0 ? PLAZA.z + Math.sin(a) * rnd() * PLAZA.r : p.z + Math.sin(a) * r;
-    P.bit.add(mtx(x, H(x, z) + 0.15, z, (rnd() - .5) * 0.4, rnd() * 6, (rnd() - .5) * 0.4, 0.6 + rnd(), 1, 0.6 + rnd()));
+    P.bit.add(mtx(x, H(x, z) + 0.13, z, (rnd() - .5) * 0.12, rnd() * 6, (rnd() - .5) * 0.12, 0.6 + rnd(), 1, 0.6 + rnd()));
   }
 }
 // herbe : brins instanciés qui ondulent au vent
@@ -285,7 +285,7 @@ for (const c of paths) for (let i = 0; i < 10; i++) {
     const x = p.x - tg.z * s * (PATH_W / 2 + 2.2), z = p.z + tg.x * s * (PATH_W / 2 + 2.2), y = H(x, z);
     if (nearest(x, z) < PATH_W / 2 + 1.5 || Math.hypot(x - PLAZA.x, z - PLAZA.z) < PLAZA.r + 1) continue;
     P.fence.add(mtx(x, y + 0.6, z, 0, 0, 0, 0.25, 1.2, 0.25));
-    if (i < 9) { const x2 = q.x - tg.z * s * (PATH_W / 2 + 2.2), z2 = q.z + tg.x * s * (PATH_W / 2 + 2.2), mx = (x + x2) / 2, mz = (z + z2) / 2, len = Math.hypot(x2 - x, z2 - z); P.fence.add(mtx(mx, H(mx, mz) + 0.9, mz, 0, -Math.atan2(z2 - z, x2 - x), 0, len, 0.18, 0.12)); }
+    if (i < 9) { const x2 = q.x - tg.z * s * (PATH_W / 2 + 2.2), z2 = q.z + tg.x * s * (PATH_W / 2 + 2.2), mx = (x + x2) / 2, mz = (z + z2) / 2, len = Math.hypot(x2 - x, z2 - z); P.fence.add(mtx(mx, H(mx, mz) + 0.9, mz, 0, -Math.atan2(z2 - z, x2 - x), 0, len, 0.18, 0.12)); boxes.push({ x: mx, z: mz, a: -Math.atan2(z2 - z, x2 - x), hw: len / 2 + 0.15, hd: 0.2, ch: 1.2 }); } // la barrière arrête la voiture
   }
 }
 
@@ -325,8 +325,16 @@ scene.add(shadowy(new THREE.Mesh(merge(wallParts), M.walls)));
 scene.add(shadowy(new THREE.Mesh(merge(roofParts), M.roof)));
 
 /* ---------- Lac, moulin ---------- */
-const lake = new THREE.Mesh(new THREE.CircleGeometry(LAKE.r + 8, 64).rotateX(-Math.PI / 2), M.water);
-lake.position.set(LAKE.x, hills(LAKE.x, LAKE.z) + 3.2, LAKE.z); lake.receiveShadow = !LITE; scene.add(lake);
+// l'eau suit le relief : partout où la rive est plus basse que l'eau, la surface passe sous le sol (plus de disque qui flotte)
+const lake = (() => {
+  let level = hills(LAKE.x, LAKE.z) + 3.2; // niveau voulu, mais jamais plus haut que la rive (sinon l'eau déborde en « mur »)
+  for (let k = 0; k < 96; k++) { const a = k / 96 * Math.PI * 2; level = Math.min(level, H(LAKE.x + Math.cos(a) * (LAKE.r + 3), LAKE.z + Math.sin(a) * (LAKE.r + 3)) - 0.25); }
+  const R = LAKE.r + 10, g = new THREE.PlaneGeometry(R * 2, R * 2, 72, 72).rotateX(-Math.PI / 2), pos = g.attributes.position;
+  for (let i = 0; i < pos.count; i++) { const x = pos.getX(i) + LAKE.x, z = pos.getZ(i) + LAKE.z, h = H(x, z), inBasin = Math.hypot(x - LAKE.x, z - LAKE.z) < LAKE.r + 3;
+    pos.setY(i, inBasin && h < level ? level : Math.min(level, h - 0.12)); } // hors du bassin : sous le sol
+  g.computeVertexNormals(); for (let i = 0; i < g.attributes.normal.count; i++) g.attributes.normal.setXYZ(i, 0, 1, 0); // reflets d'un plan d'eau calme
+  const m = new THREE.Mesh(g, M.water); m.position.set(LAKE.x, 0, LAKE.z); m.receiveShadow = !LITE; scene.add(m); return m;
+})();
 circles.push({ x: LAKE.x, z: LAKE.z, r: LAKE.r });
 const millHub = new THREE.Group();
 {
