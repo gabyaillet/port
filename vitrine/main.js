@@ -114,6 +114,7 @@ const M = {
 
 /* ---------- Relief vallonné et chemins pavés ---------- */
 const V = (x, z) => new THREE.Vector3(x, 0, z);
+const SIGN = { x: -23.8, z: -7.7 }; // grand panneau d'accueil, au bord de la place, face au départ
 const PLAZA = { x: 0, z: 0, r: 15 }, VILLAGE = { x: -72, z: 54 }, LAKE = { x: 68, z: -62, r: 24 }, HILL = { x: 70, z: 84 }, FOREST = { x: -60, z: -62 };
 const paths = [
   [V(0, 0), V(-20, 14), V(-46, 30), V(-72, 52)],
@@ -176,7 +177,7 @@ for (const c of paths) scene.add(ribbon(c, 140, PATH_W, M.path));
 
 /* ---------- Collisions ---------- */
 const circles = [], boxes = [];
-const free = (x, z, m = 0) => nearest(x, z) > PATH_W / 2 + m && Math.hypot(x - PLAZA.x, z - PLAZA.z) > PLAZA.r + m && Math.hypot(x - LAKE.x, z - LAKE.z) > LAKE.r + 4 + m && Math.hypot(x - VILLAGE.x, z - VILLAGE.z) > 26 + m && Math.hypot(x - HILL.x, z - HILL.z) > 10 + m && Math.hypot(x, z) < 140;
+const free = (x, z, m = 0) => nearest(x, z) > PATH_W / 2 + m && Math.hypot(x - PLAZA.x, z - PLAZA.z) > PLAZA.r + m && Math.hypot(x - LAKE.x, z - LAKE.z) > LAKE.r + 4 + m && Math.hypot(x - VILLAGE.x, z - VILLAGE.z) > 26 + m && Math.hypot(x - HILL.x, z - HILL.z) > 10 + m && Math.hypot(x - SIGN.x, z - SIGN.z) > 13 + m && Math.hypot(x, z) < 140;
 
 /* ---------- Végétation : arbres touffus, herbe qui ondule, rochers, feuilles ---------- */
 const P = {
@@ -398,6 +399,44 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
     addProp(m, cx + right.x * along, cz + right.z * along, Math.max(0.9, w / 2), 0.8, hgt / 2 + 0.1);
   });
 }).catch(() => {});
+/* ---------- Grand panneau d'accueil : ce qu'est le site, en quelques lignes ---------- */
+{
+  const signWood = std({ color: '#3a2c4f', roughness: 0.75 });
+  const W = 21, Hh = 11.6, lift = 1.8, y = H(SIGN.x, SIGN.z), rot = Math.atan2(START.x - SIGN.x, START.z - SIGN.z);
+  const g = new THREE.Group(); g.position.set(SIGN.x, y, SIGN.z); g.rotation.y = rot; scene.add(g);
+  const cv = document.createElement('canvas'); cv.width = 2048; cv.height = Math.round(2048 * Hh / W);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = LITE ? 4 : renderer.capabilities.getMaxAnisotropy();
+  const draw = () => {
+    const x = cv.getContext('2d'), w = cv.width, h = cv.height, m = 120;
+    const bg = x.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#231e4c'); bg.addColorStop(1, '#17132f'); x.fillStyle = bg; x.fillRect(0, 0, w, h);
+    x.strokeStyle = 'rgba(239,230,214,.35)'; x.lineWidth = 3; x.strokeRect(46, 46, w - 92, h - 92);
+    x.fillStyle = '#ffb066'; x.font = '500 40px "DM Mono", monospace'; x.textBaseline = 'alphabetic';
+    const sp = (t, px, py) => { let cx = px; for (const ch of t) { x.fillText(ch, cx, py); cx += x.measureText(ch).width + 10; } };
+    sp('ATELIER FOLIO — BIENVENUE', m, 190);
+    x.fillStyle = '#efe6d6'; x.font = 'italic 400 150px "Instrument Serif", Georgia, serif'; x.fillText('Des portfolios', m, 370); x.fillText('qui ont du style.', m, 510);
+    x.fillStyle = 'rgba(239,230,214,.82)'; x.font = '400 50px "Inter Tight", Arial, sans-serif';
+    const lines = ['Ici, je vends des maquettes de portfolio animées,', 'prêtes à personnaliser : vous gardez le design,', 'vous changez le contenu.'];
+    lines.forEach((l, i) => x.fillText(l, m, 640 + i * 68));
+    x.fillStyle = 'rgba(239,230,214,.2)'; x.fillRect(m, 860, w - m * 2, 2);
+    const steps = [['01', 'Prenez le volant', isTouch ? 'Posez le doigt : la 2CV le suit.' : 'Flèches ↑ ← ↓ → pour conduire.'], ['02', 'Suivez les lanternes', 'Les chemins mènent aux lieux.'], ['03', 'Entrez au Village', 'Toutes les maquettes y sont.']];
+    const cw = (w - m * 2) / 3;
+    steps.forEach(([n, t, d], i) => { const px = m + i * cw;
+      x.fillStyle = '#ffb066'; x.font = '500 38px "DM Mono", monospace'; x.fillText(n, px, 950);
+      x.fillStyle = '#efe6d6'; x.font = 'italic 400 60px "Instrument Serif", Georgia, serif'; x.fillText(t, px, 1030);
+      x.fillStyle = 'rgba(239,230,214,.7)'; x.font = '400 33px "Inter Tight", Arial, sans-serif'; x.fillText(d, px, 1085); });
+    tex.needsUpdate = true;
+  };
+  draw(); if (document.fonts) document.fonts.ready.then(draw);
+  const face = new THREE.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: '#ffffff', emissiveIntensity: 0.55, roughness: 0.85 });
+  const board = shadowy(new THREE.Mesh(new RoundedBoxGeometry(W + 0.6, Hh + 0.6, 0.35, 2, 0.12), signWood)); board.position.set(0, lift + Hh / 2, 0); g.add(board);
+  const front = new THREE.Mesh(new THREE.PlaneGeometry(W, Hh), face); front.position.set(0, lift + Hh / 2, 0.19); g.add(front);
+  for (const sx of [-1, 1]) { const post = shadowy(new THREE.Mesh(new RoundedBoxGeometry(0.5, lift + Hh + 0.9, 0.5, 2, 0.08), signWood)); post.position.set(sx * (W / 2 - 0.4), (lift + Hh + 0.9) / 2 - 0.3, -0.35); g.add(post); }
+  const roof = shadowy(new THREE.Mesh(new RoundedBoxGeometry(W + 1.6, 0.3, 1.4, 2, 0.1), signWood)); roof.position.set(0, lift + Hh + 0.75, 0.15); g.add(roof);
+  const glow = new THREE.MeshStandardMaterial({ color: '#fff4d6', emissive: '#ffa040', emissiveIntensity: 3 });
+  for (const sx of [-0.3, 0.3]) { const b = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 8), glow); b.position.set(sx * W, lift + Hh + 0.5, 0.6); g.add(b); }
+  if (!LITE) { const l = new THREE.PointLight('#ffb066', 60, 22, 1.5); l.position.set(0, lift + Hh + 0.4, 3.5); g.add(l); }
+  boxes.push({ x: SIGN.x, z: SIGN.z, a: rot, hw: W / 2 + 0.4, hd: 0.6, ch: lift + Hh + 1 });
+}
 // caisses en bois empilées
 { const g = new RoundedBoxGeometry(1.6, 1.6, 1.6, 2, 0.08); const bx = PLAZA.x + VIEW.z * 10 - 1.7, bz = PLAZA.z - VIEW.x * 10;
   for (let r = 0; r < 3; r++) for (let c = 0; c < 3 - r; c++) addProp(shadowy(new THREE.Mesh(g, M.wood)), bx + c * 1.7 + r * 0.85, bz, 1.1, 0.6, 0.8 + r * 1.6); }
