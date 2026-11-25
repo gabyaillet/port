@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Contact — Atelier Folio</title>
-<meta name="description" content="La Forêt : écrivez-moi pour votre portfolio Atelier Folio.">
+<meta name="description" content="La Forêt : écrivez-moi, pour un projet, une question ou une collaboration.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&family=DM+Mono:wght@400;500&display=swap">
@@ -94,14 +94,6 @@ main { position: relative; z-index: 2; padding: 0 var(--gut); }
 .send span { display: block; transition: transform .5s var(--out); }
 .note { margin: 0; color: var(--muted); font-size: .95rem; max-width: 34ch; min-height: 1.4em; }
 
-/* Les étapes */
-.steps { padding-bottom: clamp(5rem, 14vh, 9rem); }
-.steps ol { list-style: none; margin: 2.5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(1.2rem, 2.5vw, 2.4rem); counter-reset: s; }
-.steps li { display: grid; gap: .9rem; align-content: start; }
-.steps li .rule { margin-bottom: .6rem; }
-.steps li b { font: 500 clamp(1.2rem, 1.6vw, 1.45rem)/1.2 var(--f-sans); letter-spacing: -.02em; }
-.steps li p { margin: 0; color: var(--muted); font-size: .98rem; line-height: 1.55; }
-.steps li:nth-child(2) .rule, .steps li:nth-child(2) .rise { transition-delay: .1s; } .steps li:nth-child(3) .rule, .steps li:nth-child(3) .rise { transition-delay: .2s; } .steps li:nth-child(4) .rule, .steps li:nth-child(4) .rise { transition-delay: .3s; }
 
 /* L'adresse, en très grand : les lettres roulent au survol */
 .mail { padding: clamp(4rem, 10vh, 7rem) 0 calc(env(safe-area-inset-bottom, 0px) + 2.5rem); border-top: 1px solid var(--line); }
@@ -117,10 +109,9 @@ main { position: relative; z-index: 2; padding: 0 var(--gut); }
 
 @media (max-width: 860px) {
   .letter { grid-template-columns: 1fr; } .letter aside { position: static; grid-auto-flow: column; justify-content: space-between; align-items: end; }
-  .steps ol { grid-template-columns: 1fr 1fr; row-gap: 2.4rem; }
   .hero .foot { grid-template-columns: 1fr; } .scroll { display: none; }
 }
-@media (max-width: 520px) { .steps ol { grid-template-columns: 1fr; } .clock span:last-child { display: none; } }
+@media (max-width: 520px) { .clock span:last-child { display: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01s !important; transition-delay: 0s !important; animation: none !important; } }
 </style>
 </head>
@@ -136,10 +127,10 @@ main { position: relative; z-index: 2; padding: 0 var(--gut); }
 <main>
   <section class="hero wrap" id="hero">
     <div class="meta"><span class="label rise">La Forêt — Contact</span><span class="label rise">Atelier Folio</span></div>
-    <h1><span class="ln"><span>Parlons de</span></span><span class="ln"><span>votre <em>portfolio.</em></span></span></h1>
+    <h1><span class="ln"><span>Parlons de</span></span><span class="ln"><span>votre <em>projet.</em></span></span></h1>
     <div class="rule" style="margin-top:clamp(2rem,5vh,3.5rem)"></div>
     <div class="foot">
-      <p class="rise">Une maquette vous plaît, ou vous voulez l’adapter à votre univers ? Complétez la lettre ci-dessous : je vous réponds avec une proposition claire.</p>
+      <p class="rise">Un projet, une question, une envie de travailler ensemble ? Complétez la lettre ci-dessous : je vous réponds rapidement.</p>
       <span class="label scroll rise"><b></b>La lettre</span>
     </div>
   </section>
@@ -150,10 +141,10 @@ main { position: relative; z-index: 2; padding: 0 var(--gut); }
       <p class="prose rise">
         <span class="w">Bonjour,</span> je m’appelle
         <label class="blank"><span class="sizer"></span><input id="nom" placeholder="votre nom" autocomplete="name" aria-label="Votre nom"><u></u></label>
-        et la maquette
-        <label class="blank sel filled"><select id="maquette" aria-label="La maquette qui vous plaît"><option>Altitude</option><option>Noir Studio</option><option>Papier</option><option>que vous me conseillerez</option></select><u></u></label>
-        m’a tapé dans l’œil. Mon projet, c’est
-        <label class="blank"><span class="sizer"></span><input id="msg" placeholder="un portfolio pour mes photos" aria-label="Votre projet en quelques mots"><u></u></label>.
+        et je vous écris au sujet
+        <label class="blank sel filled"><select id="sujet" aria-label="Le sujet de votre message"><option>d’un projet</option><option>d’un stage</option><option>d’une collaboration</option><option>d’autre chose</option></select><u></u></label>.
+        En deux mots :
+        <label class="blank"><span class="sizer"></span><input id="msg" placeholder="ce que vous avez en tête" aria-label="Votre projet en quelques mots"><u></u></label>.
         Vous pouvez me répondre à
         <label class="blank"><span class="sizer"></span><input id="email" type="email" placeholder="votre e-mail" autocomplete="email" aria-label="Votre e-mail"><u></u></label>.
       </p>
@@ -162,16 +153,6 @@ main { position: relative; z-index: 2; padding: 0 var(--gut); }
         <p class="note" id="note" aria-live="polite">Le bouton ouvre votre messagerie avec la lettre prête à partir.</p>
       </div>
     </form>
-  </section>
-
-  <section class="steps wrap" data-io>
-    <span class="label rise">Comment ça se passe</span>
-    <ol>
-      <li><div class="rule"></div><span class="label rise">01</span><b class="rise">Vous m’écrivez</b><p class="rise">Quelques lignes sur vous et sur ce que vous voulez montrer.</p></li>
-      <li><div class="rule"></div><span class="label rise">02</span><b class="rise">On choisit</b><p class="rise">La maquette qui vous ressemble, ses couleurs, ses polices.</p></li>
-      <li><div class="rule"></div><span class="label rise">03</span><b class="rise">Je l’adapte</b><p class="rise">Vos textes, vos images, vos projets, à votre nom.</p></li>
-      <li><div class="rule"></div><span class="label rise">04</span><b class="rise">En ligne</b><p class="rise">Votre portfolio est publié, prêt à être partagé.</p></li>
-    </ol>
   </section>
 
   <section class="mail wrap" data-io>
@@ -221,8 +202,8 @@ main { position: relative; z-index: 2; padding: 0 var(--gut); }
     e.preventDefault();
     const v = id => document.getElementById(id).value.trim();
     if (!v('nom') || !v('email') || !v('msg')) { note.textContent = 'Il manque votre nom, votre projet ou votre e-mail dans la lettre.'; return; }
-    const body = `Bonjour,\n\nje m'appelle ${v('nom')} et la maquette ${v('maquette')} m'a tapé dans l'œil. Mon projet, c'est ${v('msg')}.\nVous pouvez me répondre à ${v('email')}.\n\n${v('nom')}`;
-    location.href = `mailto:${MAIL}?subject=${encodeURIComponent('Portfolio — ' + v('nom'))}&body=${encodeURIComponent(body)}`;
+    const body = `Bonjour,\n\nje m'appelle ${v('nom')} et je vous écris au sujet ${v('sujet')}. En deux mots : ${v('msg')}.\nVous pouvez me répondre à ${v('email')}.\n\n${v('nom')}`;
+    location.href = `mailto:${MAIL}?subject=${encodeURIComponent('Contact — ' + v('nom'))}&body=${encodeURIComponent(body)}`;
     note.textContent = 'Votre messagerie s’ouvre, la lettre est prête à partir.';
   });
 

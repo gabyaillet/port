@@ -384,6 +384,7 @@ Object.values(P).forEach(p => p.build());
 /* ---------- Départ, lettres « BIENVENUE » à bousculer ---------- */
 const VIEW = new THREE.Vector3(1, 0, 1).normalize();            // côté où se tient la caméra
 const START = { x: PLAZA.x + VIEW.x * 5, z: PLAZA.z + VIEW.z * 5, h: Math.atan2(VIEW.z, -VIEW.x) }; // la voiture s'éloigne de la caméra
+const HOME = { x: START.x, z: START.z }; // départ habituel, fixe : sert à orienter les panneaux quel que soit le point d'arrivée
 const FROM = new URLSearchParams(location.search).get('from'); // on revient d'une page (village, forêt) : on repart sur son chemin, cap vers la place
 const FROM_VILLAGE = FROM === 'village' || FROM === 'forest';
 if (FROM_VILLAGE) { const c = paths[FROM === 'forest' ? 3 : 0], p = c.getPointAt(0.68), tg = c.getTangentAt(0.68); Object.assign(START, { x: p.x, z: p.z, h: Math.atan2(tg.z, -tg.x) }); history.replaceState(null, '', location.pathname); }
@@ -405,7 +406,7 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
 /* ---------- Grand panneau d'accueil : ce qu'est le site, en quelques lignes ---------- */
 {
   const signWood = std({ color: '#3a2c4f', roughness: 0.75 });
-  const W = 17, Hh = 9.4, lift = 1.4, y = H(SIGN.x, SIGN.z), rot = Math.atan2(START.x - SIGN.x, START.z - SIGN.z) + 0.4; // un peu de travers
+  const W = 17, Hh = 9.4, lift = 1.4, y = H(SIGN.x, SIGN.z), rot = Math.atan2(HOME.x - SIGN.x, HOME.z - SIGN.z) + 0.4; // un peu de travers
   const g = new THREE.Group(); g.position.set(SIGN.x, y, SIGN.z); g.rotation.y = rot; scene.add(g);
   const cv = document.createElement('canvas'); cv.width = 2048; cv.height = Math.round(2048 * Hh / W);
   const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = LITE ? 4 : renderer.capabilities.getMaxAnisotropy();
@@ -419,7 +420,7 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
     x.fillStyle = '#efe6d6'; x.font = 'italic 400 300px "Instrument Serif", Georgia, serif';
     x.fillText('Voyagez', w / 2, 520); x.fillText('pour découvrir.', w / 2, 790);
     x.fillStyle = 'rgba(239,230,214,.8)'; x.font = '400 64px "Inter Tight", Arial, sans-serif';
-    x.fillText('Les maquettes vous attendent au Village →', w / 2, 960);
+    x.fillText('Le Moulin mène au portfolio, la Forêt au contact →', w / 2, 960);
     tex.needsUpdate = true;
   };
   draw(); if (document.fonts) document.fonts.ready.then(draw);
@@ -496,10 +497,9 @@ function signpost(P, rotY, rows, poleH = 6.6) {
     ['LE VILLAGE', D(VILLAGE) + ' m', -1, '#dcd2bf', '#1d1a17', true],
     ['LA FORÊT', D(FOREST) + ' m', 1, '#2a2725', '#ece4d3', false],
     ['LE LAC', D(LAKE) + ' m', 1, '#b9a98f', '#1d1a17', true],
-    ['LE MOULIN', D(HILL) + ' m', -1, '#8a3f2b', '#f1e6d4', false],
-    ['LES MAQUETTES', D(VILLAGE) + ' m', 1, '#d4cab6', '#1d1a17', false]
+    ['LE MOULIN', D(HILL) + ' m', -1, '#8a3f2b', '#f1e6d4', false]
   ];
-  signpost(POST, Math.atan2(START.x - POST.x, START.z - POST.z) - 0.25, rows);
+  signpost(POST, Math.atan2(HOME.x - POST.x, HOME.z - POST.z) - 0.25, rows);
 }
 // au bout du chemin du lac : cul-de-sac
 {
@@ -520,7 +520,8 @@ for (let k = 0; k < 6; k++) { const a = k * 1.05, x = HILL.x + Math.cos(a) * 10,
 /* ---------- La 2CV, version nocturne ---------- */
 /* ---------- La 2CV « Charleston » ---------- */
 const car = new THREE.Group(), body = new THREE.Group(), wheels = [];
-car.add(body); scene.add(car);
+const chassis = new THREE.Group(); // porte la caisse ET les roues : la pente les incline ensemble
+car.add(chassis); chassis.add(body); scene.add(car);
 {
   const red = new THREE.MeshPhysicalMaterial({ color: '#2a2246', roughness: 0.4, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.12 });
   const black = new THREE.MeshPhysicalMaterial({ color: '#120f1f', roughness: 0.38, metalness: 0.05, clearcoat: 0.8, clearcoatRoughness: 0.2 });
@@ -600,7 +601,7 @@ car.add(body); scene.add(car);
     const spin = new THREE.Group(); pivot.add(spin);
     spin.add(shadowy(new THREE.Mesh(tg, tire)), shadowy(new THREE.Mesh(sg, tire)), shadowy(new THREE.Mesh(hg, hub)));
     const cap = new THREE.Mesh(cg, chrome); cap.position.z = z > 0 ? 0.19 : -0.19; spin.add(cap);
-    car.add(pivot); wheels.push({ pivot, spin, front });
+    chassis.add(pivot); wheels.push({ pivot, spin, front });
   }
   // ombre douce sous la voiture
   const blob = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 2.4).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({
@@ -742,13 +743,12 @@ const ZONES = [
 ];
 const zoneEl = $('zone'), zoneK = $('zone-k'), zoneT = $('zone-t'); let curZone = null, zoneTimer = 0;
 let ignoreZone = FROM_VILLAGE ? FROM : null, leaving = 0, leaveMode = 'village';
-const LINK = { 'Le Village': 'village', 'La Forêt': 'forest', 'Le Moulin': 'mill' };
-const KICKER = { 'Le Village': 'Les maquettes', 'La Forêt': 'Me contacter', 'Le Moulin': 'Mon portfolio', 'Le Lac': 'Cul-de-sac' };
+const LINK = { 'La Forêt': 'forest', 'Le Moulin': 'mill' };
+const KICKER = { 'Le Village': 'Halte', 'La Forêt': 'Me contacter', 'Le Moulin': 'Mon portfolio', 'Le Lac': 'Cul-de-sac' };
 // trois départs, trois façons de quitter la ville
 function goTo(mode) {
   if (leaving) return; leaving = 0.0001; leaveMode = mode;
   for (const k in keys) keys[k] = false; finger.on = false;
-  if (mode === 'village') { setTimeout(() => $('portal').classList.add('in'), 750); setTimeout(() => { location.href = 'village.html'; }, 1650); }      // gros zoom puis un cercle de couleur
   if (mode === 'forest') { setTimeout(() => $('blinds').classList.add('in'), 700); setTimeout(() => { location.href = 'contact.html'; }, 1750); }       // caméra au ras du sol, puis des stores se ferment
   if (mode === 'mill') { setTimeout(() => $('curtain').classList.add('in'), 900); setTimeout(() => { location.href = '../index.html'; }, 2500); }      // on s'élève dans le ciel, un rideau clair monte
 }
@@ -818,11 +818,16 @@ function tick() {
     if (state.y < gY) { state.y = gY; if (state.vy < -7) bump(); state.vy = 0; state.air = false; }
   }
   car.position.set(state.x, state.y, state.z); car.rotation.set(0, state.heading, 0);
-  const targetRoll = -state.steer * Math.min(1, Math.abs(state.speed) / MAX) * 0.22 * Math.sign(state.speed || 1) + Math.atan2(hL - hR, 2.6);
-  state.roll += (targetRoll - state.roll) * Math.min(1, dt * 5);
-  state.pitch += ((state.air ? -0.12 : throttle * 0.03 + Math.atan2(hF - hB, 4.8)) - state.pitch) * Math.min(1, dt * (state.air ? 1.5 : 5));
+  // pente : châssis entier (caisse + roues) ; virage et accélération : léger balancement de la caisse seule, assez faible pour ne jamais toucher les roues
+  const slopeRoll = Math.atan2(hL - hR, 2.6), slopePitch = state.air ? -0.12 : Math.atan2(hF - hB, 4.8);
+  state.roll += (slopeRoll - state.roll) * Math.min(1, dt * 5);
+  state.pitch += (slopePitch - state.pitch) * Math.min(1, dt * (state.air ? 1.5 : 5));
+  chassis.rotation.set(state.roll, 0, state.pitch);
+  const lean = Math.max(-0.06, Math.min(0.06, -state.steer * Math.min(1, Math.abs(state.speed) / MAX) * 0.2 * Math.sign(state.speed || 1)));
+  const squat = state.air ? 0 : Math.max(-0.025, Math.min(0.025, throttle * 0.025));
+  state.lean = (state.lean || 0) + (lean - (state.lean || 0)) * Math.min(1, dt * 5); state.squat = (state.squat || 0) + (squat - (state.squat || 0)) * Math.min(1, dt * 5);
   state.bounce += dt * (4 + Math.abs(state.speed) * 0.4);
-  body.rotation.set(state.roll, 0, state.pitch); body.position.y = Math.sin(state.bounce) * 0.015 * (0.3 + Math.abs(state.speed) / MAX) + 0.16; // caisse relevée sur les grosses roues
+  body.rotation.set(state.lean, 0, state.squat); body.position.y = Math.sin(state.bounce) * 0.015 * (0.3 + Math.abs(state.speed) / MAX) + 0.16; // caisse relevée sur les grosses roues
   state.wheelSpin -= state.speed * dt / (0.61 * 1.6);
   for (const w of wheels) { w.spin.rotation.z = state.wheelSpin; if (w.front) w.pivot.rotation.y = state.steer * 0.9; }
 
