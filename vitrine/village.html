@@ -136,6 +136,8 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
 }
 
 /* ===== Village ===== */
+:root { --bg: #15122e; --surface: #1d1940; --line: #2b2656; }
+body, #main, .end { background: var(--night); }
 /* Le Village : un logo central, des cartes de sites qui gravitent puis sont aspirées vers lui au défilement, puis la galerie des modèles reliée par trois points. */
 :root {
   --night: #15122e;   /* nuit violette, comme la ville */
@@ -149,7 +151,7 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: #0d0d0d; color: var(--cream); font-family: var(--f-sans); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+html, body { margin: 0; background: var(--night); color: var(--cream); font-family: var(--f-sans); -webkit-font-smoothing: antialiased; overflow-x: clip; }
 a { color: inherit; }
 .label { font: 400 .68rem var(--f-mono); letter-spacing: .2em; text-transform: uppercase; }
 :focus-visible { outline: 1px solid var(--amber); outline-offset: 3px; }
@@ -163,7 +165,7 @@ a { color: inherit; }
 .back:hover { background: var(--cream); color: var(--night); }
 
 /* ---------- Partie 1 : la gravitation ---------- */
-.orbit { position: relative; height: 340vh; height: 340svh; background: radial-gradient(ellipse at 50% 45%, #2a2466 0%, var(--night) 40%, #0d0d0d 100%); }
+.orbit { position: relative; height: 340vh; height: 340svh; background: radial-gradient(ellipse 60% 55% at 50% 45%, #241f5a 0%, var(--night) 100%); }
 .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 .cards { position: absolute; inset: 0; }
 .card { position: absolute; left: 50%; top: 50%; width: clamp(100px, 12vw, 170px); aspect-ratio: 4 / 3; margin: 0; will-change: transform, opacity; }
