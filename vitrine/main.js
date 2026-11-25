@@ -29,7 +29,7 @@ renderer.shadowMap.enabled = !LITE;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
-const FOG = new THREE.Color('#2c2766');
+const FOG = new THREE.Color('#5d57b4'); // ciel de crépuscule, plus clair
 scene.background = FOG;
 scene.fog = new THREE.Fog(FOG, 70, 210);
 const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.5, 400);
@@ -114,8 +114,8 @@ const M = {
 
 /* ---------- Relief vallonné et chemins pavés ---------- */
 const V = (x, z) => new THREE.Vector3(x, 0, z);
-const SIGN = { x: 6.9, z: -24.0 }; // grand panneau d'accueil : devant à droite du départ, un peu de travers
-const POST = { x: -18.4, z: -4.9 };  // poteau indicateur : devant à gauche, une flèche par lieu
+const SIGN = { x: -23.8, z: -7.7 }; // grand panneau d'accueil : devant à gauche du départ, un peu de travers
+const POST = { x: 6.5, z: -17.9 };  // panneau directionnel en planches peintes : devant à droite
 const PLAZA = { x: 0, z: 0, r: 15 }, VILLAGE = { x: -72, z: 54 }, LAKE = { x: 68, z: -62, r: 24 }, HILL = { x: 70, z: 84 }, FOREST = { x: -60, z: -62 };
 const paths = [
   [V(0, 0), V(-20, 14), V(-46, 30), V(-72, 52)],
@@ -404,7 +404,7 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
 /* ---------- Grand panneau d'accueil : ce qu'est le site, en quelques lignes ---------- */
 {
   const signWood = std({ color: '#3a2c4f', roughness: 0.75 });
-  const W = 17, Hh = 9.4, lift = 1.4, y = H(SIGN.x, SIGN.z), rot = Math.atan2(START.x - SIGN.x, START.z - SIGN.z) - 0.4; // un peu de travers
+  const W = 17, Hh = 9.4, lift = 1.4, y = H(SIGN.x, SIGN.z), rot = Math.atan2(START.x - SIGN.x, START.z - SIGN.z) + 0.4; // un peu de travers
   const g = new THREE.Group(); g.position.set(SIGN.x, y, SIGN.z); g.rotation.y = rot; scene.add(g);
   const cv = document.createElement('canvas'); cv.width = 2048; cv.height = Math.round(2048 * Hh / W);
   const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = LITE ? 4 : renderer.capabilities.getMaxAnisotropy();
@@ -439,37 +439,70 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
   if (!LITE) { const l = new THREE.PointLight('#ffb066', 60, 22, 1.5); l.position.set(0, lift + Hh + 0.4, 3.5); g.add(l); }
   boxes.push({ x: SIGN.x, z: SIGN.z, a: rot, hw: W / 2 + 0.4, hd: 0.6, ch: lift + Hh + 1 });
 }
-/* ---------- Poteau indicateur en bois : petites flèches presque du même côté, chacune un peu de biais ---------- */
+/* ---------- Panneau directionnel : planches de récup peintes, flèches à gauche et à droite, lettres au pochoir ---------- */
 {
-  const y = H(POST.x, POST.z), g = new THREE.Group(); g.position.set(POST.x, y, POST.z); scene.add(g);
-  const grain = (w, h, base) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
+  const y = H(POST.x, POST.z), g = new THREE.Group(); g.position.set(POST.x, y, POST.z);
+  g.rotation.y = Math.atan2(START.x - POST.x, START.z - POST.z) - 0.25; scene.add(g);
+  const woodCanvas = (w, h, base) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
     x.fillStyle = base; x.fillRect(0, 0, w, h);
-    for (let k = 0; k < 26; k++) { x.strokeStyle = `rgba(40,22,10,${0.12 + Math.random() * 0.18})`; x.lineWidth = 1 + Math.random() * 2.5; const yy = Math.random() * h; x.beginPath(); x.moveTo(0, yy); x.bezierCurveTo(w * .3, yy + (Math.random() - .5) * 10, w * .7, yy + (Math.random() - .5) * 10, w, yy + (Math.random() - .5) * 6); x.stroke(); }
+    for (let k = 0; k < 40; k++) { x.strokeStyle = `rgba(50,28,12,${0.08 + Math.random() * 0.16})`; x.lineWidth = 1 + Math.random() * 2; const yy = Math.random() * h; x.beginPath(); x.moveTo(0, yy); x.bezierCurveTo(w * .3, yy + (Math.random() - .5) * 8, w * .7, yy + (Math.random() - .5) * 8, w, yy + (Math.random() - .5) * 5); x.stroke(); }
     return { c, x }; };
-  const poleTex = new THREE.CanvasTexture(grain(64, 256, '#7a5236').c); poleTex.colorSpace = THREE.SRGBColorSpace;
-  const poleMat = std({ map: poleTex, roughness: 0.9 });
-  const pole = shadowy(new THREE.Mesh(new RoundedBoxGeometry(0.42, 6.2, 0.42, 2, 0.06), poleMat)); pole.position.y = 3.1; g.add(pole);
-  const tip = shadowy(new THREE.Mesh(new THREE.ConeGeometry(0.34, 0.5, 4).rotateY(Math.PI / 4), poleMat)); tip.position.y = 6.45; g.add(tip);
-  if (!LITE) { const l = new THREE.PointLight('#ffb066', 10, 9, 1.6); l.position.set(1.2, 5.2, 1.8); g.add(l); }
-  const right = new THREE.Vector3(VIEW.z, 0, -VIEW.x), base = Math.atan2(-right.z, right.x); // toutes vers la droite vue du départ
-  const dests = [['Le Village', 0.16, 0.05], ['La Forêt', -0.12, -0.04], ['Le Lac', 0.26, 0.03], ['Le Moulin', -0.05, -0.06]];
-  const L = 2.9, T = 0.52, shape = new THREE.Shape();
-  shape.moveTo(0, -T / 2); shape.lineTo(L - 0.42, -T / 2); shape.lineTo(L, 0); shape.lineTo(L - 0.42, T / 2); shape.lineTo(0, T / 2); shape.closePath();
-  const plankGeo = new THREE.ExtrudeGeometry(shape, { depth: 0.12, bevelEnabled: true, bevelThickness: 0.025, bevelSize: 0.025, bevelSegments: 1 }); plankGeo.translate(0, 0, -0.06);
-  const uvMap = geo => { const pos = geo.attributes.position, uv = geo.attributes.uv; for (let k = 0; k < pos.count; k++) { const u = pos.getX(k) / L; uv.setXY(k, pos.getZ(k) < -0.04 ? 1 - u : u, pos.getY(k) / T + 0.5); } uv.needsUpdate = true; return geo; }; // lisible des deux côtés
-  const sideMat = std({ color: '#5e3d27', roughness: 0.9 });
-  dests.forEach(([name, yaw, roll], i) => {
-    const { c, x } = grain(768, 138, ['#9a6a45', '#8c5e3c', '#a07250', '#93643f'][i]);
+  const pTex = new THREE.CanvasTexture(woodCanvas(64, 512, '#a7713f').c); pTex.colorSpace = THREE.SRGBColorSpace;
+  const poleMat = std({ map: pTex, roughness: 0.9 });
+  const pole = shadowy(new THREE.Mesh(new RoundedBoxGeometry(0.5, 6.6, 0.3, 2, 0.04), poleMat)); pole.position.set(0, 3.3, -0.2); g.add(pole);
+  // [texte, distance, sens (1 = pointe à droite, -1 = à gauche, 0 = écriteau), peinture, encre, police large]
+  const D = (o) => Math.round(Math.hypot(o.x - POST.x, o.z - POST.z) * 2) * 5;
+  const rows = [
+    ['ATELIER FOLIO', '', 0, '#cfc6b4', '#1d1a17', true],
+    ['LE VILLAGE', D(VILLAGE) + ' m', -1, '#dcd2bf', '#1d1a17', true],
+    ['LA FORÊT', D(FOREST) + ' m', 1, '#2a2725', '#ece4d3', false],
+    ['LE LAC', D(LAKE) + ' m', 1, '#b9a98f', '#1d1a17', true],
+    ['LE MOULIN', D(HILL) + ' m', -1, '#8a3f2b', '#f1e6d4', false],
+    ['LES MAQUETTES', D(VILLAGE) + ' m', 1, '#d4cab6', '#1d1a17', false]
+  ];
+  const T = 0.6, sideMat = std({ color: '#6b4a2e', roughness: 0.95 });
+  const fontsReady = document.fonts ? document.fonts.load('400 80px "Stardos Stencil"').catch(() => {}) : Promise.resolve();
+  rows.forEach(([name, dist, dir, paint, ink, bold], i) => {
+    const sign = dir === 0, L = sign ? 2.9 : 3.3 + (i % 3) * 0.15, tip = 0.42;
+    const shape = new THREE.Shape(), hl = L / 2, h2 = (sign ? 0.85 : T) / 2;
+    if (sign) { shape.moveTo(-hl, -h2); shape.lineTo(hl, -h2); shape.lineTo(hl, h2); shape.lineTo(-hl, h2); }
+    else { shape.moveTo(-hl, -h2); shape.lineTo(hl - tip, -h2); shape.lineTo(hl, 0); shape.lineTo(hl - tip, h2); shape.lineTo(-hl, h2); shape.lineTo(-hl + 0.12, 0); } // pointe d'un côté, encoche de l'autre
+    shape.closePath();
+    const geo = new THREE.ExtrudeGeometry(shape, { depth: 0.1, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 1 }); geo.translate(0, 0, -0.05);
+    const pos = geo.attributes.position, uv = geo.attributes.uv;
+    for (let k = 0; k < pos.count; k++) uv.setXY(k, (pos.getX(k) + hl) / L, (pos.getY(k) + h2) / (h2 * 2));
+    if (dir < 0) { geo.rotateZ(Math.PI); for (let k = 0; k < pos.count; k++) uv.setXY(k, 1 - uv.getX(k), 1 - uv.getY(k)); } // pointe à gauche, texte toujours à l'endroit
+    uv.needsUpdate = true;
+    const W2 = 1024, H2 = Math.round(1024 * (h2 * 2) / L), { c, x } = woodCanvas(W2, H2, '#9b6a40');
     const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
-    const write = () => { x.textBaseline = 'middle'; x.font = 'italic 400 84px "Instrument Serif", Georgia, serif';
-      x.fillStyle = 'rgba(30,16,8,.55)'; x.fillText(name, 66, 76); x.fillStyle = '#f3e7d2'; x.fillText(name, 64, 72);
-      x.fillStyle = 'rgba(30,16,8,.6)'; for (const px of [24, 650]) { x.beginPath(); x.arc(px, 69, 6, 0, 7); x.fill(); } tex.needsUpdate = true; };
-    write(); if (document.fonts) document.fonts.ready.then(() => { const f = grain(768, 138, ['#9a6a45', '#8c5e3c', '#a07250', '#93643f'][i]); x.drawImage(f.c, 0, 0); write(); });
-    const mat = new THREE.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: '#ffffff', emissiveIntensity: 0.18, roughness: 0.85 });
-    const plank = shadowy(new THREE.Mesh(uvMap(plankGeo.clone()), [mat, sideMat])); plank.position.x = 0.2; plank.rotation.x = roll * 0.5;
-    const arm = new THREE.Group(); arm.position.y = 5.3 - i * 0.68; arm.rotation.set(0, base + yaw, roll); arm.add(plank); g.add(arm);
+    const paintIt = () => {
+      x.fillStyle = paint; x.fillRect(0, 0, W2, H2);
+      x.globalCompositeOperation = 'destination-out'; // peinture écaillée sur les bords : le bois réapparaît
+      for (let k = 0; k < 140; k++) { const edge = Math.random() < 0.5, ex = Math.random() * W2, ey = edge ? (Math.random() < 0.5 ? Math.random() * 14 : H2 - Math.random() * 14) : Math.random() * H2; x.globalAlpha = 0.5 + Math.random() * 0.5; x.fillRect(ex, ey, 6 + Math.random() * 30, 2 + Math.random() * 5); }
+      x.globalAlpha = 1; x.globalCompositeOperation = 'destination-over'; const w = woodCanvas(W2, H2, '#9b6a40'); x.drawImage(w.c, 0, 0); x.globalCompositeOperation = 'source-over';
+      for (let k = 0; k < 30; k++) { x.strokeStyle = 'rgba(0,0,0,.06)'; x.lineWidth = 2; const yy = Math.random() * H2; x.beginPath(); x.moveTo(0, yy); x.lineTo(W2, yy + (Math.random() - .5) * 4); x.stroke(); }
+      const fs = sign ? H2 * 0.36 : H2 * (bold ? 0.5 : 0.44);
+      x.fillStyle = ink; x.textBaseline = 'middle';
+      x.font = `400 ${fs}px "Stardos Stencil", "Courier New", monospace`;
+      if (sign) { x.textAlign = 'center'; x.fillText('ATELIER', W2 / 2, H2 * 0.32); x.fillText('FOLIO', W2 / 2, H2 * 0.7); }
+      else {
+        const pad = W2 * 0.07, tipPad = W2 * (tip / L) + W2 * 0.03; // le côté de la pointe est à droite sur la texture si dir > 0
+        const nameRight = (i % 2 === 0); // comme sur les vrais panneaux : nom et distance changent de côté
+        const left = dir > 0 ? pad : tipPad, right = dir > 0 ? W2 - tipPad : W2 - pad;
+        x.textAlign = nameRight ? 'right' : 'left'; x.fillText(name, nameRight ? right : left, H2 * 0.54);
+        x.font = `400 ${fs * 0.72}px "Stardos Stencil", "Courier New", monospace`; x.textAlign = nameRight ? 'left' : 'right'; x.fillText(dist, nameRight ? left : right, H2 * 0.54);
+      }
+      tex.needsUpdate = true;
+    };
+    paintIt(); fontsReady.then(paintIt);
+    const mat = new THREE.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: '#ffffff', emissiveIntensity: 0.05, roughness: 0.9 });
+    const m = shadowy(new THREE.Mesh(geo, [mat, sideMat]));
+    m.position.set((i % 2 ? 0.12 : -0.1) + (sign ? 0 : dir * 0.25), 6.0 - i * 0.74 - (sign ? 0 : 0.12), 0.02 * (i % 2));
+    m.rotation.set(0, (i % 3 - 1) * 0.05, (i % 2 ? 1 : -1) * (0.02 + (i % 3) * 0.012));
+    g.add(m);
   });
-  circles.push({ x: POST.x, z: POST.z, r: 0.4 });
+  if (!LITE) { const l = new THREE.PointLight('#ffcf9a', 6, 9, 1.6); l.position.set(0, 4.6, 2.6); g.add(l); }
+  circles.push({ x: POST.x, z: POST.z, r: 0.5 });
 }
 // caisses en bois empilées
 { const g = new RoundedBoxGeometry(1.6, 1.6, 1.6, 2, 0.08); const bx = PLAZA.x + VIEW.z * 10 - 1.7, bz = PLAZA.z - VIEW.x * 10;
