@@ -12,17 +12,18 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isTouch = matchMedia('(hover: none) and (pointer: coarse)').matches;
+const LITE = isTouch || innerWidth < 760; // téléphones : mode léger pour rester fluide
 const $ = id => document.getElementById(id);
 
 /* ---------- Rendu ---------- */
 const canvas = $('world');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio || 1, isTouch ? 1.5 : 2));
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: !LITE, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, LITE ? 1 : 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled = !LITE;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
@@ -58,7 +59,7 @@ const pick = a => a[Math.floor(rnd() * a.length)];
 function canvasTex(size, draw, rx = 1, ry = 1) {
   const c = document.createElement('canvas'); c.width = c.height = size; const g = c.getContext('2d'); draw(g, size);
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry);
-  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t;
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = LITE ? 2 : renderer.capabilities.getMaxAnisotropy(); return t;
 }
 const speckle = (g, s, n, a, light = false) => { for (let i = 0; i < n; i++) { g.fillStyle = `rgba(${light ? '255,255,255' : '0,0,0'},${Math.random() * a})`; const r = Math.random() * 2 + 0.5; g.fillRect(Math.random() * s, Math.random() * s, r, r); } };
 const TEX = {
@@ -343,7 +344,7 @@ for (const x of LINES) for (const z of LINES) if (rnd() < 0.5) {
   }
 }
 const fountain = (() => {
-  const n = 160, m = new THREE.InstancedMesh(new THREE.SphereGeometry(0.08, 6, 6), M.water, n), data = [];
+  const n = LITE ? 60 : 160, m = new THREE.InstancedMesh(new THREE.SphereGeometry(0.08, 6, 6), M.water, n), data = [];
   for (let i = 0; i < n; i++) data.push({ t: Math.random(), a: Math.random() * Math.PI * 2, s: 0.7 + Math.random() * 0.6, up: Math.random() < 0.4 });
   scene.add(m); return { m, data };
 })();
@@ -491,7 +492,7 @@ function collide() {
 
 /* Poussière */
 const dust = (() => {
-  const n = 80, m = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.5, 1), new THREE.MeshStandardMaterial({ color: '#f1e5d0', roughness: 1, transparent: true, opacity: 0.7 }), n);
+  const n = LITE ? 30 : 80, m = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.5, 1), new THREE.MeshStandardMaterial({ color: '#f1e5d0', roughness: 1, transparent: true, opacity: 0.7 }), n);
   const items = [...Array(n)].map(() => ({ life: 1, p: new THREE.Vector3(), v: new THREE.Vector3(), s: 1 }));
   scene.add(m); return { m, items, i: 0 };
 })();
@@ -502,7 +503,7 @@ const signboard = new THREE.Group(); scene.add(signboard);
 {
   const W = 11, H = 6.4, sx = 43, sz = -10, ry = -1.15, POST = 5.6;
   const wood = std({ color: '#3a302a', roughness: 0.7 });
-  const board = document.createElement('canvas'); board.width = 2200; board.height = Math.round(2200 * H / W);
+  const board = document.createElement('canvas'); board.width = LITE ? 1400 : 2200; board.height = Math.round(2200 * H / W);
   const tex = new THREE.CanvasTexture(board); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
   const draw = () => {
     const g = board.getContext('2d'), w = board.width, h = board.height, F = '"Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif', MONO = '"DM Mono", ui-monospace, monospace';
@@ -609,6 +610,8 @@ function updateZone() {
   if (z) zoneTimer = setTimeout(() => { zoneK.textContent = z.k; zoneT.textContent = z.t; zoneEl.classList.remove('off'); void zoneEl.offsetWidth; zoneEl.classList.add('on'); }, 350);
 }
 
+canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); const d = document.createElement('div'); d.className = 'glerr'; d.textContent = 'La 3D a été interrompue par le téléphone. Rechargez la page.'; document.body.appendChild(d); });
+
 /* ---------- Boucle principale ---------- */
 const clock = new THREE.Clock(), fwd = new THREE.Vector3(), tmp = new THREE.Vector3(), Om = new THREE.Object3D();
 function tick() {
@@ -705,7 +708,7 @@ function tick() {
   updateZone();
   kmh.textContent = Math.round(Math.abs(state.speed) * 3.2);
   grade.uniforms.time.value = (grade.uniforms.time.value + 1) % 1000;
-  composer.render();
+  if (LITE) renderer.render(scene, camera); else composer.render();
   requestAnimationFrame(tick);
 }
 requestAnimationFrame(tick);
