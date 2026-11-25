@@ -114,7 +114,8 @@ const M = {
 
 /* ---------- Relief vallonné et chemins pavés ---------- */
 const V = (x, z) => new THREE.Vector3(x, 0, z);
-const SIGN = { x: -23.8, z: -7.7 }; // grand panneau d'accueil, au bord de la place, face au départ
+const SIGN = { x: 6.9, z: -24.0 }; // grand panneau d'accueil : devant à droite du départ, un peu de travers
+const POST = { x: -18.4, z: -4.9 };  // poteau indicateur : devant à gauche, une flèche par lieu
 const PLAZA = { x: 0, z: 0, r: 15 }, VILLAGE = { x: -72, z: 54 }, LAKE = { x: 68, z: -62, r: 24 }, HILL = { x: 70, z: 84 }, FOREST = { x: -60, z: -62 };
 const paths = [
   [V(0, 0), V(-20, 14), V(-46, 30), V(-72, 52)],
@@ -177,7 +178,7 @@ for (const c of paths) scene.add(ribbon(c, 140, PATH_W, M.path));
 
 /* ---------- Collisions ---------- */
 const circles = [], boxes = [];
-const free = (x, z, m = 0) => nearest(x, z) > PATH_W / 2 + m && Math.hypot(x - PLAZA.x, z - PLAZA.z) > PLAZA.r + m && Math.hypot(x - LAKE.x, z - LAKE.z) > LAKE.r + 4 + m && Math.hypot(x - VILLAGE.x, z - VILLAGE.z) > 26 + m && Math.hypot(x - HILL.x, z - HILL.z) > 10 + m && Math.hypot(x - SIGN.x, z - SIGN.z) > 13 + m && Math.hypot(x, z) < 140;
+const free = (x, z, m = 0) => nearest(x, z) > PATH_W / 2 + m && Math.hypot(x - PLAZA.x, z - PLAZA.z) > PLAZA.r + m && Math.hypot(x - LAKE.x, z - LAKE.z) > LAKE.r + 4 + m && Math.hypot(x - VILLAGE.x, z - VILLAGE.z) > 26 + m && Math.hypot(x - HILL.x, z - HILL.z) > 10 + m && Math.hypot(x - SIGN.x, z - SIGN.z) > 13 + m && Math.hypot(x - POST.x, z - POST.z) > 4 + m && Math.hypot(x, z) < 140;
 
 /* ---------- Végétation : arbres touffus, herbe qui ondule, rochers, feuilles ---------- */
 const P = {
@@ -268,6 +269,7 @@ const grassUniforms = { uTime: { value: 0 } };
 const lampLights = [];
 function lantern(x, z, light = false) {
   if (nearest(x, z) < PATH_W / 2 + 1.2 || Math.hypot(x - PLAZA.x, z - PLAZA.z) < PLAZA.r + 0.8) return; // pas sur la route
+  if (Math.hypot(x - SIGN.x, z - SIGN.z) < 13 || Math.hypot(x - POST.x, z - POST.z) < 5) return; // rien devant les panneaux
   const y = H(x, z);
   P.post.add(mtx(x, y + 1.8, z, 0, 0, 0, 1, 3.6, 1)); P.post.add(mtx(x, y + 0.2, z, 0, 0, 0, 2.6, 0.4, 2.6));
   P.lampHead.add(mtx(x, y + 4, z)); P.lampCap.add(mtx(x, y + 4.55, z));
@@ -402,7 +404,7 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
 /* ---------- Grand panneau d'accueil : ce qu'est le site, en quelques lignes ---------- */
 {
   const signWood = std({ color: '#3a2c4f', roughness: 0.75 });
-  const W = 21, Hh = 11.6, lift = 1.8, y = H(SIGN.x, SIGN.z), rot = Math.atan2(START.x - SIGN.x, START.z - SIGN.z);
+  const W = 17, Hh = 9.4, lift = 1.4, y = H(SIGN.x, SIGN.z), rot = Math.atan2(START.x - SIGN.x, START.z - SIGN.z) - 0.4; // un peu de travers
   const g = new THREE.Group(); g.position.set(SIGN.x, y, SIGN.z); g.rotation.y = rot; scene.add(g);
   const cv = document.createElement('canvas'); cv.width = 2048; cv.height = Math.round(2048 * Hh / W);
   const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = LITE ? 4 : renderer.capabilities.getMaxAnisotropy();
@@ -436,6 +438,38 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
   for (const sx of [-0.3, 0.3]) { const b = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 8), glow); b.position.set(sx * W, lift + Hh + 0.5, 0.6); g.add(b); }
   if (!LITE) { const l = new THREE.PointLight('#ffb066', 60, 22, 1.5); l.position.set(0, lift + Hh + 0.4, 3.5); g.add(l); }
   boxes.push({ x: SIGN.x, z: SIGN.z, a: rot, hw: W / 2 + 0.4, hd: 0.6, ch: lift + Hh + 1 });
+}
+/* ---------- Poteau indicateur en bois : petites flèches presque du même côté, chacune un peu de biais ---------- */
+{
+  const y = H(POST.x, POST.z), g = new THREE.Group(); g.position.set(POST.x, y, POST.z); scene.add(g);
+  const grain = (w, h, base) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
+    x.fillStyle = base; x.fillRect(0, 0, w, h);
+    for (let k = 0; k < 26; k++) { x.strokeStyle = `rgba(40,22,10,${0.12 + Math.random() * 0.18})`; x.lineWidth = 1 + Math.random() * 2.5; const yy = Math.random() * h; x.beginPath(); x.moveTo(0, yy); x.bezierCurveTo(w * .3, yy + (Math.random() - .5) * 10, w * .7, yy + (Math.random() - .5) * 10, w, yy + (Math.random() - .5) * 6); x.stroke(); }
+    return { c, x }; };
+  const poleTex = new THREE.CanvasTexture(grain(64, 256, '#7a5236').c); poleTex.colorSpace = THREE.SRGBColorSpace;
+  const poleMat = std({ map: poleTex, roughness: 0.9 });
+  const pole = shadowy(new THREE.Mesh(new RoundedBoxGeometry(0.42, 6.2, 0.42, 2, 0.06), poleMat)); pole.position.y = 3.1; g.add(pole);
+  const tip = shadowy(new THREE.Mesh(new THREE.ConeGeometry(0.34, 0.5, 4).rotateY(Math.PI / 4), poleMat)); tip.position.y = 6.45; g.add(tip);
+  if (!LITE) { const l = new THREE.PointLight('#ffb066', 10, 9, 1.6); l.position.set(1.2, 5.2, 1.8); g.add(l); }
+  const right = new THREE.Vector3(VIEW.z, 0, -VIEW.x), base = Math.atan2(-right.z, right.x); // toutes vers la droite vue du départ
+  const dests = [['Le Village', 0.16, 0.05], ['La Forêt', -0.12, -0.04], ['Le Lac', 0.26, 0.03], ['Le Moulin', -0.05, -0.06]];
+  const L = 2.9, T = 0.52, shape = new THREE.Shape();
+  shape.moveTo(0, -T / 2); shape.lineTo(L - 0.42, -T / 2); shape.lineTo(L, 0); shape.lineTo(L - 0.42, T / 2); shape.lineTo(0, T / 2); shape.closePath();
+  const plankGeo = new THREE.ExtrudeGeometry(shape, { depth: 0.12, bevelEnabled: true, bevelThickness: 0.025, bevelSize: 0.025, bevelSegments: 1 }); plankGeo.translate(0, 0, -0.06);
+  const uvMap = geo => { const pos = geo.attributes.position, uv = geo.attributes.uv; for (let k = 0; k < pos.count; k++) { const u = pos.getX(k) / L; uv.setXY(k, pos.getZ(k) < -0.04 ? 1 - u : u, pos.getY(k) / T + 0.5); } uv.needsUpdate = true; return geo; }; // lisible des deux côtés
+  const sideMat = std({ color: '#5e3d27', roughness: 0.9 });
+  dests.forEach(([name, yaw, roll], i) => {
+    const { c, x } = grain(768, 138, ['#9a6a45', '#8c5e3c', '#a07250', '#93643f'][i]);
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+    const write = () => { x.textBaseline = 'middle'; x.font = 'italic 400 84px "Instrument Serif", Georgia, serif';
+      x.fillStyle = 'rgba(30,16,8,.55)'; x.fillText(name, 66, 76); x.fillStyle = '#f3e7d2'; x.fillText(name, 64, 72);
+      x.fillStyle = 'rgba(30,16,8,.6)'; for (const px of [24, 650]) { x.beginPath(); x.arc(px, 69, 6, 0, 7); x.fill(); } tex.needsUpdate = true; };
+    write(); if (document.fonts) document.fonts.ready.then(() => { const f = grain(768, 138, ['#9a6a45', '#8c5e3c', '#a07250', '#93643f'][i]); x.drawImage(f.c, 0, 0); write(); });
+    const mat = new THREE.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: '#ffffff', emissiveIntensity: 0.18, roughness: 0.85 });
+    const plank = shadowy(new THREE.Mesh(uvMap(plankGeo.clone()), [mat, sideMat])); plank.position.x = 0.2; plank.rotation.x = roll * 0.5;
+    const arm = new THREE.Group(); arm.position.y = 5.3 - i * 0.68; arm.rotation.set(0, base + yaw, roll); arm.add(plank); g.add(arm);
+  });
+  circles.push({ x: POST.x, z: POST.z, r: 0.4 });
 }
 // caisses en bois empilées
 { const g = new RoundedBoxGeometry(1.6, 1.6, 1.6, 2, 0.08); const bx = PLAZA.x + VIEW.z * 10 - 1.7, bz = PLAZA.z - VIEW.x * 10;
