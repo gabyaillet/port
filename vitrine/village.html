@@ -170,10 +170,9 @@ a { color: inherit; }
 .cards { position: absolute; inset: 0; z-index: 3; perspective: 900px; perspective-origin: 50% 42%; transform-style: preserve-3d; }
 .card { position: absolute; left: 50%; top: 42%; width: clamp(118px, 17vw, 240px); aspect-ratio: 16 / 10; margin: 0; will-change: transform, opacity; opacity: 0; }
 .card .site { width: 100%; height: 100%; border-radius: 8px; overflow: hidden; box-shadow: 0 40px 70px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.07); }
-.big { position: absolute; left: 50%; top: 42%; width: min(78vw, 62vh, 640px); aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 1; pointer-events: none; will-change: transform; }
-.big svg { width: 100%; height: 100%; overflow: visible; }
-.big .o { fill: none; stroke: rgba(255,255,255,.22); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.big .f { opacity: 0; }
+.ring { position: absolute; left: 50%; top: 42%; width: min(70vw, 52vh, 520px); aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 1; pointer-events: none; will-change: transform; }
+.ring svg { width: 100%; height: 100%; overflow: visible; }
+.ring circle { fill: none; stroke: #fff; stroke-width: 1.2; vector-effect: non-scaling-stroke; opacity: .55; }
 .intro { position: absolute; left: 50%; top: 66%; transform: translate(-50%, 0); z-index: 20; width: min(92vw, 34rem); text-align: center; pointer-events: none; will-change: transform; }
 .intro h1 { margin: 0; font: 400 clamp(3.2rem, 9vw, 6.4rem)/.95 var(--f-serif); letter-spacing: -.01em; color: #fff; }
 .intro p { margin: 1rem auto 0; max-width: 30ch; font-size: clamp(.92rem, 1.3vw, 1.05rem); line-height: 1.5; color: rgba(239,230,214,.72); }
@@ -189,19 +188,23 @@ a { color: inherit; }
 
 /* Mini sites (aperçus) */
 .media .site { width: 100%; height: 100%; }
-.site { display: grid; grid-template-rows: auto 1fr; font-family: var(--f-sans); }
-.site .bar { display: flex; align-items: center; gap: 4px; padding: 6px 8px; background: rgba(0,0,0,.18); }
-.site .bar i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.45); }
-.site .bar span { margin-left: 6px; font: 400 7px var(--f-mono); opacity: .7; }
-.site .body { position: relative; padding: 9% 8%; overflow: hidden; }
-.site .nav { display: flex; justify-content: space-between; font: 500 7px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
-.site .title { margin-top: 10%; font-size: clamp(14px, 2.2vw, 30px); line-height: .95; }
-.media .site .title { font-size: clamp(22px, 4.5vw, 54px); }
-.site .lines { margin-top: 7%; display: grid; gap: 5px; width: 55%; }
-.site .lines i { height: 4px; border-radius: 2px; background: currentColor; opacity: .25; }
-.site .shape { position: absolute; right: 7%; bottom: 9%; width: 36%; aspect-ratio: 1; }
-.site .tiles { position: absolute; left: 8%; right: 8%; bottom: 8%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; height: 22%; }
-.site .tiles i { border-radius: 3px; background: currentColor; opacity: .18; }
+/* Aperçus de maquettes : de vrais petits sites, sobres (tailles en cqw : même rendu en carte ou en grand) */
+.site { container-type: size; display: grid; grid-template-rows: auto 1fr; font-family: var(--f-sans); }
+.site .bar { display: flex; align-items: center; gap: .8cqw; padding: 1.4cqw 2cqw; border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent); }
+.site .bar i { width: 1.1cqw; height: 1.1cqw; border-radius: 50%; background: currentColor; opacity: .25; }
+.site .bar span { margin: 0 auto; font: 400 1.5cqw var(--f-mono); opacity: .45; letter-spacing: .05em; }
+.site .body { position: relative; padding: 4.5cqw 6cqw 5cqw; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; gap: 4cqw; }
+.site .nav { display: flex; justify-content: space-between; align-items: center; font: 400 1.7cqw var(--f-mono); letter-spacing: .14em; text-transform: uppercase; }
+.site .nav b { font-weight: 500; }
+.site .nav span { opacity: .6; }
+.site .hero { display: grid; grid-template-columns: 1.15fr .85fr; gap: 5cqw; align-items: end; min-height: 0; }
+.site .title { font-size: 7.4cqw; line-height: .92; letter-spacing: -.03em; }
+.site .sub { margin-top: 2.6cqw; font-size: 1.6cqw; line-height: 1.5; opacity: .6; max-width: 32ch; }
+.site .cta { display: inline-block; margin-top: 2.6cqw; font: 400 1.4cqw var(--f-mono); letter-spacing: .14em; text-transform: uppercase; padding-bottom: .5cqw; border-bottom: 1px solid currentColor; }
+.site .photo { height: 100%; min-height: 0; border-radius: .8cqw; }
+.site .row { display: grid; grid-template-columns: auto repeat(4, 1fr); gap: 1.6cqw; align-items: end; }
+.site .row span { font: 400 1.4cqw var(--f-mono); letter-spacing: .12em; text-transform: uppercase; opacity: .5; padding-right: 2cqw; }
+.site .row i { aspect-ratio: 4 / 3; border-radius: .5cqw; }
 
 @media (prefers-reduced-motion: reduce) { .portal { transition: none; } .scroll-cue i { animation: none; } }
 </style>
@@ -212,26 +215,7 @@ a { color: inherit; }
 
 <section class="orbit" id="orbit" aria-label="Le Village : les maquettes">
   <div class="stage">
-    <div class="big" id="big" aria-hidden="true">
-      <svg viewBox="0 0 120 120">
-        <defs>
-          <pattern id="hatch" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><rect width="3.2" height="1.7" fill="#fff"/></pattern>
-        </defs>
-        <g class="f" id="fill">
-          <rect x="30" y="22" width="62" height="46" rx="6" transform="rotate(-9 61 45)" fill="var(--night)"/><rect x="30" y="22" width="62" height="46" rx="6" transform="rotate(-9 61 45)" fill="url(#hatch)" opacity=".55"/>
-          <rect x="26" y="34" width="62" height="46" rx="6" transform="rotate(5 57 57)" fill="var(--night)"/><rect x="26" y="34" width="62" height="46" rx="6" transform="rotate(5 57 57)" fill="url(#hatch)" opacity=".8"/>
-          <rect x="22" y="48" width="66" height="50" rx="6" fill="var(--night)"/><rect x="22" y="48" width="66" height="50" rx="6" fill="url(#hatch)"/>
-          <rect x="22" y="48" width="66" height="11" rx="6" fill="#fff"/>
-          <circle cx="72" cy="80" r="8" fill="#fff"/>
-        </g>
-        <g class="o">
-          <rect x="30" y="22" width="62" height="46" rx="6" transform="rotate(-9 61 45)"/>
-          <rect x="26" y="34" width="62" height="46" rx="6" transform="rotate(5 57 57)"/>
-          <rect x="22" y="48" width="66" height="50" rx="6"/>
-          <path d="M22 59 H88 M31 70 H58 M31 77 H50"/><circle cx="72" cy="80" r="8"/>
-        </g>
-      </svg>
-    </div>
+    <div class="ring" id="big" aria-hidden="true"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="58"/></svg></div>
     <div class="cards" id="cards" aria-hidden="true"></div>
     <svg class="strings" id="strings" aria-hidden="true"><path/><path/><path/><circle r="3"/><circle r="3"/><circle r="3"/></svg>
     <div class="intro" id="intro">
@@ -245,7 +229,9 @@ a { color: inherit; }
 <!-- MAQUETTES (même mise en page que projets.html) -->
 <main id="main">
   <svg class="thread" id="thread" aria-hidden="true"><g id="thread-segs"></g><g id="thread-dots"><circle r="3" cx="-20" cy="-20"/><circle r="3" cx="-20" cy="-20"/><circle r="3" cx="-20" cy="-20"/></g></svg>
-  <header class="head wrap" style="min-height:0;padding-block:1.5rem 4rem">
+  <header class="head wrap">
+    <h1 class="reveal-text">Les maquettes</h1>
+    <p class="reveal-text">Des portfolios prêts à personnaliser :<br>vous gardez le design, vous changez le contenu.</p>
     <span class="label count reveal-text" id="thread-start">03 maquettes</span>
   </header>
   <div class="wrap list">
@@ -321,16 +307,16 @@ a { color: inherit; }
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   /* ---------- Thèmes de mini-sites ---------- */
   const THEMES = [
-    { n: 'Altitude', url: 'altitude.folio', bg: '#dededc', fg: '#111', ac: '#111', font: '600 ', title: 'Code en<br>altitude', shape: 'circle', tiles: true },
-    { n: 'Noir Studio', url: 'noir.studio', bg: '#0d0d0d', fg: '#ededeb', ac: '#ededeb', font: 'italic 400 ', serif: true, title: 'Studio<br>Noir', shape: 'square' },
-    { n: 'Papier', url: 'papier.folio', bg: '#ece6da', fg: '#2a2420', ac: '#b8553c', font: 'italic 400 ', serif: true, title: 'Carnet<br>d’images', shape: 'arch', tiles: true },
-    { n: 'Néon', url: 'neon.folio', bg: '#1a1240', fg: '#e9e4ff', ac: '#8d8bff', font: '600 ', title: 'Design<br>en mouvement', shape: 'ring' },
-    { n: 'Forêt', url: 'foret.folio', bg: '#203126', fg: '#e7efe2', ac: '#a7c79a', font: 'italic 400 ', serif: true, title: 'Nature<br>& lumière', shape: 'leaf', tiles: true },
-    { n: 'Brique', url: 'brique.folio', bg: '#7a2e24', fg: '#f6e9dd', ac: '#f6c39a', font: '600 ', title: 'Atelier<br>Brique', shape: 'square' },
-    { n: 'Lagon', url: 'lagon.folio', bg: '#bfe0e6', fg: '#0f2e36', ac: '#1d6b78', font: '600 ', title: 'Bleu<br>lagon', shape: 'circle', tiles: true },
-    { n: 'Moutarde', url: 'moutarde.folio', bg: '#e2b33c', fg: '#1d1a14', ac: '#1d1a14', font: 'italic 400 ', serif: true, title: 'Grain<br>de folie', shape: 'arch' },
-    { n: 'Craie', url: 'craie.folio', bg: '#f7f5f0', fg: '#1a1a1a', ac: '#d0442f', font: '600 ', title: 'Simple<br>& net', shape: 'ring', tiles: true },
-    { n: 'Nuit', url: 'nuit.folio', bg: '#121a33', fg: '#dfe6ff', ac: '#ffb066', font: 'italic 400 ', serif: true, title: 'Après<br>minuit', shape: 'circle' }
+    { n: 'Altitude', ph: ['#c9c9c4','#5d5f63'], url: 'altitude.folio', bg: '#dededc', fg: '#111', ac: '#111', font: '600 ', title: 'Code en<br>altitude', shape: 'circle', tiles: true },
+    { n: 'Noir Studio', ph: ['#3b3a38','#a8a49c'], url: 'noir.studio', bg: '#0d0d0d', fg: '#ededeb', ac: '#ededeb', font: 'italic 400 ', serif: true, title: 'Studio<br>Noir', shape: 'square' },
+    { n: 'Papier', ph: ['#d9c7a8','#8a5a3f'], url: 'papier.folio', bg: '#ece6da', fg: '#2a2420', ac: '#b8553c', font: 'italic 400 ', serif: true, title: 'Carnet<br>d’images', shape: 'arch', tiles: true },
+    { n: 'Néon', ph: ['#3a2b8c','#b68cff'], url: 'neon.folio', bg: '#1a1240', fg: '#e9e4ff', ac: '#8d8bff', font: '600 ', title: 'Design<br>en mouvement', shape: 'ring' },
+    { n: 'Forêt', ph: ['#3f5a43','#c8d6a6'], url: 'foret.folio', bg: '#203126', fg: '#e7efe2', ac: '#a7c79a', font: 'italic 400 ', serif: true, title: 'Nature<br>& lumière', shape: 'leaf', tiles: true },
+    { n: 'Brique', ph: ['#a8473a','#f0c9a0'], url: 'brique.folio', bg: '#7a2e24', fg: '#f6e9dd', ac: '#f6c39a', font: '600 ', title: 'Atelier<br>Brique', shape: 'square' },
+    { n: 'Lagon', ph: ['#7fb8c2','#1d4f5a'], url: 'lagon.folio', bg: '#bfe0e6', fg: '#0f2e36', ac: '#1d6b78', font: '600 ', title: 'Bleu<br>lagon', shape: 'circle', tiles: true },
+    { n: 'Moutarde', ph: ['#b88a24','#f3dc8f'], url: 'moutarde.folio', bg: '#e2b33c', fg: '#1d1a14', ac: '#1d1a14', font: 'italic 400 ', serif: true, title: 'Grain<br>de folie', shape: 'arch' },
+    { n: 'Craie', ph: ['#e4e0d8','#9a948a'], url: 'craie.folio', bg: '#f7f5f0', fg: '#1a1a1a', ac: '#d0442f', font: '600 ', title: 'Simple<br>& net', shape: 'ring', tiles: true },
+    { n: 'Nuit', ph: ['#1e2a55','#ffb066'], url: 'nuit.folio', bg: '#121a33', fg: '#dfe6ff', ac: '#ffb066', font: 'italic 400 ', serif: true, title: 'Après<br>minuit', shape: 'circle' }
   ];
   const shapeSVG = (s, c) => ({
     circle: `<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="${c}"/></svg>`,
@@ -339,17 +325,22 @@ a { color: inherit; }
     ring: `<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="${c}" stroke-width="1.4"/></svg>`,
     leaf: `<svg viewBox="0 0 10 10"><path d="M1 9 C1 3 4 1 9 1 C9 6 7 9 1 9 Z" fill="${c}"/></svg>`
   })[s];
+  const photo = (t, a) => `background: radial-gradient(120% 90% at ${a % 2 ? 20 : 80}% ${a % 3 ? 15 : 85}%, ${t.ph[1]} 0%, transparent 60%), linear-gradient(${140 + a * 35}deg, ${t.ph[0]}, ${t.ph[1]})`;
   const site = t => `<div class="site" style="background:${t.bg};color:${t.fg}">
     <div class="bar"><i></i><i></i><i></i><span>${t.url}</span></div>
-    <div class="body"><div class="nav"><span>${t.n}</span><span>Projets · Contact</span></div>
-      <div class="title" style="font-family:${t.serif ? 'var(--f-serif)' : 'var(--f-sans)'};font-style:${t.serif ? 'italic' : 'normal'};font-weight:${t.serif ? 400 : 600};letter-spacing:-.03em">${t.title}</div>
-      <div class="lines"><i></i><i style="width:80%"></i><i style="width:60%"></i></div>
-      <div class="shape">${shapeSVG(t.shape, t.ac)}</div>
-      ${t.tiles ? '<div class="tiles"><i></i><i></i><i></i></div>' : ''}</div></div>`;
+    <div class="body">
+      <div class="nav"><b>${t.n}</b><span>Travaux · Studio · Contact</span></div>
+      <div class="hero">
+        <div><div class="title" style="font-family:${t.serif ? 'var(--f-serif)' : 'var(--f-sans)'};font-style:${t.serif ? 'italic' : 'normal'};font-weight:${t.serif ? 400 : 500}">${t.title}</div>
+          <div class="sub">Portfolio — sélection de travaux récents, commandes et projets personnels.</div><span class="cta" style="color:${t.ac}">Voir les travaux →</span></div>
+        <div class="photo" style="${photo(t, 0)}"></div>
+      </div>
+      <div class="row"><span>(04) Travaux</span><i style="${photo(t, 1)}"></i><i style="${photo(t, 2)}"></i><i style="${photo(t, 3)}"></i><i style="${photo(t, 4)}"></i></div>
+    </div></div>`;
 
   /* ---------- Partie 1 : sites qui flottent en profondeur, puis se fondent dans le logo ---------- */
   const cardsEl = document.getElementById('cards'), orbit = document.getElementById('orbit'), cue = document.getElementById('cue');
-  const big = document.getElementById('big'), fillG = document.getElementById('fill'), intro = document.getElementById('intro');
+  const big = document.getElementById('big'), ringC = big.querySelector('circle'), intro = document.getElementById('intro');
   const strings = document.getElementById('strings'), sPaths = [...strings.querySelectorAll('path')], sDots = [...strings.querySelectorAll('circle')];
   let s = 4242; const R = () => (s = (s * 16807) % 2147483647) / 2147483647;
   const MOB = innerWidth < 760, N = MOB ? 13 : 20, cards = [];
@@ -375,8 +366,7 @@ a { color: inherit; }
     const jit = reduce ? 0 : Math.sin(Math.PI * clamp(p / 0.62)) * 3; // léger tremblement pendant l'aspiration
     const jx = Math.sin(t * 61) * jit, jy = Math.cos(t * 53) * jit;
     big.style.transform = `translate(-50%, -50%) translate(${jx}px, ${cy + jy}px) scale(${sc})`;
-    fillG.style.opacity = fillP;
-    big.querySelector('.o').style.stroke = `rgba(255,255,255,${0.22 + fillP * 0.6})`;
+    ringC.style.opacity = 0.55 + fillP * 0.45; ringC.style.strokeWidth = 1.2 + fillP * 1.3; // le cercle se précise en avalant les sites
     intro.style.transform = `translate(-50%, ${-fillP * H * 0.1 + cy}px)`;
     cards.forEach((c, i) => {
       let age = (t - c.born) / c.life;
@@ -391,7 +381,7 @@ a { color: inherit; }
       c.el.style.opacity = Math.max(life, q < 1 ? q * 0.9 : 0) * (1 - clamp((q - 0.8) / 0.2));
     });
     // fils : du bas du logo jusqu'en bas de l'écran, ils rejoignent le fil des maquettes
-    const bb = big.getBoundingClientRect(), ox = bb.left + bb.width * 0.47, oy = bb.top + bb.height * 0.8;
+    const bb = big.getBoundingClientRect(), ox = bb.left + bb.width * 0.5, oy = bb.top + bb.height * 0.985;
     strings.setAttribute('viewBox', `0 0 ${W} ${H}`);
     const ends = [-0.06, 0, 0.05];
     sPaths.forEach((pa, k) => {
