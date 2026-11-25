@@ -362,11 +362,15 @@ a { color: inherit; }
     const W = innerWidth, H = innerHeight;
     // 0 → 0.55 : les sites sont aspirés ; 0.35 → 0.7 : le logo se remplit et rétrécit ; 0.65 → 1 : il remonte et lâche ses fils
     const fillP = ease(clamp((p - 0.3) / 0.38)), up = ease(clamp((p - 0.62) / 0.3)), threadP = clamp((p - 0.7) / 0.3);
-    const sc = 1 - fillP * 0.5, cy = -up * H * 0.2;
+    const shr = ease(clamp(p / 0.58)); // le cercle rapetisse au rythme des cartes qui arrivent…
+    const w0 = big.offsetWidth * 0.967 || 1, sc = 1 + (6 / w0 - 1) * shr, cy = -up * H * 0.2; // …jusqu'à la taille des points du fil (6 px)
     const jit = reduce ? 0 : Math.sin(Math.PI * clamp(p / 0.62)) * 3; // léger tremblement pendant l'aspiration
     const jx = Math.sin(t * 61) * jit, jy = Math.cos(t * 53) * jit;
     big.style.transform = `translate(-50%, -50%) translate(${jx}px, ${cy + jy}px) scale(${sc})`;
-    ringC.style.opacity = 0.55 + fillP * 0.45; ringC.style.strokeWidth = 1.2 + fillP * 1.3; // le cercle se précise en avalant les sites
+    const dot = clamp((shr - 0.82) / 0.18); // en fin de course il devient un point plein et lumineux
+    ringC.style.opacity = 0.55 + shr * 0.45; ringC.style.fill = `rgba(237,237,235,${dot})`;
+    big.style.filter = dot ? `drop-shadow(0 0 ${4 * dot}px rgba(255,255,255,.8))` : 'none';
+    big.style.visibility = threadP > 0.015 ? 'hidden' : 'visible'; // les trois points prennent le relais
     intro.style.transform = `translate(-50%, ${-fillP * H * 0.1 + cy}px)`;
     cards.forEach((c, i) => {
       let age = (t - c.born) / c.life;
@@ -381,11 +385,11 @@ a { color: inherit; }
       c.el.style.opacity = Math.max(life, q < 1 ? q * 0.9 : 0) * (1 - clamp((q - 0.8) / 0.2));
     });
     // fils : du bas du logo jusqu'en bas de l'écran, ils rejoignent le fil des maquettes
-    const bb = big.getBoundingClientRect(), ox = bb.left + bb.width * 0.5, oy = bb.top + bb.height * 0.985;
+    const bb = big.getBoundingClientRect(), ox = bb.left + bb.width / 2, oy = bb.top + bb.height / 2; // les fils partent du point
     strings.setAttribute('viewBox', `0 0 ${W} ${H}`);
     const ends = [-0.06, 0, 0.05];
     sPaths.forEach((pa, k) => {
-      const ex = W / 2 + ends[k] * W, ey = H + 40, sx = ox + (k - 1) * bb.width * 0.08;
+      const ex = W / 2 + ends[k] * W, ey = H + 40, sx = ox;
       pa.setAttribute('d', `M${sx},${oy} C${sx + (k - 1) * 60},${oy + (ey - oy) * 0.45} ${ex - (k - 1) * 40},${ey - (ey - oy) * 0.35} ${ex},${ey}`);
       pa.style.strokeDashoffset = L * (1 - threadP);
       const d = sDots[k], len = pa.getTotalLength(); const pt = pa.getPointAtLength(len * threadP);
