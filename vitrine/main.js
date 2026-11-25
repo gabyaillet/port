@@ -266,19 +266,21 @@ const grassUniforms = { uTime: { value: 0 } };
 /* ---------- Lanternes ---------- */
 const lampLights = [];
 function lantern(x, z, light = false) {
+  if (nearest(x, z) < PATH_W / 2 + 1.2 || Math.hypot(x - PLAZA.x, z - PLAZA.z) < PLAZA.r + 0.8) return; // pas sur la route
   const y = H(x, z);
   P.post.add(mtx(x, y + 1.8, z, 0, 0, 0, 1, 3.6, 1)); P.post.add(mtx(x, y + 0.2, z, 0, 0, 0, 2.6, 0.4, 2.6));
   P.lampHead.add(mtx(x, y + 4, z)); P.lampCap.add(mtx(x, y + 4.55, z));
   circles.push({ x, z, r: 0.35 });
   if (light && !LITE) { const l = new THREE.PointLight('#ff9b45', 25, 16, 1.6); l.position.set(x, y + 3.8, z); scene.add(l); lampLights.push(l); }
 }
-for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + 0.5; lantern(PLAZA.x + Math.cos(a) * (PLAZA.r + 1.2), PLAZA.z + Math.sin(a) * (PLAZA.r + 1.2), k % 2 === 0); }
-for (const c of paths) for (let i = 1; i < 6; i++) { const t = i / 6, p = c.getPointAt(t), tg = c.getTangentAt(t), s = i % 2 ? 1 : -1; lantern(p.x - tg.z * s * (PATH_W / 2 + 1), p.z + tg.x * s * (PATH_W / 2 + 1)); }
+for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + 0.5; lantern(PLAZA.x + Math.cos(a) * (PLAZA.r + 1.8), PLAZA.z + Math.sin(a) * (PLAZA.r + 1.8), k % 2 === 0); }
+for (const c of paths) for (let i = 1; i < 6; i++) { const t = i / 6, p = c.getPointAt(t), tg = c.getTangentAt(t), s = i % 2 ? 1 : -1; lantern(p.x - tg.z * s * (PATH_W / 2 + 2), p.z + tg.x * s * (PATH_W / 2 + 2)); }
 // barrières en bois le long des chemins près de la place
 for (const c of paths) for (let i = 0; i < 10; i++) {
   const t = 0.2 + i * 0.018, p = c.getPointAt(t), tg = c.getTangentAt(t), q = c.getPointAt(t + 0.018);
   for (const s of [-1, 1]) {
     const x = p.x - tg.z * s * (PATH_W / 2 + 2.2), z = p.z + tg.x * s * (PATH_W / 2 + 2.2), y = H(x, z);
+    if (nearest(x, z) < PATH_W / 2 + 1.5 || Math.hypot(x - PLAZA.x, z - PLAZA.z) < PLAZA.r + 1) continue;
     P.fence.add(mtx(x, y + 0.6, z, 0, 0, 0, 0.25, 1.2, 0.25));
     if (i < 9) { const x2 = q.x - tg.z * s * (PATH_W / 2 + 2.2), z2 = q.z + tg.x * s * (PATH_W / 2 + 2.2), mx = (x + x2) / 2, mz = (z + z2) / 2, len = Math.hypot(x2 - x, z2 - z); P.fence.add(mtx(mx, H(mx, mz) + 0.9, mz, 0, -Math.atan2(z2 - z, x2 - x), 0, len, 0.18, 0.12)); }
   }
@@ -360,11 +362,12 @@ function rampHeight(x, z) {
 const groundAt = (x, z) => H(x, z) + (ramps.length ? rampHeight(x, z) : 0);
 {
   // tremplins : sur la prairie, autour de la place
-  for (const [x, z, a] of [[26, 14, -0.5], [-24, -8, 2.6], [14, -30, -1.4], [-30, 30, 2.2], [40, 30, 0.9]]) if (free(x, z, 3)) ramp(x, z, a);
+  const rampFree = (x, z, a, L = 9, W = 5) => { const fx = Math.cos(a), fz = -Math.sin(a); for (const u of [0, L / 2, L]) for (const w of [-W / 2, 0, W / 2]) if (!free(x + fx * u - fz * w, z + fz * u + fx * w, 4)) return false; return free(x - fx * 10, z - fz * 10, 1) && free(x + fx * (L + 10), z + fz * (L + 10), 1); }; // dégagé devant et derrière pour l'élan et l'atterrissage
+  let nr = 0; for (let k = 0; k < 400 && nr < 6; k++) { const a = rnd() * 6.28, d = 24 + rnd() * 60, x = Math.cos(a) * d, z = Math.sin(a) * d, ang = rnd() * 6.28; if (rampFree(x, z, ang) && !ramps.some(r => Math.hypot(r.x - x, r.z - z) < 25)) { ramp(x, z, ang); nr++; } }
   // murets de pierre texturés
   const wallMat = std({ map: TEX.bricks, roughness: 0.9 });
   const wall = (x, z, a, len) => { const y = H(x, z); const t = TEX.bricks.clone(); t.needsUpdate = true; t.repeat.set(len / 3, 1); const m = shadowy(new THREE.Mesh(new RoundedBoxGeometry(len, 1.3, 0.9, 2, 0.12), wallMat.clone())); m.material.map = t; m.position.set(x, y + 0.5, z); m.rotation.y = a; scene.add(m); boxes.push({ x, z, a, hw: len / 2, hd: 0.45, ch: 1.4 }); };
-  for (const [x, z, a, l] of [[32, -6, 0.3, 10], [-14, 32, -0.8, 12], [-38, 8, 1.4, 9], [8, 40, 0.1, 11], [44, -48, -0.6, 10], [-50, -30, 0.9, 12], [58, 46, 2.0, 9]]) if (free(x, z, 1)) wall(x, z, a, l);
+  for (const [x, z, a, l] of [[32, -6, 0.3, 10], [-14, 32, -0.8, 12], [-38, 8, 1.4, 9], [8, 40, 0.1, 11], [44, -48, -0.6, 10], [-50, -30, 0.9, 12], [58, 46, 2.0, 9]]) if ([-0.5, 0, 0.5].every(f => free(x + Math.cos(a) * l * f, z - Math.sin(a) * l * f, 2.5))) wall(x, z, a, l);
 }
 Object.values(P).forEach(p => p.build());
 
@@ -390,7 +393,7 @@ fetch('./vendor/fonts/helvetiker_bold.typeface.json').then(r => r.json()).then(j
 { const g = new RoundedBoxGeometry(1.6, 1.6, 1.6, 2, 0.08); const bx = PLAZA.x + VIEW.z * 10 - 1.7, bz = PLAZA.z - VIEW.x * 10;
   for (let r = 0; r < 3; r++) for (let c = 0; c < 3 - r; c++) addProp(shadowy(new THREE.Mesh(g, M.wood)), bx + c * 1.7 + r * 0.85, bz, 1.1, 0.6, 0.8 + r * 1.6); }
 { const bg = new THREE.CylinderGeometry(0.75, 0.75, 1.7, 16), bm = std({ map: TEX.barrel, roughness: 0.7 });
-  for (const [x, z] of [[11, -12], [12.5, -11], [11.6, -13.6], [-16, 20], [-17.4, 21], [30, -18], [-22, -26], [-23.5, -25]]) addProp(shadowy(new THREE.Mesh(bg, bm)), x, z, 1, 0.7, 0.85); }
+  for (const [x, z] of [[11, -12], [12.5, -11], [11.6, -13.6], [-16, 20], [-17.4, 21], [30, -18], [-22, -26], [-23.5, -25]]) if (nearest(x, z) > PATH_W / 2 + 1.5) addProp(shadowy(new THREE.Mesh(bg, bm)), x, z, 1, 0.7, 0.85); }
 for (let k = 0; k < 6; k++) { const a = k * 1.05, x = HILL.x + Math.cos(a) * 10, z = HILL.z + Math.sin(a) * 10; addProp(shadowy(new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 1.6, 14).rotateX(Math.PI / 2), M.hay)), x, z, 1.4, 0.6, 0.9); }
 
 /* ---------- La 2CV, version nocturne ---------- */
