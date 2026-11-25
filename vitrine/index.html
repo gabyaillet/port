@@ -82,11 +82,11 @@ body.grabbing canvas#world { cursor: grabbing; }
 .reset.show { opacity: 1; }
 .hint .mob { display: none; }
 @media (hover: none) and (pointer: coarse) { .reset { display: block; } .hint { display: block !important; left: 50%; transform: translate(-50%, 14px); } .hint.show { transform: translate(-50%, 0); } .hint .desk { display: none; } .hint .mob { display: inline; } }
-.portal { position: fixed; inset: 0; z-index: 90; background: #15122e; clip-path: circle(0% at 50% 55%); transition: clip-path .9s cubic-bezier(.77,0,.18,1); pointer-events: none; }
+.portal { position: fixed; inset: 0; z-index: 90; background: #0d0d0d; clip-path: circle(0% at 50% 55%); transition: clip-path .9s cubic-bezier(.77,0,.18,1); pointer-events: none; }
 .portal.in { clip-path: circle(150% at 50% 55%); }
 /* Vers la forêt (contact) : des stores se ferment, de gauche à droite, en décalé */
 .blinds { position: fixed; inset: 0; z-index: 90; display: grid; grid-template-rows: repeat(8, 1fr); pointer-events: none; }
-.blinds i { background: #15122e; transform: scaleX(0); transform-origin: left center; transition: transform .75s cubic-bezier(.77,0,.18,1); }
+.blinds i { background: #0d0d0d; transform: scaleX(0); transform-origin: left center; transition: transform .75s cubic-bezier(.77,0,.18,1); }
 .blinds i:nth-child(even) { transform-origin: right center; }
 .blinds.in i { transform: scaleX(1.001); }
 .blinds i:nth-child(1) { transition-delay: 0s; } .blinds i:nth-child(2) { transition-delay: .05s; } .blinds i:nth-child(3) { transition-delay: .1s; } .blinds i:nth-child(4) { transition-delay: .15s; }

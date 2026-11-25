@@ -136,12 +136,12 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
 }
 
 /* ===== Village ===== */
-:root { --bg: #15122e; --surface: #1d1940; --line: #2b2656; }
+:root { --bg: #0d0d0d; --surface: #161616; --line: #262626; }
 body, #main, .end { background: var(--night); }
 /* Le Village : un logo central, des cartes de sites qui gravitent puis sont aspirées vers lui au défilement, puis la galerie des modèles reliée par trois points. */
 :root {
-  --night: #15122e;   /* nuit violette, comme la ville */
-  --deep: #0e0c22;
+  --night: #0d0d0d;   /* noir, comme le portfolio */
+  --deep: #080808;
   --cream: #efe6d6;
   --amber: #ffb066;
   --violet: #8d8bff;
@@ -161,11 +161,11 @@ a { color: inherit; }
 .portal.open { clip-path: circle(0% at 50% 55%); }
 
 /* Retour */
-.back { position: fixed; z-index: 50; top: calc(env(safe-area-inset-top, 0px) + 1rem); left: max(16px, env(safe-area-inset-left, 0px)); font: 400 .66rem var(--f-mono); letter-spacing: .16em; text-transform: uppercase; text-decoration: none; padding: .7rem 1.1rem; border-radius: 999px; border: 1px solid rgba(239,230,214,.3); background: rgba(21,18,46,.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: background .3s, color .3s; }
+.back { position: fixed; z-index: 50; top: calc(env(safe-area-inset-top, 0px) + 1rem); left: max(16px, env(safe-area-inset-left, 0px)); font: 400 .66rem var(--f-mono); letter-spacing: .16em; text-transform: uppercase; text-decoration: none; padding: .7rem 1.1rem; border-radius: 999px; border: 1px solid rgba(239,230,214,.3); background: rgba(13,13,13,.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: background .3s, color .3s; }
 .back:hover { background: var(--cream); color: var(--night); }
 
 /* ---------- Partie 1 : un grand logo en contour, des sites qui flottent en profondeur puis s'y fondent ---------- */
-.orbit { position: relative; height: 320vh; height: 320svh; background: radial-gradient(ellipse 70% 55% at 50% 40%, #221d52 0%, var(--night) 100%); }
+.orbit { position: relative; height: 320vh; height: 320svh; background: radial-gradient(ellipse 70% 55% at 50% 40%, #1a1a1a 0%, var(--night) 100%); }
 .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 .cards { position: absolute; inset: 0; z-index: 3; perspective: 900px; perspective-origin: 50% 42%; transform-style: preserve-3d; }
 .card { position: absolute; left: 50%; top: 42%; width: clamp(118px, 17vw, 240px); aspect-ratio: 16 / 10; margin: 0; will-change: transform, opacity; opacity: 0; }
