@@ -349,6 +349,17 @@ const fountain = (() => {
   scene.add(m); return { m, data };
 })();
 
+// bord de la ville : muret de pierre et haie
+{
+  const E = 118, wallG = new RoundedBoxGeometry(1, 1, 1, 2, 0.12);
+  const wall = new Pool(wallG, M.stone), hedge = new Pool(new THREE.IcosahedronGeometry(1, 1), M.leaf);
+  for (const [ax, az, horiz] of [[0, E, true], [0, -E, true], [E, 0, false], [-E, 0, false]]) {
+    wall.add(horiz ? mtx(ax, 0.6, az, 0, 0, 0, E * 2 + 2, 1.2, 1.2) : mtx(ax, 0.6, az, 0, 0, 0, 1.2, 1.2, E * 2 + 2));
+    for (let t = -E; t <= E; t += 2.6) { const x = horiz ? t : ax + Math.sign(ax) * 1.6, z = horiz ? az + Math.sign(az) * 1.6 : t; hedge.add(mtx(x, 1.3, z, rnd(), rnd() * 6, 0, 1.7, 1.5, 1.7), pick(LEAF_COLORS)); }
+  }
+  wall.build(); hedge.build();
+}
+
 // assemblage : murs et toits fusionnés, éléments instanciés
 scene.add(shadowy(new THREE.Mesh(merge(wallParts), M.walls)));
 scene.add(shadowy(new THREE.Mesh(merge(roofParts), M.roofs)));
@@ -466,28 +477,47 @@ const kbd = Object.fromEntries([...document.querySelectorAll('.keys kbd')].map(k
 const setKey = (k, v) => { if (!(k in keys)) return; keys[k] = v; kbd[k] && kbd[k].classList.toggle('on', v); };
 addEventListener('keydown', e => { const k = KMAP[e.code]; if (k) { setKey(k, true); e.preventDefault(); } if (e.code === 'KeyR') resetCar(); });
 addEventListener('keyup', e => { const k = KMAP[e.code]; if (k) setKey(k, false); });
-document.querySelectorAll('.touch button').forEach(b => {
+const resetBtn = document.getElementById('reset'); if (resetBtn) resetBtn.addEventListener('click', () => resetCar());
+document.querySelectorAll('.touch button[data-k]').forEach(b => {
   const on = e => { e.preventDefault(); e.stopPropagation(); b.classList.add('on'); setKey(b.dataset.k, true); };
   const off = () => { b.classList.remove('on'); setKey(b.dataset.k, false); };
   b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off);
 });
 const START = { x: 25, z: 0, h: 0 };
 const state = { x: START.x, z: START.z, heading: START.h, speed: 0, steer: 0, roll: 0, pitch: 0, wheelSpin: 0, bounce: 0 };
-const MAX = 34, REV = -12, ACC = 16, BRAKE = 34, DRAG = 0.35, CAR_R = 3.1;
+const MAX = 34, REV = -12, ACC = 16, BRAKE = 34, DRAG = 0.35, CAR_R = 3.1, EDGE = 118;
 function resetCar() { Object.assign(state, { x: START.x, z: START.z, heading: START.h, speed: 0, steer: 0 }); }
+let stuckT = 0; const stuckP = { x: 0, z: 0 };
 let shake = 0; const bump = () => { shake = Math.min(1, shake + 0.6); };
+function pushOut(nx, nz, depth) {
+  // on sort la voiture de l'obstacle et on retire seulement la part de vitesse qui fonce dedans : elle glisse le long
+  state.x += nx * depth; state.z += nz * depth;
+  const vx = Math.cos(state.heading) * state.speed, vz = -Math.sin(state.heading) * state.speed, vn = vx * nx + vz * nz;
+  if (vn < 0) { const hard = -vn > 12; state.speed *= hard ? -0.3 : 0.55; if (hard || -vn > 4) bump(); }
+}
 function collide() {
+  const r = CAR_R * 0.75;
   for (const c of colliders) {
     if (c.round) {
-      const dx = state.x - (c.x0 + c.x1) / 2, dz = state.z - (c.z0 + c.z1) / 2, d = Math.hypot(dx, dz), min = c.round + CAR_R * 0.8;
-      if (d < min) { state.x += dx / d * (min - d); state.z += dz / d * (min - d); state.speed *= 0.5; bump(); }
+      const cx = (c.x0 + c.x1) / 2, cz = (c.z0 + c.z1) / 2, dx = state.x - cx, dz = state.z - cz, d = Math.hypot(dx, dz) || 1e-3, min = c.round + CAR_R * 0.8;
+      if (d < min) pushOut(dx / d, dz / d, min - d);
       continue;
     }
+    if (state.x < c.x0 - r || state.x > c.x1 + r || state.z < c.z0 - r || state.z > c.z1 + r) continue;
+    const inside = state.x > c.x0 && state.x < c.x1 && state.z > c.z0 && state.z < c.z1;
+    if (inside) { // centre dans la boîte : on sort par le côté le plus proche
+      const opts = [[state.x - c.x0, -1, 0], [c.x1 - state.x, 1, 0], [state.z - c.z0, 0, -1], [c.z1 - state.z, 0, 1]].sort((a, b) => a[0] - b[0])[0];
+      pushOut(opts[1], opts[2], opts[0] + r); continue;
+    }
     const nx = Math.max(c.x0, Math.min(state.x, c.x1)), nz = Math.max(c.z0, Math.min(state.z, c.z1));
-    const dx = state.x - nx, dz = state.z - nz, d = Math.hypot(dx, dz), r = CAR_R * 0.75;
-    if (d < r) { if (d > 1e-4) { state.x += dx / d * (r - d); state.z += dz / d * (r - d); } else state.x += r; state.speed *= -0.25; bump(); }
+    const dx = state.x - nx, dz = state.z - nz, d = Math.hypot(dx, dz);
+    if (d < r) pushOut(dx / d, dz / d, r - d);
   }
-  state.x = Math.max(-WORLD + 3, Math.min(WORLD - 3, state.x)); state.z = Math.max(-WORLD + 3, Math.min(WORLD - 3, state.z));
+  // bord de la ville : la haie fait rebondir
+  const L = EDGE - 2.5;
+  if (state.x > L) pushOut(-1, 0, state.x - L); if (state.x < -L) pushOut(1, 0, -L - state.x);
+  if (state.z > L) pushOut(0, -1, state.z - L); if (state.z < -L) pushOut(0, 1, -L - state.z);
+  if (!Number.isFinite(state.x) || !Number.isFinite(state.z) || !Number.isFinite(state.speed)) resetCar();
 }
 
 /* Poussière */
@@ -610,7 +640,10 @@ function updateZone() {
   if (z) zoneTimer = setTimeout(() => { zoneK.textContent = z.k; zoneT.textContent = z.t; zoneEl.classList.remove('off'); void zoneEl.offsetWidth; zoneEl.classList.add('on'); }, 350);
 }
 
-canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); const d = document.createElement('div'); d.className = 'glerr'; d.textContent = 'La 3D a été interrompue par le téléphone. Rechargez la page.'; document.body.appendChild(d); });
+const showErr = msg => { if (document.querySelector('.glerr')) return; const d = document.createElement('div'); d.className = 'glerr'; d.innerHTML = msg + '<br><button type="button">Recharger</button>'; d.querySelector('button').onclick = () => location.reload(); document.body.appendChild(d); };
+canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); showErr('La 3D a été interrompue par le téléphone (mémoire).'); });
+addEventListener('error', e => showErr('Erreur : ' + (e.message || 'inconnue')));
+addEventListener('unhandledrejection', e => showErr('Erreur : ' + ((e.reason && e.reason.message) || 'inconnue')));
 
 /* ---------- Boucle principale ---------- */
 const clock = new THREE.Clock(), fwd = new THREE.Vector3(), tmp = new THREE.Vector3(), Om = new THREE.Object3D();
@@ -628,11 +661,13 @@ function tick() {
     state.speed = Math.max(REV, Math.min(MAX, state.speed));
     const steerIn = (keys.left ? 1 : 0) - (keys.right ? 1 : 0);
     state.steer += (steerIn * 0.55 - state.steer) * Math.min(1, dt * 7);
-    const grip = Math.min(1, Math.abs(state.speed) / 8);
-    state.heading += state.steer * grip * Math.sign(state.speed) * dt * 2.2 * (1 - Math.abs(state.speed) / MAX * 0.35);
+    const grip = Math.max(Math.min(1, Math.abs(state.speed) / 8), throttle ? 0.45 : 0);
+    state.heading += state.steer * grip * (Math.sign(state.speed) || throttle || 1) * dt * 2.2 * (1 - Math.abs(state.speed) / MAX * 0.35);
     state.x += Math.cos(state.heading) * state.speed * dt; state.z -= Math.sin(state.heading) * state.speed * dt;
     collide();
   }
+  // si la voiture n'avance plus alors qu'on accélère depuis 4 s, on la remet au départ
+  if (intro.done && (keys.up || keys.down)) { stuckT += dt; if (Math.hypot(state.x - stuckP.x, state.z - stuckP.z) > 3) { stuckT = 0; stuckP.x = state.x; stuckP.z = state.z; } if (stuckT > 4) { resetCar(); stuckT = 0; } } else { stuckT = 0; stuckP.x = state.x; stuckP.z = state.z; }
   car.position.set(state.x, 0, state.z); car.rotation.y = state.heading;
   const targetRoll = -state.steer * Math.min(1, Math.abs(state.speed) / MAX) * 0.22 * Math.sign(state.speed || 1);
   state.roll += (targetRoll - state.roll) * Math.min(1, dt * 4);
