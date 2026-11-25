@@ -230,9 +230,15 @@ main { position: relative; z-index: 2; padding: 0 var(--gut); }
   const cv = document.getElementById('woods'), x = cv.getContext('2d');
   let W, H, trunks = [], lx, ly, tx, ty, auto = true;
   const R = (a, b) => a + Math.random() * (b - a);
+  let layer; // les troncs, dessinés une seule fois sur un calque hors écran
   function build() {
     const d = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; x.setTransform(d, 0, 0, d, 0, 0);
     trunks = Array.from({ length: Math.round(W / 22) }, () => ({ x: R(0, W), w: R(.5, 2.2), z: Math.random(), top: R(-.2, .4) * H }));
+    layer = document.createElement('canvas'); layer.width = (W + 40) * d; layer.height = H * d; const lx2 = layer.getContext('2d'); lx2.setTransform(d, 0, 0, d, 0, 0);
+    for (const tr of trunks) {
+      const g = lx2.createLinearGradient(0, tr.top, 0, H); g.addColorStop(0, 'rgba(237,237,235,0)'); g.addColorStop(.3, `rgba(237,237,235,${.1 + tr.z * .22})`); g.addColorStop(1, `rgba(237,237,235,${.05 + tr.z * .1})`);
+      lx2.fillStyle = g; lx2.fillRect(tr.x + 20, tr.top, tr.w, H - tr.top);
+    }
     if (lx === undefined) { lx = tx = W * .7; ly = ty = H * .35; }
   }
   build(); addEventListener('resize', build);
@@ -242,11 +248,7 @@ main { position: relative; z-index: 2; padding: 0 var(--gut); }
     if (auto) { tx = W * (.5 + .3 * Math.sin(t * .23)); ty = H * (.4 + .2 * Math.sin(t * .31 + 1)); } // sur mobile, la lumière se promène seule
     lx += (tx - lx) * .07; ly += (ty - ly) * .07;
     x.clearRect(0, 0, W, H);
-    for (const tr of trunks) {
-      const px = tr.x + (lx - W / 2) * .02 * tr.z;
-      const g = x.createLinearGradient(0, tr.top, 0, H); g.addColorStop(0, 'rgba(237,237,235,0)'); g.addColorStop(.3, `rgba(237,237,235,${.1 + tr.z * .22})`); g.addColorStop(1, `rgba(237,237,235,${.05 + tr.z * .1})`);
-      x.fillStyle = g; x.fillRect(px, tr.top, tr.w, H - tr.top);
-    }
+    x.drawImage(layer, -20 - (lx - W / 2) * .012, 0, W + 40, H); // léger glissement avec la lumière
     // la lumière : seul ce qui est sous elle reste visible
     x.globalCompositeOperation = 'destination-in';
     const r = Math.max(W, H) * .42, m = x.createRadialGradient(lx, ly, 0, lx, ly, r); m.addColorStop(0, 'rgba(0,0,0,1)'); m.addColorStop(.55, 'rgba(0,0,0,.35)'); m.addColorStop(1, 'rgba(0,0,0,0)');

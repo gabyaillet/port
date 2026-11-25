@@ -359,6 +359,7 @@ a { color: inherit; }
   sPaths.forEach(pa => { pa.setAttribute('pathLength', L); pa.style.strokeDasharray = L; });
   function frame(now) {
     const t = now / 1000, r = orbit.getBoundingClientRect(), p = clamp(-r.top / Math.max(1, r.height - innerHeight));
+    if (r.bottom < -50) { requestAnimationFrame(frame); return; } // intro sortie de l'écran : rien à calculer
     const W = innerWidth, H = innerHeight;
     // 0 → 0.55 : les sites sont aspirés ; 0.35 → 0.7 : le logo se remplit et rétrécit ; 0.65 → 1 : il remonte et lâche ses fils
     const fillP = ease(clamp((p - 0.3) / 0.38)), up = ease(clamp((p - 0.62) / 0.3)), threadP = clamp((p - 0.7) / 0.3);
@@ -483,7 +484,9 @@ a { color: inherit; }
 
   /* Animation de particules (projet Go) */
   const gc = document.getElementById('go-canvas'), gctx = setupCanvas(gc); let parts = [];
+  let goVisible = true; new IntersectionObserver(es => { goVisible = es[0].isIntersecting; }).observe(gc); // hors écran : en pause
   function goFrame() {
+    if (!goVisible && !reduce) { requestAnimationFrame(goFrame); return; }
     const w = gc.clientWidth, h = gc.clientHeight;
     for (let i = 0; i < 4; i++) { const a = -Math.PI / 2 + (Math.random() - .5) * 0.9, s = 2.5 + Math.random() * 2.5; parts.push({ x: w / 2, y: h - 16, vx: Math.cos(a) * s, vy: Math.sin(a) * s, l: 0, m: 90 + Math.random() * 70, r: 1.5 + Math.random() * 3 }); }
     gctx.fillStyle = '#111'; gctx.fillRect(0, 0, w, h);

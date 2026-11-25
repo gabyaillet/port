@@ -702,6 +702,14 @@ const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 /* ---------- Rendu ---------- */
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
+// finesse adaptative : si l'appareil peine (< 45 i/s), on baisse un peu la résolution, par paliers, jamais sous 1
+let dprCur = renderer.getPixelRatio(), perfAcc = 0, perfN = 0;
+function adaptDpr(rawDt) {
+  if (dprCur <= 1 || rawDt > 0.25) return;            // onglet caché, à-coup : on ignore
+  perfAcc += rawDt; if (++perfN < 90) return;
+  if (perfAcc / perfN > 1 / 45) { dprCur = Math.max(1, dprCur - 0.25); renderer.setPixelRatio(dprCur); composer.setPixelRatio(dprCur); }
+  perfAcc = 0; perfN = 0;
+}
 if (!LITE) composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.85, 0.5, 0.72));
 composer.addPass(new OutputPass());
 const grade = new ShaderPass({
@@ -761,6 +769,7 @@ addEventListener('error', e => showErr('Erreur : ' + (e.message || 'inconnue')))
 const propBox = new THREE.Box3();
 const clock = new THREE.Clock(), fwd = new THREE.Vector3(), tmp = new THREE.Vector3(), Om = new THREE.Object3D();
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
+let lastKmh = -1;
 function tick() {
   const rawDt = clock.getDelta(), dt = Math.min(rawDt, 1 / 30), t = clock.elapsedTime;
 
@@ -818,8 +827,9 @@ function tick() {
   for (const w of wheels) { w.spin.rotation.z = state.wheelSpin; if (w.front) w.pivot.rotation.y = state.steer * 0.9; }
 
   if (intro.done && Math.abs(state.speed) > 6 && Math.random() < 0.5) for (const side of [-1, 1]) { tmp.set(-fwd.z, 0, fwd.x).multiplyScalar(side * 1.2); puff(state.x - fwd.x * 2.2 + tmp.x, state.y, state.z - fwd.z * 2.2 + tmp.z, -fwd.x * 2, -fwd.z * 2); }
-  dust.items.forEach((d, i) => { if (d.life < 1) { d.life += dt * 1.1; d.p.addScaledVector(d.v, dt); d.v.multiplyScalar(0.96); } const s = d.life < 1 ? d.s * (0.6 + d.life * 1.4) * (1 - d.life) : 0; Om.position.copy(d.p); Om.rotation.set(0, 0, 0); Om.scale.setScalar(s); Om.updateMatrix(); dust.m.setMatrixAt(i, Om.matrix); });
-  dust.m.instanceMatrix.needsUpdate = true;
+  let dustDirty = false;
+  dust.items.forEach((d, i) => { if (d.life >= 1 && d.dead) return; if (d.life < 1) { d.life += dt * 1.1; d.p.addScaledVector(d.v, dt); d.v.multiplyScalar(0.96); d.dead = false; } else d.dead = true; const s = d.life < 1 ? d.s * (0.6 + d.life * 1.4) * (1 - d.life) : 0; Om.position.copy(d.p); Om.rotation.set(0, 0, 0); Om.scale.setScalar(s); Om.updateMatrix(); dust.m.setMatrixAt(i, Om.matrix); dustDirty = true; });
+  if (dustDirty) dust.m.instanceMatrix.needsUpdate = true;
 
   // lettres, caisses, foin : poussés par la voiture, ils basculent et glissent
   for (const c of props) {
@@ -887,8 +897,9 @@ function tick() {
   moon.position.copy(car.position).addScaledVector(MOON_DIR, 80); moon.target.position.copy(car.position);
 
   updateZone();
-  kmh.textContent = Math.round(Math.abs(state.speed) * 3.6);
+  const kv = Math.round(Math.abs(state.speed) * 3.6); if (kv !== lastKmh) { kmh.textContent = kv; lastKmh = kv; }
   grade.uniforms.time.value = (grade.uniforms.time.value + 1) % 1000;
+  if (intro.done) adaptDpr(rawDt);
   if (LITE) renderer.render(scene, camera); else composer.render();
   requestAnimationFrame(tick);
 }
