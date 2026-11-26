@@ -1,10 +1,10 @@
-// Intro du portfolio : une petite boutique dessinée, la caméra entre seule,
+// Intro d'Obtura (marque de web design) : une petite boutique dessinée, la caméra entre seule,
 // fait un tour rapide, passe derrière le comptoir et plonge dans l'écran du PC.
-// Ensuite tout se joue en HTML : la souris clique sur l'onglet du portfolio.
+// Ensuite tout se joue en HTML : la souris clique sur l'onglet « Qui sommes-nous ».
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
-const TARGET = '../index.html';
+const TARGET = './qui-sommes-nous.html';
 const $ = id => document.getElementById(id);
 const canvas = $('shop'), veil = $('veil'), skipBtn = $('skip');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -13,7 +13,7 @@ const LITE = matchMedia('(hover: none) and (pointer: coarse)').matches || Math.m
 let leaving = false;
 function leave() {
   if (leaving) return; leaving = true;
-  try { sessionStorage.setItem('ga-intro-vue', '1'); } catch (e) {}
+  try { sessionStorage.setItem('obtura-intro-vue', '1'); } catch (e) {}
   location.replace(TARGET);
 }
 skipBtn.addEventListener('click', leave);
@@ -129,8 +129,8 @@ function poster(kind) {
     } else {
       g.fillStyle = '#f4f1ea'; g.fillRect(0, 0, w, h);
       g.strokeStyle = '#111'; g.lineWidth = 10; g.beginPath(); g.arc(w / 2, h * .42, 130, 0, 7); g.stroke();
-      g.fillStyle = '#111'; g.font = '500 40px "Inter Tight"'; g.textAlign = 'center'; g.fillText('Gabriel Aillet', w / 2, h * .82);
-      g.font = '400 22px "JetBrains Mono"'; g.fillText('PORTFOLIO · 2026', w / 2, h * .87);
+      g.fillStyle = '#111'; g.font = '500 40px "Inter Tight"'; g.textAlign = 'center'; g.font = '600 46px "Inter Tight"'; g.fillText('OBTURA', w / 2, h * .82);
+      g.font = '400 22px "JetBrains Mono"'; g.fillText('WEB DESIGN · 2026', w / 2, h * .87);
     }
   });
 }
@@ -214,8 +214,7 @@ for (const x of [-4.6, -1.6, 1.6, 4.6]) { // fenêtres d'étage, allumées
 const sign = canvasTex(1024, 128, (g, w, h) => {
   g.fillStyle = '#141416'; g.fillRect(0, 0, w, h);
   g.strokeStyle = '#f3efe6'; g.lineWidth = 7; g.beginPath(); g.arc(70, h / 2, 30, 0, 7); g.stroke();
-  g.fillStyle = '#f3efe6'; g.font = '600 64px "Inter Tight"'; g.textBaseline = 'middle'; g.fillText('GABRIEL AILLET', 130, h / 2 + 3);
-  g.fillStyle = 'rgba(243,239,230,.6)'; g.font = '400 26px "JetBrains Mono"'; g.textAlign = 'right'; g.fillText('PORTFOLIO', w - 40, h / 2 + 2);
+  g.fillStyle = '#f3efe6'; g.font = '600 64px "Inter Tight"'; g.textBaseline = 'middle'; g.letterSpacing = '18px'; g.fillText('OBTURA', 135, h / 2 + 3); g.letterSpacing = '0px';
 });
 box(7.2, 0.62, 0.12, mat.black, 0, 3.42, 0.32, { parent: facade, lines: lineDark });
 plane(7, 0.58, new THREE.MeshBasicMaterial({ map: sign }), 0, 3.73, 0.385, 0, facade);
@@ -389,7 +388,7 @@ function drawScreen() {
   g.fillStyle = '#3a3a3f'; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(x + 0.45 * u, th / 2, 0.45 * u, 0, 7); g.fill(); x += 0.9 * u + 0.55 * u; }
   x += 1 * u - 0.55 * u + 0.4 * u;
   const tabH = th * 0.78;
-  [['Nouvel onglet', true], ['Gabriel Aillet — Portfolio', false]].forEach(([t, on], i) => {
+  [['Nouvel onglet', true], ['Qui sommes-nous', false]].forEach(([t, on], i) => {
     if (on) { g.fillStyle = '#2b2b30'; rr(g, x, th - tabH, 19 * u, tabH + 2, 0.8 * u, true); g.fill(); }
     const fy = th - tabH / 2;
     if (i === 0) { g.fillStyle = '#4a4a52'; rr(g, x + 1.1 * u, fy - 0.6 * u, 1.2 * u, 1.2 * u, 3); g.fill(); }
@@ -555,7 +554,7 @@ async function clickTab() {
   Object.assign(ripple.style, { left: to.x + 'px', top: to.y + 'px' }); ripple.classList.add('pop');
   await wait(140);
   tab2.classList.remove('press'); tab1.classList.remove('on'); tab2.classList.add('on');
-  url.innerHTML = '<span>https://</span><b>gabyaillet.github.io</b><span>/port/</span>';
+  url.innerHTML = '<b>obtura</b><span>/qui-sommes-nous</span>';
   page.classList.add('go'); load.classList.add('run');
   await wait(850);
   cursor.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' });
