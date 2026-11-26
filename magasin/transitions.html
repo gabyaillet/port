@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Obtura — Choix de la transition</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Planche de choix : chaque vignette joue en boucle une transition « mur gris → noir ». */
+:root { --wallbg: radial-gradient(40% 30% at 30% 35%, #ececea, transparent 70%), radial-gradient(35% 28% at 72% 62%, #e8e8e6, transparent 70%), radial-gradient(25% 20% at 60% 20%, #e6e6e4, transparent 70%), #cfcfcd; --ink: #141414; --muted: #5d5d5a; --f: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #e4e4e2; color: var(--ink); font-family: var(--f); -webkit-font-smoothing: antialiased; padding: clamp(1.5rem, 5vw, 4rem) max(16px, 4vw) 4rem; }
+header { max-width: 1200px; margin: 0 auto 2.5rem; }
+h1 { margin: 0 0 .6rem; font: 500 clamp(2rem, 5vw, 3.6rem)/1 var(--f); letter-spacing: -.045em; }
+header p { margin: 0; max-width: 60ch; color: var(--muted); line-height: 1.5; }
+.grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 1.6rem 1.2rem; }
+figure { margin: 0; }
+.tile { position: relative; aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; cursor: pointer;
+  background: var(--wallbg);
+  box-shadow: 0 10px 30px -18px rgba(0,0,0,.4); }
+.tile .word { position: absolute; inset: 0; display: grid; place-items: center; font: 500 clamp(1.4rem, 3vw, 2rem)/1 var(--f); letter-spacing: -.02em; color: #141414; }
+.tile canvas, .tile .fx { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tile canvas { display: block; }
+figcaption { display: grid; gap: .3rem; padding: .8rem .2rem 0; }
+figcaption b { font: 500 1.05rem var(--f); letter-spacing: -.01em; }
+figcaption b span { font: 400 .7rem var(--mono); letter-spacing: .14em; color: var(--muted); margin-right: .5rem; }
+figcaption small { color: var(--muted); line-height: 1.45; font-size: .88rem; }
+/* plein écran au clic */
+.tile.big { position: fixed; inset: 0; z-index: 10; border-radius: 0; aspect-ratio: auto; }
+.tile.big .word { font-size: clamp(2.6rem, 7vw, 5.2rem); }
+.close { position: fixed; z-index: 11; top: 1rem; right: 1rem; display: none; font: 500 .72rem var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: .5rem .95rem; border-radius: 99px; border: 1px solid #ededeb; background: #0d0d0d; color: #ededeb; cursor: pointer; }
+body.zoom .close { display: block; }
+
+/* 2 · Stores */
+.blinds { display: grid; grid-template-rows: repeat(9, 1fr); }
+.blinds i { background: #0d0d0d; transform-origin: top; transform: scaleY(0); }
+/* 3 · Le cercle du logo */
+.ring { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 2px solid #141414; background: #0d0d0d; }
+/* 5 · Vagues */
+.waves { display: flex; align-items: flex-end; }
+.waves i { flex: 1; height: 100%; background: #0d0d0d; border-radius: 50% 50% 0 0 / 14% 14% 0 0; transform: translateY(105%); margin: 0 -1px; }
+/* 7 · Ouverture */
+.tile.split { background: #0d0d0d; }
+.split .half { position: absolute; left: 0; right: 0; height: 50%; overflow: hidden; background: var(--wallbg); background-size: 100% 200%; }
+.split .top { background-position: top; } .split .bot { background-position: bottom; }
+.split .half > div { position: absolute; left: 0; right: 0; height: 200%; display: grid; place-items: center; font: 500 clamp(1.4rem, 3vw, 2rem)/1 var(--f); letter-spacing: -.02em; }
+.tile.big.split .half > div { font-size: clamp(2.6rem, 7vw, 5.2rem); }
+.split .top { top: 0; } .split .top > div { top: 0; }
+.split .bot { bottom: 0; } .split .bot > div { bottom: 0; }
+.goo { filter: url(#goo); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter></svg>
+<header>
+  <h1>Quelle transition ?</h1>
+  <p>Chaque vignette joue en boucle le passage du mur gris au noir, à la place de l'obturateur. Clique sur une vignette pour la voir en plein écran. Dis-moi simplement le numéro qui te plaît.</p>
+</header>
+
+<div class="grid">
+  <figure><div class="tile" data-fx="pixels"><div class="word">portfolio</div><canvas></canvas></div>
+    <figcaption><b><span>01</span>Pixels</b><small>L'écran se remplit de carrés noirs dans un ordre aléatoire, du bas vers le haut. Inspiré des « pixel page transitions » de Codrops.</small></figcaption></figure>
+
+  <figure><div class="tile" data-fx="blinds"><div class="word">portfolio</div><div class="fx blinds"></div></div>
+    <figcaption><b><span>02</span>Stores</b><small>Des bandes horizontales descendent l'une après l'autre, comme un store qui se ferme. Sobre et très « éditorial ».</small></figcaption></figure>
+
+  <figure><div class="tile" data-fx="ring"><div class="word">portfolio</div><div class="ring"></div></div>
+    <figcaption><b><span>03</span>Le cercle du logo</b><small>Le petit cercle d'Obtura apparaît au centre et grossit jusqu'à avaler tout l'écran. La marque devient la transition.</small></figcaption></figure>
+
+  <figure><div class="tile" data-fx="ink"><div class="word">portfolio</div><canvas class="goo"></canvas></div>
+    <figcaption><b><span>04</span>Encre</b><small>Des gouttes noires tombent, s'étalent et fusionnent comme de l'encre jusqu'à tout recouvrir. Suit bien la chute des lettres.</small></figcaption></figure>
+
+  <figure><div class="tile" data-fx="waves"><div class="word">portfolio</div><div class="fx waves"></div></div>
+    <figcaption><b><span>05</span>Vagues</b><small>Des colonnes arrondies montent du bas en décalé, comme une vague de noir qui déferle.</small></figcaption></figure>
+
+  <figure><div class="tile" data-fx="dither"><div class="word">portfolio</div><canvas></canvas></div>
+    <figcaption><b><span>06</span>Grain d'imprimerie</b><small>Le mur se dissout en points de trame, comme une photo imprimée qui s'assombrit. Très « photo », proche du nom.</small></figcaption></figure>
+
+  <figure><div class="tile split" data-fx="split"><div class="half top"><div>portfolio</div></div><div class="half bot"><div>portfolio</div></div></div>
+    <figcaption><b><span>07</span>Ouverture</b><small>Le mur se coupe en deux au niveau du mot ; les deux moitiés s'écartent vers le haut et le bas et laissent apparaître le noir derrière.</small></figcaption></figure>
+</div>
+<button class="close" type="button">Fermer ✕</button>
+
+<script>
+(() => {
+  // remplit les éléments répétés
+  document.querySelectorAll('.blinds').forEach(el => el.innerHTML = '<i></i>'.repeat(9));
+  document.querySelectorAll('.waves').forEach(el => el.innerHTML = '<i></i>'.repeat(7));
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const io = (k) => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const rnd = (s => () => (s = (s * 16807) % 2147483647) / 2147483647)(9);
+
+  // ordre aléatoire fixe pour les pixels, bruit pour la trame
+  const COLS = 24, ROWS = 15, order = Array.from({ length: COLS * ROWS }, (_, i) => { const r = Math.floor(i / COLS); return (1 - r / ROWS) * .55 + rnd() * .45; });
+  const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(v => v / 16);
+  const inkDrops = Array.from({ length: 9 }, () => ({ x: .1 + rnd() * .8, d: rnd() * .35, r: .08 + rnd() * .1 }));
+
+  const tiles = [...document.querySelectorAll('.tile')].map(el => ({ el, fx: el.dataset.fx, cv: el.querySelector('canvas'), off: Math.random() * 3 }));
+  function fit(t) { if (!t.cv) return; const r = t.el.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2); t.cv.width = Math.round(r.width * d); t.cv.height = Math.round(r.height * d); }
+  tiles.forEach(fit); addEventListener('resize', () => tiles.forEach(fit));
+
+  function render(t, p) {
+    const el = t.el, word = el.querySelector('.word');
+    if (word) word.style.opacity = clamp(1 - p * 3).toFixed(2);
+    if (t.fx === 'pixels') {
+      const g = t.cv.getContext('2d'), W = t.cv.width, H = t.cv.height, cw = W / COLS, ch = H / ROWS;
+      g.clearRect(0, 0, W, H); g.fillStyle = '#0d0d0d';
+      for (let i = 0; i < order.length; i++) if (order[i] < p * 1.02) g.fillRect(Math.floor((i % COLS) * cw), Math.floor(Math.floor(i / COLS) * ch), Math.ceil(cw) + 1, Math.ceil(ch) + 1);
+    } else if (t.fx === 'blinds') {
+      [...el.querySelectorAll('.blinds i')].forEach((b, i) => b.style.transform = `scaleY(${io(clamp(p * 1.6 - i * .07)).toFixed(3)})`);
+    } else if (t.fx === 'ring') {
+      const r = el.querySelector('.ring'), e = Math.pow(clamp(p * 1.1), 2.6), s = 1 + e * 90;
+      r.style.transform = `scale(${s.toFixed(2)})`; r.style.opacity = clamp(p * 8).toFixed(2);
+      r.style.borderWidth = (2 / Math.max(1, s * .2)).toFixed(2) + 'px';
+    } else if (t.fx === 'ink') {
+      const g = t.cv.getContext('2d'), W = t.cv.width, H = t.cv.height;
+      g.clearRect(0, 0, W, H); g.fillStyle = '#0d0d0d';
+      for (const d of inkDrops) {
+        const k = clamp((p - d.d) / (1 - d.d)), y = (-.15 + io(clamp(k * 1.6)) * .75) * H, rr = (d.r + Math.pow(k, 2.2) * 1.1) * W;
+        g.beginPath(); g.arc(d.x * W, y, rr, 0, 7); g.fill();
+        if (k > 0 && k < .6) { g.beginPath(); g.arc(d.x * W, y - rr * 1.6, rr * .4, 0, 7); g.fill(); }
+      }
+      g.fillRect(0, H * (1 - io(clamp(p * 1.3 - .25))), W, H);
+    } else if (t.fx === 'waves') {
+      [...el.querySelectorAll('.waves i')].forEach((w, i) => { const c = Math.abs(i - 3); w.style.transform = `translateY(${((1 - io(clamp(p * 1.5 - c * .09))) * 105).toFixed(1)}%)`; });
+    } else if (t.fx === 'dither') {
+      const g = t.cv.getContext('2d'), W = t.cv.width, H = t.cv.height, s = Math.max(3, Math.round(W / 110));
+      g.clearRect(0, 0, W, H); g.fillStyle = '#0d0d0d';
+      for (let y = 0, j = 0; y < H; y += s, j++) for (let x = 0, i = 0; x < W; x += s, i++) {
+        const local = p * 1.35 - (1 - y / H) * .35 + Math.sin(x * .02 + y * .013) * .04;
+        if (BAYER[(j % 4) * 4 + (i % 4)] < local) { const r = s * .5 * clamp(.55 + (local - BAYER[(j % 4) * 4 + (i % 4)]) * 2.2, 0, 1.45); g.beginPath(); g.arc(x + s / 2, y + s / 2, r, 0, 7); g.fill(); }
+      }
+    } else if (t.fx === 'split') {
+      const e = io(clamp(p * 1.15)), H = el.getBoundingClientRect().height;
+      el.querySelector('.top').style.transform = `translateY(${(-e * H * .55).toFixed(1)}px)`;
+      el.querySelector('.bot').style.transform = `translateY(${(e * H * .55).toFixed(1)}px)`;
+    }
+  }
+  // boucle : 0 → 1 (2,2 s), pause, retour en fondu
+  const CYCLE = 4.2, FIX = new URLSearchParams(location.search).get('p');
+  function loop(now) {
+    const t = now / 1000;
+    tiles.forEach(T => {
+      const c = ((t + T.off) % CYCLE), p = FIX !== null ? +FIX : c < .5 ? 0 : c < 2.9 ? (c - .5) / 2.4 : 1;
+      render(T, p);
+    });
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  // plein écran
+  const close = document.querySelector('.close');
+  tiles.forEach(T => T.el.addEventListener('click', () => {
+    const big = !T.el.classList.contains('big');
+    tiles.forEach(o => o.el.classList.remove('big')); document.body.classList.toggle('zoom', big);
+    if (big) T.el.classList.add('big'); requestAnimationFrame(() => fit(T));
+  }));
+  close.addEventListener('click', () => { tiles.forEach(o => { o.el.classList.remove('big'); requestAnimationFrame(() => fit(o)); }); document.body.classList.remove('zoom'); });
+})();
+</script>
+</body>
+</html>
