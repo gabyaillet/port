@@ -18,8 +18,8 @@ body { margin: 0; color: var(--ink); font-family: var(--f); -webkit-font-smoothi
 /* Le mur : la lumière (canvas) puis le relief de l'enduit par-dessus */
 .wall { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 .wall canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.wall .grain { position: absolute; inset: 0; mix-blend-mode: multiply; opacity: .62;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeDiffuseLighting lighting-color='%23fff' surfaceScale='1.7'%3E%3CfeDistantLight azimuth='225' elevation='52'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+.wall .grain { position: absolute; inset: 0; mix-blend-mode: multiply; opacity: .3;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeDiffuseLighting lighting-color='%23fff' surfaceScale='1.1'%3E%3CfeDistantLight azimuth='225' elevation='52'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 360px 360px; }
 
 /* Le titre et sa chute */
@@ -51,12 +51,52 @@ dd { margin: 0; }
   .shot { order: -1; }
 }
 @media (prefers-reduced-motion: reduce) { .cue::after { animation: none; } }
+/* En-tête : la marque à gauche, le menu à droite (même menu plein écran que le portfolio de Gabriel) */
+.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  min-height: 4rem; padding: env(safe-area-inset-top, 0px) max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px)); }
+.brand { display: flex; align-items: center; gap: .6rem; color: var(--ink); text-decoration: none; font: 500 1.15rem var(--f); letter-spacing: -.02em; }
+.brand i { width: 1.05rem; height: 1.05rem; border-radius: 50%; border: 2px solid currentColor; }
+.pills { display: flex; gap: .5rem; align-items: center; }
+.pill { display: inline-flex; align-items: center; gap: .4rem; font: 500 .72rem var(--mono); letter-spacing: .08em; text-transform: uppercase; text-decoration: none; cursor: pointer;
+  padding: .5rem .95rem; border-radius: 999px; border: 1px solid var(--ink); background: transparent; color: var(--ink); transition: background .3s, color .3s; }
+.pill.solid, .pill:hover { background: var(--ink); color: var(--wall); }
+.pill.solid:hover { background: transparent; color: var(--ink); }
+.pill:focus-visible, .brand:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
+.nav { position: fixed; inset: 0; z-index: 180; margin: 0; display: flex; flex-direction: column; justify-content: center; gap: .2rem; list-style: none;
+  background: #0d0d0d; padding: 5rem max(24px, 6vw) 2rem; clip-path: inset(0 0 100% 0); visibility: hidden; transition: clip-path .9s cubic-bezier(.76,0,.24,1), visibility 0s .9s; }
+.nav[data-open="true"] { clip-path: inset(0 0 0 0); visibility: visible; transition: clip-path .9s cubic-bezier(.76,0,.24,1); }
+.nav li { overflow: hidden; }
+.nav a { display: inline-block; color: #ededeb; text-decoration: none; font: 500 clamp(2.6rem, 8vw, 6.5rem)/1 var(--f); letter-spacing: -.05em; text-transform: uppercase;
+  transform: translateY(110%); transition: transform .9s cubic-bezier(.16,1,.3,1), color .3s; }
+.nav a:hover { color: #8f8f8b; }
+.nav a:focus-visible { outline: 1px solid #ededeb; outline-offset: 4px; }
+.nav[data-open="true"] a { transform: none; }
+.nav li:nth-child(2) a { transition-delay: .05s; } .nav li:nth-child(3) a { transition-delay: .1s; } .nav li:nth-child(4) a { transition-delay: .15s; }
+.nav .nav-foot { display: flex; gap: 1.5rem; align-items: center; margin-top: 2rem; overflow: visible; }
+.nav-close { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 1rem); right: max(20px, env(safe-area-inset-right, 0px)); border-color: #ededeb; color: #ededeb; }
+.nav-close:hover { background: #ededeb; color: #0d0d0d; }
+@media (max-width: 480px) { .pills .pill.solid { display: none; } }
+@media (prefers-reduced-motion: reduce) { .nav, .nav a { transition: none !important; } }
+
 </style>
 </head>
 <body>
+<header class="topbar">
+  <a class="brand" href="#top"><i aria-hidden="true"></i>Obtura Studio</a>
+  <div class="pills">
+    <a class="pill solid" href="#projet">Nos projets</a>
+    <button class="pill" id="menu-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu <span aria-hidden="true">+</span></button>
+  </div>
+</header>
+<ul class="nav" id="nav" data-open="false">
+  <li><a href="#top">Qui sommes-nous</a></li>
+  <li><a href="#projet">Projets</a></li>
+  <li><a href="./">Revoir l'intro</a></li>
+  <li class="nav-foot"><button class="pill nav-close" type="button">Fermer ✕</button></li>
+</ul>
 <div class="wall" aria-hidden="true"><canvas id="light"></canvas><div class="grain"></div></div>
 
-<section class="fall" aria-label="Portfolio">
+<section class="fall" id="top" aria-label="Portfolio">
   <div class="stage">
     <h1 id="title" aria-label="portfolio">portfolio</h1>
     <span class="cue" id="cue">Défiler</span>
@@ -83,6 +123,15 @@ dd { margin: 0; }
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
+
+  /* ---------- Menu plein écran ---------- */
+  const toggle = document.getElementById('menu-toggle'), nav = document.getElementById('nav');
+  const setMenu = o => { nav.dataset.open = String(o); toggle.setAttribute('aria-expanded', String(o)); if (o) nav.querySelector('a').focus({ preventScroll: true }); };
+  toggle.addEventListener('click', () => setMenu(nav.dataset.open !== 'true'));
+  nav.querySelector('.nav-close').addEventListener('click', () => { setMenu(false); toggle.focus(); });
+  nav.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && nav.dataset.open === 'true') { setMenu(false); toggle.focus(); } });
+
   /* ---------- Lumière à travers le feuillage ----------
      Dessinée petit (1/4) puis agrandie : le flou est gratuit et c'est léger à animer. */
   const cv = document.getElementById('light'), g = cv.getContext('2d');
@@ -90,8 +139,8 @@ dd { margin: 0; }
   const SC = 0.25;
   let W = 0, H = 0;
   // formes en coordonnées relatives (0..1), chacune avec son propre petit mouvement
-  const spots = Array.from({ length: 16 }, () => ({ x: rnd(), y: rnd(), rx: .05 + rnd() * .12, ry: .03 + rnd() * .07, a: rnd() * 3, ph: rnd() * 9, f: .12 + rnd() * .2, amp: .006 + rnd() * .01 }));
-  const leaves = Array.from({ length: 70 }, () => ({ x: rnd() * 1.2 - .1, y: rnd() * 1.2 - .1, r: .012 + rnd() * .03, a: rnd() * 3, ph: rnd() * 9, f: .25 + rnd() * .4, amp: .004 + rnd() * .008 }));
+  const spots = Array.from({ length: 16 }, () => ({ x: rnd(), y: rnd(), rx: .05 + rnd() * .12, ry: .03 + rnd() * .07, a: rnd() * 3, ph: rnd() * 9, f: .04 + rnd() * .06, amp: .004 + rnd() * .005 }));
+  const leaves = Array.from({ length: 70 }, () => ({ x: rnd() * 1.2 - .1, y: rnd() * 1.2 - .1, r: .012 + rnd() * .03, a: rnd() * 3, ph: rnd() * 9, f: .06 + rnd() * .1, amp: .002 + rnd() * .004 }));
   const branches = [
     { x0: -.05, y0: .25, x1: .35, y1: 1.05, w: .022 }, { x0: .78, y0: -.05, x1: 1.05, y1: .55, w: .03 },
     { x0: .6, y0: 1.05, x1: 1.05, y1: .62, w: .016 }, { x0: -.05, y0: .8, x1: .18, y1: .55, w: .012 },
@@ -101,30 +150,30 @@ dd { margin: 0; }
     cv.width = W; cv.height = H;
   }
   function draw(t) {
-    const m = Math.max(W, H), wind = Math.sin(t * .23) * .6 + Math.sin(t * .071 + 2) * .4; // rafale lente
-    g.filter = 'none'; g.fillStyle = '#cfcfcd'; g.fillRect(0, 0, W, H);
+    const m = Math.max(W, H), wind = Math.sin(t * .09) * .6 + Math.sin(t * .031 + 2) * .4; // rafale lente
+    g.filter = 'none'; g.fillStyle = '#d5d5d3'; g.fillRect(0, 0, W, H);
     // taches de soleil
-    g.filter = `blur(${Math.round(m * .022)}px)`; g.fillStyle = '#efefed';
+    g.filter = `blur(${Math.round(m * .03)}px)`; g.fillStyle = '#e6e6e4';
     for (const s of spots) {
       const dx = (Math.sin(t * s.f + s.ph) + Math.sin(t * s.f * 1.7 + s.ph * 2) * .5 + wind * .6) * s.amp, dy = Math.cos(t * s.f * .8 + s.ph) * s.amp;
       g.beginPath(); g.ellipse((s.x + dx) * W, (s.y + dy) * H, s.rx * m, s.ry * m, s.a + wind * .05, 0, 7); g.fill();
     }
     // feuilles et branches en ombre
-    g.filter = `blur(${Math.round(m * .009)}px)`; g.fillStyle = 'rgba(190,190,188,.75)'; g.strokeStyle = 'rgba(190,190,188,.7)'; g.lineCap = 'round';
+    g.filter = `blur(${Math.round(m * .014)}px)`; g.fillStyle = 'rgba(200,200,198,.6)'; g.strokeStyle = 'rgba(200,200,198,.55)'; g.lineCap = 'round';
     for (const b of branches) {
       const sway = wind * .012;
       g.lineWidth = b.w * m; g.beginPath(); g.moveTo(b.x0 * W, b.y0 * H); g.quadraticCurveTo(((b.x0 + b.x1) / 2 + sway) * W, ((b.y0 + b.y1) / 2 - sway) * H, (b.x1 + sway * 1.5) * W, b.y1 * H); g.stroke();
     }
     for (const l of leaves) {
       const dx = (Math.sin(t * l.f + l.ph) + wind) * l.amp, dy = Math.cos(t * l.f * 1.3 + l.ph) * l.amp;
-      g.beginPath(); g.ellipse((l.x + dx) * W, (l.y + dy) * H, l.r * m, l.r * m * .45, l.a + Math.sin(t * l.f + l.ph) * .25, 0, 7); g.fill();
+      g.beginPath(); g.ellipse((l.x + dx) * W, (l.y + dy) * H, l.r * m, l.r * m * .45, l.a, 0, 7); g.fill();
     }
   }
   size(); addEventListener('resize', () => { size(); if (reduce) draw(0); });
   let lastDraw = 0;
   function loop(now) {
     // 30 images/s suffisent pour des ombres lentes
-    if (now - lastDraw > 33) { draw(now / 1000); lastDraw = now; }
+    if (now - lastDraw > 40) { draw(now / 1000); lastDraw = now; }
     requestAnimationFrame(loop);
   }
   if (reduce) draw(0); else requestAnimationFrame(loop);
