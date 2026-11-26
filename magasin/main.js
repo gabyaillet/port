@@ -35,6 +35,8 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.12;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.autoUpdate = false; // la boutique ne bouge pas : l'ombre est calculée une fois (et quand les portes glissent)
+renderer.shadowMap.needsUpdate = true;
 
 const scene = new THREE.Scene();
 const SKY = new THREE.Color('#2e2e33');
@@ -53,7 +55,13 @@ await (document.fonts ? Promise.race([
 ]) : null);
 
 /* ---------- Matières ---------- */
-const M = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.82, metalness: 0, ...o });
+// Une seule matière par couleur : moins de matières, et des lots plus gros à la fusion
+const matCache = new Map();
+const M = (color, o = {}) => {
+  const k = color + JSON.stringify(o);
+  if (!matCache.has(k)) matCache.set(k, new THREE.MeshStandardMaterial({ color, roughness: 0.82, metalness: 0, ...o }));
+  return matCache.get(k);
+};
 const mat = {
   white: M('#f3f1ec'), wall: M('#efece6'), black: M('#1c1c1e', { roughness: 0.6 }), grey: M('#6c6c70'), darkGrey: M('#46464a'),
   steel: M('#2a2a2d', { roughness: 0.4, metalness: 0.5 }), green: M('#4d7a3c', { flatShading: true }), green2: M('#3c6630', { flatShading: true }),
@@ -222,7 +230,7 @@ for (const [a, b] of [[-6.86, -4.47], [-4.33, -1.22], [1.22, 4.33], [4.47, 6.86]
 }
 plane(2.16, 0.3, mat.glass, 0, 2.68, 0).renderOrder = 2;
 const doors = [-1, 1].map(s => {
-  const g = new THREE.Group(); g.position.set(s * 0.54, 0, 0.12); scene.add(g);
+  const g = new THREE.Group(); g.userData.keep = true; g.position.set(s * 0.54, 0, 0.12); scene.add(g);
   box(1.08, 0.06, 0.06, mat.black, 0, 0.12, 0, { parent: g, lines: lineDark }); box(1.08, 0.06, 0.06, mat.black, 0, 2.38, 0, { parent: g, lines: lineDark });
   box(0.06, 2.32, 0.06, mat.black, -0.51, 0.12, 0, { parent: g, lines: lineDark }); box(0.06, 2.32, 0.06, mat.black, 0.51, 0.12, 0, { parent: g, lines: lineDark });
   plane(0.96, 2.2, mat.glass, 0, 1.27, 0, 0, g).renderOrder = 2;
@@ -336,6 +344,7 @@ box(SW + 0.03, SH + 0.03, 0.03, mat.black, 0, TOP + 0.13, 0.07, { parent: counte
 const scrCanvas = document.createElement('canvas'); scrCanvas.width = 1280; scrCanvas.height = 768;
 const scrTex = new THREE.CanvasTexture(scrCanvas); scrTex.colorSpace = THREE.SRGBColorSpace; scrTex.anisotropy = 8;
 const screen = plane(SW, SH, new THREE.MeshBasicMaterial({ map: scrTex, toneMapped: false }), 0, TOP + 0.13 + (SH + 0.03) / 2, 0.07 - 0.0155, Math.PI, counter);
+screen.userData.keep = true;
 // Clavier, souris, terminal de paiement, sac
 box(0.42, 0.02, 0.14, mat.white, -0.05, TOP, -0.22, { parent: counter });
 const mouse = box(0.06, 0.025, 0.1, mat.white, 0.32, TOP, -0.22, { parent: counter, round: 0.012 });
@@ -401,7 +410,42 @@ function rr(g, x, y, w, h, r, topOnly) {
   g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y); g.closePath();
 }
 
+/* ---------- Fusion : tout ce qui ne bouge pas devient quelques gros maillages ----------
+   Des centaines de petits objets (feuilles, produits, contours) coûtaient chacun un appel de dessin. */
+function mergeStatic() {
+  scene.updateMatrixWorld(true);
+  const lots = new Map(), old = [];
+  scene.traverse(o => {
+    if (!o.isMesh && !o.isLineSegments) return;
+    for (let q = o; q; q = q.parent) if (q.userData.keep) return;
+    if (o.isMesh && o.material.transparent) return; // les vitres gardent leur ordre d'affichage
+    const key = (o.isMesh ? 'm' : 'l') + o.material.uuid + (o.castShadow ? 'c' : '');
+    if (!lots.has(key)) lots.set(key, { mat: o.material, line: !o.isMesh, cast: o.castShadow, parts: [] });
+    lots.get(key).parts.push(o); old.push(o);
+  });
+  for (const lot of lots.values()) {
+    if (lot.parts.length < 2) continue;
+    const names = lot.line ? ['position'] : ['position', 'normal', 'uv'];
+    const geos = lot.parts.map(o => { const g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone(); g.applyMatrix4(o.matrixWorld); return g; });
+    const merged = new THREE.BufferGeometry();
+    for (const n of names) {
+      const size = n === 'uv' ? 2 : 3, total = geos.reduce((a, g) => a + g.attributes.position.count, 0), arr = new Float32Array(total * size);
+      let off = 0;
+      for (const g of geos) { const at = g.attributes[n]; if (at) arr.set(at.array, off); off += g.attributes.position.count * size; }
+      merged.setAttribute(n, new THREE.BufferAttribute(arr, size));
+    }
+    geos.forEach(g => g.dispose());
+    const m = lot.line ? new THREE.LineSegments(merged, lot.mat) : new THREE.Mesh(merged, lot.mat);
+    if (!lot.line) { m.castShadow = lot.cast; m.receiveShadow = true; }
+    m.matrixAutoUpdate = false; scene.add(m);
+    for (const o of lot.parts) { o.userData.merged = true; }
+  }
+  // retire les originaux fusionnés (les enfants contours le sont aussi, déjà fusionnés)
+  for (const o of old) if (o.userData.merged && o.parent) { o.parent.remove(o); o.geometry.dispose(); }
+}
+
 /* ---------- Trajet de la caméra ---------- */
+mergeStatic();
 scene.updateMatrixWorld(true);
 const S = new THREE.Vector3(); screen.getWorldPosition(S);
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -427,6 +471,7 @@ addEventListener('resize', fit); fit();
 /* ---------- Animation ---------- */
 const pos = new THREE.Vector3(), tgt = new THREE.Vector3();
 let t0 = null, phase = 'path', last = 0;
+let lastDoor = -1;
 function frameAt(t) {
   const k = Math.min(t / T, 1), u = easeCruise(k);
   path.getPoint(u, pos); look.getPoint(u, tgt);
@@ -436,8 +481,18 @@ function frameAt(t) {
   camera.lookAt(tgt);
   // les portes s'écartent quand on approche
   const o = THREE.MathUtils.smoothstep(7, 3.2, pos.z);
-  for (const d of doors) d.g.position.x = d.s * (0.54 + o * 1.05);
+  if (o !== lastDoor) { lastDoor = o; for (const d of doors) d.g.position.x = d.s * (0.54 + o * 1.05); renderer.shadowMap.needsUpdate = true; }
   return k;
+}
+// Résolution adaptative : si l'appareil peine (moins de ~45 i/s), on baisse un peu la définition
+let dprPrev = 0, dprSum = 0, dprN = 0;
+function adaptDpr(now) {
+  if (dprPrev) { dprSum += now - dprPrev; dprN++; }
+  dprPrev = now;
+  if (dprN < 30) return;
+  const avg = dprSum / dprN, pr = renderer.getPixelRatio();
+  dprSum = dprN = 0;
+  if (avg > 22 && pr > 1) { renderer.setPixelRatio(Math.max(1, pr * 0.75)); renderer.setSize(innerWidth, innerHeight, false); }
 }
 let paused = new URLSearchParams(location.search).has('pause');
 function tick(now) {
@@ -455,7 +510,7 @@ function tick(now) {
     camera.lookAt(S);
     if (k >= 1) phase = 'done';
   }
-  if (phase !== 'done') renderer.render(scene, camera);
+  if (phase !== 'done') { renderer.render(scene, camera); adaptDpr(now); }
   requestAnimationFrame(tick);
 }
 
@@ -515,4 +570,4 @@ async function clickTab() {
   frameAt(0); renderer.render(scene, camera);
   requestAnimationFrame(() => { veil.classList.add('off'); skipBtn.classList.add('show'); requestAnimationFrame(tick); });
 }
-window.__magasin = { camera, scene, T, jump: t => { t0 = performance.now() - t * 1000; paused = false; }, shot: t => { frameAt(t); renderer.render(scene, camera); }, play: () => { paused = false; } };
+window.__magasin = { camera, scene, T, info: () => ({ ...renderer.info.render, pr: renderer.getPixelRatio(), geo: renderer.info.memory.geometries, progs: renderer.info.programs.length }), jump: t => { t0 = performance.now() - t * 1000; paused = false; }, shot: t => { frameAt(t); renderer.render(scene, camera); }, play: () => { paused = false; } };
