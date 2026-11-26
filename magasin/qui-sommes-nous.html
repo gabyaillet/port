@@ -253,8 +253,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     target = [];
     const hw = title.offsetWidth / 2, lh = letters[0].el.offsetHeight;
     const ws = PROFIL.map(i => letters[i].el.offsetWidth), sum = ws.reduce((a, b) => a + b, 0);
-    const S = Math.min(innerWidth * .84 / sum, innerHeight * .34 / lh);
-    let acc = -sum * S / 2;
+    // plus petit, calé à gauche (marge du site), centré en hauteur
+    const narrow = innerWidth < 700, S = Math.min(innerWidth * (narrow ? .62 : .36) / sum, innerHeight * .2 / lh);
+    let acc = -innerWidth / 2 + Math.max(20, innerWidth * .05);
     PROFIL.forEach((i, j) => {
       const el = letters[i].el, cx = el.offsetLeft + el.offsetWidth / 2 - hw;
       target[i] = { x: acc + ws[j] * S / 2 - cx, s: S }; acc += ws[j] * S;
