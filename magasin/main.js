@@ -90,7 +90,7 @@ const woodFloor = canvasTex(1024, 1024, (g, w, h) => {
 }, [3, 3]);
 const woodDark = canvasTex(512, 256, (g, w, h) => {
   g.fillStyle = '#7a5537'; g.fillRect(0, 0, w, h);
-  for (let x = 0; x < w; x += 32) { g.fillStyle = `hsl(26, 36%, ${30 + rnd() * 7}%)`; g.fillRect(x, 0, 30, h); g.fillStyle = 'rgba(30,18,8,.5)'; g.fillRect(x + 30, 0, 2, h); }
+  for (let x = 0; x < w; x += 64) { g.fillStyle = `hsl(26, 36%, ${30 + rnd() * 6}%)`; g.fillRect(x, 0, 64, h); g.fillStyle = 'rgba(30,18,8,.35)'; g.fillRect(x + 60, 0, 4, h); }
 });
 const paving = canvasTex(512, 512, (g, w, h) => {
   g.fillStyle = '#58585c'; g.fillRect(0, 0, w, h);
@@ -295,12 +295,12 @@ for (let i = 0; i < 5; i++) box(0.18, 0.06 + rnd() * 0.1, 0.18, M(cloth[(i * 3 +
 for (let i = 0; i < 4; i++) box(0.22, 0.05, 0.16, M(cloth[(i * 4 + 2) % 12]), -0.55 + i * 0.37, 1.1, (rnd() - .5) * 0.3, { parent: vcase });
 const low = new THREE.Group(); low.position.set(-3.9, 0, -6.2); scene.add(low);
 box(1.66, 0.62, 0.66, mat.white, 0, 0, 0, { parent: low });
-box(1.7, 0.08, 0.7, woodDark ? new THREE.MeshStandardMaterial({ map: woodDark }) : mat.oak, 0, 0.62, 0, { parent: low });
+box(1.72, 0.07, 0.72, M('#8f6142', { roughness: 0.6 }), 0, 0.625, 0, { parent: low }); // plateau en bois uni : plus de rayures qui scintillent
 for (let i = 0; i < 4; i++) box(0.28, 0.04 + i * 0.02, 0.36, M(cloth[(i * 2 + 3) % 12]), -0.55 + i * 0.36, 0.7, 0, { parent: low });
 plant(-4.95, -1.7, 1.15); plant(-4.15, -1.0, 0.95);
 
 // Devant à droite : table en bois et chaises, suspensions
-const oakMat = new THREE.MeshStandardMaterial({ map: woodFloor, roughness: 0.6 });
+const oakMat = M('#b88a5c', { roughness: 0.6 });
 function chair(x, z, ry) {
   const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; scene.add(g);
   box(0.42, 0.04, 0.42, oakMat, 0, 0.44, 0, { parent: g });
