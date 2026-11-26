@@ -214,6 +214,7 @@ plane(7, 0.58, new THREE.MeshBasicMaterial({ map: sign }), 0, 3.73, 0.385, 0, fa
 // Vitrine : montants, imposte, vitres, portes coulissantes
 box(14, 0.12, 0.16, mat.black, 0, 0, 0, { lines: lineDark });
 box(14, 0.14, 0.16, mat.black, 0, 2.86, 0, { lines: lineDark });
+box(14.4, 0.32, 0.36, mat.darkGrey, 0, 2.99, 0.02, { edges: false }); // linteau : plus de jour entre la vitrine et la façade
 box(14, 0.06, 0.12, mat.black, 0, 2.5, 0, { lines: lineDark });
 for (const x of [-6.93, -4.4, -1.15, 1.15, 4.4, 6.93]) box(0.14, 3, 0.18, mat.black, x, 0, 0, { lines: lineDark });
 for (const [a, b] of [[-6.86, -4.47], [-4.33, -1.22], [1.22, 4.33], [4.47, 6.86]]) {
@@ -248,7 +249,8 @@ const streetBulb = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 8), mat.bulb
 // Mur gauche : portant de vêtements
 box(0.06, 2.4, 3.2, mat.white, -W + 0.03, 0.1, -4.6, { cast: false });
 box(0.6, 0.06, 3.0, mat.white, -W + 0.32, 0.15, -4.6);
-cyl(0.015, 0.015, 3, mat.steel, -W + 0.4, 1.72, -4.6, { seg: 8 }).rotation.x = Math.PI / 2;
+cyl(0.015, 0.015, 3, mat.steel, -W + 0.42, 1.7 - 1.5, -4.6, { seg: 8 }).rotation.x = Math.PI / 2; // la tringle, couchée le long du mur
+for (const z of [-3.15, -6.05]) box(0.03, 0.03, 0.03, mat.steel, -W + 0.21, 1.685, z, { edges: false }), box(0.42, 0.02, 0.02, mat.steel, -W + 0.21, 1.69, z, { edges: false });
 const cloth = ['#e9b8b5', '#2b2b2b', '#8aa7c4', '#d9d4cc', '#6f7a68', '#c9a27a', '#f2f0ea', '#3b4a63', '#b65f4a', '#9a9a96', '#e1c8a0', '#2f3b33'];
 for (let i = 0; i < 12; i++) {
   const z = -3.3 - i * 0.23, h = 0.72 + rnd() * 0.25;
@@ -263,15 +265,17 @@ plant(-6.3, -1.2, 1.1, 'white');
 
 // Fond : étagère de produits, porte de réserve, affiches
 const shelf = new THREE.Group(); shelf.position.set(0.4, 0, D + 0.25); scene.add(shelf);
-box(3.6, 2.5, 0.4, mat.white, 0, 0, -0.05, { parent: shelf, cast: false });
+box(3.6, 2.5, 0.04, mat.white, 0, 0, -0.23, { parent: shelf, cast: false }); // fond
+for (const x of [-1.78, 1.78]) box(0.04, 2.5, 0.4, mat.white, x, 0, -0.05, { parent: shelf });
+box(3.6, 0.04, 0.4, mat.white, 0, 2.46, -0.05, { parent: shelf }); box(3.52, 0.12, 0.38, mat.white, 0, 0, -0.05, { parent: shelf });
 for (let r = 0; r < 4; r++) {
   const y = 0.45 + r * 0.52;
-  box(3.4, 0.03, 0.36, mat.white, 0, y, 0.05, { parent: shelf });
+  box(3.52, 0.03, 0.38, mat.white, 0, y, -0.05, { parent: shelf });
   let x = -1.55;
-  while (x < 1.5) {
+  while (x < 1.3) {
     const w = 0.14 + rnd() * 0.2, h = 0.14 + rnd() * 0.26;
-    if (rnd() < 0.3) cyl(w / 2.4, w / 2.4, h, M(cloth[Math.floor(rnd() * 12)]), x + w / 2, y + 0.03, 0.06, { parent: shelf, seg: 14 });
-    else box(w, h, 0.22, M(cloth[Math.floor(rnd() * 12)]), x + w / 2, y + 0.03, 0.06, { parent: shelf });
+    if (rnd() < 0.3) cyl(w / 2.4, w / 2.4, h, M(cloth[Math.floor(rnd() * 12)]), x + w / 2, y + 0.03, -0.04, { parent: shelf, seg: 14 });
+    else box(w, h, 0.22, M(cloth[Math.floor(rnd() * 12)]), x + w / 2, y + 0.03, -0.04, { parent: shelf });
     x += w + 0.05 + rnd() * 0.08;
   }
 }
@@ -290,10 +294,10 @@ box(1.84, 0.02, 0.74, mat.white, 0, 1.08, 0, { parent: vcase, edges: false });
 for (let i = 0; i < 5; i++) box(0.18, 0.06 + rnd() * 0.1, 0.18, M(cloth[(i * 3 + 1) % 12]), -0.7 + i * 0.35, 0.84, (rnd() - .5) * 0.3, { parent: vcase });
 for (let i = 0; i < 4; i++) box(0.22, 0.05, 0.16, M(cloth[(i * 4 + 2) % 12]), -0.55 + i * 0.37, 1.1, (rnd() - .5) * 0.3, { parent: vcase });
 const low = new THREE.Group(); low.position.set(-3.9, 0, -6.2); scene.add(low);
-box(1.7, 0.7, 0.7, mat.white, 0, 0, 0, { parent: low });
+box(1.66, 0.62, 0.66, mat.white, 0, 0, 0, { parent: low });
 box(1.7, 0.08, 0.7, woodDark ? new THREE.MeshStandardMaterial({ map: woodDark }) : mat.oak, 0, 0.62, 0, { parent: low });
 for (let i = 0; i < 4; i++) box(0.28, 0.04 + i * 0.02, 0.36, M(cloth[(i * 2 + 3) % 12]), -0.55 + i * 0.36, 0.7, 0, { parent: low });
-plant(-4.9, -1.5, 1.15); plant(-4.3, -1.25, 0.95);
+plant(-4.95, -1.7, 1.15); plant(-4.15, -1.0, 0.95);
 
 // Devant à droite : table en bois et chaises, suspensions
 const oakMat = new THREE.MeshStandardMaterial({ map: woodFloor, roughness: 0.6 });
@@ -320,7 +324,7 @@ tree(6.3, -1.1, 0.9);
 const C = { x: 3.2, z: -8.3 };
 const counter = new THREE.Group(); counter.position.set(C.x, 0, C.z); scene.add(counter);
 box(3.0, 0.98, 0.62, new THREE.MeshStandardMaterial({ map: woodDark, roughness: 0.7 }), 0, 0, 0.02, { parent: counter });
-box(3.12, 0.05, 0.78, mat.white, 0, 0.98, -0.02, { parent: counter });
+box(3.18, 0.05, 0.8, mat.white, 0, 0.98, -0.02, { parent: counter });
 box(0.1, 0.98, 0.7, mat.white, -1.52, 0, 0, { parent: counter }); box(0.1, 0.98, 0.7, mat.white, 1.52, 0, 0, { parent: counter });
 box(3.0, 0.06, 0.04, mat.black, 0, 0, 0.33, { parent: counter, edges: false });
 // Moniteur : pied, bras, dalle. L'écran regarde vers le fond (-z), côté vendeur.
@@ -337,7 +341,9 @@ box(0.42, 0.02, 0.14, mat.white, -0.05, TOP, -0.22, { parent: counter });
 const mouse = box(0.06, 0.025, 0.1, mat.white, 0.32, TOP, -0.22, { parent: counter, round: 0.012 });
 box(0.4, 0.004, 0.3, mat.black, 0.32, TOP, -0.22, { parent: counter, edges: false, cast: false });
 box(0.09, 0.04, 0.16, mat.black, -0.9, TOP, 0.05, { parent: counter, round: 0.01 });
-box(0.34, 0.3, 0.12, M('#d9cdb8'), 1.05, TOP, 0.05, { parent: counter });
+box(0.24, 0.26, 0.1, M('#d9cdb8'), 1.1, TOP, 0.12, { parent: counter }); // petit sac kraft et ses anses
+for (const dx of [-0.05, 0.05]) box(0.012, 0.06, 0.012, mat.black, 1.1 + dx, TOP + 0.26, 0.12, { parent: counter, edges: false, cast: false });
+box(0.112, 0.012, 0.012, mat.black, 1.1, TOP + 0.32, 0.12, { parent: counter, edges: false, cast: false });
 cyl(0.045, 0.04, 0.1, M('#b65f4a'), -0.6, TOP, -0.15, { parent: counter, seg: 12 });
 // Tabouret du vendeur
 cyl(0.2, 0.2, 0.05, mat.black, 3.9, 0.7, -9.3, { seg: 20 }); cyl(0.025, 0.025, 0.7, mat.steel, 3.9, 0, -9.3, { seg: 8 });
