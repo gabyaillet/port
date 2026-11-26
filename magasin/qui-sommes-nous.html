@@ -11,8 +11,9 @@
 <style>
 /* Un mur d'enduit gris où passent des ombres de feuillage ; au défilement, les lettres de « bienvenue » tombent une à une en s'effaçant
    et la caméra les suit. Un trait épais au bout rond se dessine avec le défilement, fait des boucles au hasard, suit la chute
-   puis mène à nos deux profils et à nos projets. */
-:root { --wall: #d2d2d0; --ink: #141414; --muted: #5d5d5a; --card: #e6e6e4; --line: #141414;
+   puis mène à nos deux profils et à nos projets. Couleurs vives et transitions en rideau, dans l'esprit de lusion.co et unseen.co. */
+:root { --wall: #d2d2d0; --ink: #141414; --muted: #5d5d5a; --card: #e6e6e4;
+  --c1: #2f45ff; --c2: #7a3cff; --c3: #ff4f8b; --c4: #ff8a3d; --c5: #22c1ff;   /* les couleurs vives : bleu électrique, violet, rose, orange, cyan */
   --f: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; color-scheme: light; }
 * { box-sizing: border-box; }
 html { background: var(--wall); }
@@ -30,10 +31,10 @@ img { display: block; max-width: 100%; }
 
 /* Le trait : posé sur la page (il défile avec elle), devant les lettres, derrière les cartes */
 .ribbon { position: absolute; left: 0; top: 0; width: 100%; z-index: 2; pointer-events: none; overflow: visible; display: block; }
-.ribbon path { fill: none; stroke: var(--line); stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
+.ribbon path { fill: none; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
 
 /* Le titre et sa chute */
-.fall { position: relative; height: 270svh; }
+.fall { position: relative; height: 200svh; }
 .stage { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; }
 h1 { position: relative; margin: 0; font: 500 clamp(2.6rem, 7vw, 5.2rem)/1 var(--f); letter-spacing: -.02em; display: flex; }
 h1 .l { display: inline-block; will-change: transform, opacity; transform-origin: 50% 60%; }
@@ -42,35 +43,85 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 @keyframes cue { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); transform-origin: top; } 50.01% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
 @media (prefers-reduced-motion: reduce) { .cue::after { animation: none; } }
 
-/* Qui sommes-nous : nos deux profils */
+/* La première page : une lueur colorée derrière le mot, et quelques lignes autour */
+.aura { position: absolute; left: 50%; top: 50%; width: min(86vmin, 760px); aspect-ratio: 1.5; translate: -50% -50%; pointer-events: none; mix-blend-mode: multiply; will-change: transform, opacity; }
+.aura i { position: absolute; border-radius: 50%; filter: blur(46px); }
+.aura i:nth-child(1) { left: 4%; top: 14%; width: 52%; height: 70%; background: var(--c1); opacity: .5; animation: drift1 15s ease-in-out infinite alternate; }
+.aura i:nth-child(2) { right: 2%; top: 8%; width: 48%; height: 64%; background: var(--c3); opacity: .42; animation: drift2 18s ease-in-out infinite alternate; }
+.aura i:nth-child(3) { left: 30%; bottom: 0; width: 44%; height: 52%; background: var(--c4); opacity: .45; animation: drift3 13s ease-in-out infinite alternate; }
+.aura i:nth-child(4) { left: 34%; top: 0; width: 34%; height: 46%; background: var(--c2); opacity: .4; animation: drift2 21s ease-in-out infinite alternate-reverse; }
+@keyframes drift1 { to { transform: translate(12%, 10%) scale(1.12); } }
+@keyframes drift2 { to { transform: translate(-14%, 12%) scale(.9); } }
+@keyframes drift3 { to { transform: translate(10%, -16%) scale(1.15); } }
+.hero-x { position: absolute; transition: opacity .2s linear; }
+.hero-top { left: 50%; top: calc(50% - clamp(4.4rem, 9vw, 6.6rem)); translate: -50% 0; font: 400 .66rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: #4a4a48; white-space: nowrap; }
+.hero-bl { left: max(20px, 5vw); bottom: calc(env(safe-area-inset-bottom, 0px) + 2rem); font: 400 .64rem/1.9 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: #4a4a48; }
+.hero-br { right: max(20px, 5vw); bottom: calc(env(safe-area-inset-bottom, 0px) + 2rem); max-width: 17rem; text-align: right; font: 400 .95rem/1.45 var(--f); color: #2e2e2c; }
+.hero-bl b, .hero-br b { font-weight: 400; background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@media (max-width: 600px) { .hero-bl { display: none; } .hero-br { max-width: 12rem; font-size: .82rem; } .cue { left: max(20px, 5vw); transform: none; } }
+@media (prefers-reduced-motion: reduce) { .aura i { animation: none; } }
+
+/* Qui sommes-nous : un manifeste qui se révèle mot à mot, puis nos deux cartes qui s'empilent */
 .team, .work, .foot { position: relative; z-index: 3; }
-.team { padding: 14svh 0 18svh; }
+.team { padding: 2svh 0 10svh; }
 .head { display: grid; grid-template-columns: 1fr minmax(0, 24rem); gap: 1.5rem 3rem; align-items: end; margin-bottom: clamp(2.5rem, 6vw, 4.5rem); }
 h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacing: -.045em; }
 .head p { margin: 0; font-size: 1.02rem; line-height: 1.55; color: #3a3a38; }
-.profiles { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 4vw, 4rem); }
-.profile { background: var(--card); border-radius: 20px; padding: clamp(1.4rem, 3vw, 2.2rem); box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 30px 60px -40px rgba(0,0,0,.35);
-  display: grid; gap: 1.4rem; align-content: start; }
-.profile .who { display: flex; align-items: center; gap: 1rem; }
-.mono { flex: none; width: 3.6rem; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--ink); display: grid; place-items: center; font: 500 1rem var(--f); letter-spacing: .02em; }
-.profile h3 { margin: 0; font: 500 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--f); letter-spacing: -.03em; }
-.profile .role { margin: .3rem 0 0; font: 400 .66rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
-.profile dl { margin: 0; display: grid; gap: .9rem; }
-.profile dl div { display: grid; grid-template-columns: 7.5rem 1fr; gap: 1rem; padding-top: .9rem; border-top: 1px solid rgba(20,20,20,.12); }
-.profile dt { font: 400 .66rem/1.9 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-.profile dd { margin: 0; line-height: 1.5; }
+.grad { background: linear-gradient(90deg, var(--c1), var(--c2) 45%, var(--c3) 75%, var(--c4)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.manifesto { margin: 0 0 clamp(3.5rem, 9vw, 7rem); max-width: 17em; font: 500 clamp(1.9rem, 4.4vw, 4rem)/1.06 var(--f); letter-spacing: -.035em; -webkit-text-stroke: 4px #d8d8d6; paint-order: stroke fill; }
+.manifesto .w { opacity: .14; }
+.grad, .grad .w, .head h2 .grad { -webkit-text-stroke: 0; }   /* pas de contour sur les mots en dégradé */
+.paused, .paused * { animation-play-state: paused !important; }
+.people { display: grid; }
+.person { --dim: 0; position: sticky; top: calc(4.6rem + var(--n) * 1.6rem); height: min(80svh, 44rem); margin-bottom: 10svh; border-radius: 28px; overflow: hidden; isolation: isolate;
+  background: #0e0e11; color: #ededeb; display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); transform-origin: 50% 0; box-shadow: 0 50px 90px -50px rgba(0,0,0,.55); }
+.person:last-child { margin-bottom: 0; }
+.person::after { content: ""; position: absolute; inset: 0; background: #000; opacity: var(--dim); pointer-events: none; z-index: 5; }
+.p-art { position: relative; overflow: hidden; margin: 10px; border-radius: 20px; background: #15151a; }
+.p-art .orb { position: absolute; inset: -25%; filter: blur(42px) saturate(1.15);
+  background: radial-gradient(closest-side at 30% 35%, var(--a), transparent), radial-gradient(closest-side at 72% 58%, var(--b), transparent), radial-gradient(closest-side at 42% 82%, var(--c), transparent);
+  animation: orb 18s ease-in-out infinite alternate; }
+@keyframes orb { to { transform: rotate(50deg) scale(1.18); } }
+.p-art .noise { position: absolute; inset: 0; opacity: .5; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.p-ring { position: absolute; left: 50%; top: 50%; width: min(72%, 26rem); aspect-ratio: 1; border: 1.5px solid rgba(255,255,255,.55); border-radius: 50%; translate: -50% -50%; }
+.p-ini { position: absolute; left: 50%; top: 50%; translate: -50% -52%; font: 500 clamp(5.5rem, 14vw, 13rem)/1 var(--f); letter-spacing: -.06em; color: #fff; mix-blend-mode: overlay; }
+.p-idx, .p-loc { position: absolute; font: 400 .66rem var(--mono); letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.85); }
+.p-idx { left: 1.3rem; top: 1.2rem; } .p-loc { right: 1.3rem; bottom: 1.2rem; }
+.p-body { padding: clamp(1.6rem, 3.4vw, 3rem) clamp(1.4rem, 3.4vw, 3rem) clamp(1.6rem, 3.4vw, 3rem) clamp(.6rem, 2vw, 2rem); display: flex; flex-direction: column; justify-content: space-between; gap: 1.6rem; min-width: 0; }
+.p-role { margin: 0; font: 400 .66rem var(--mono); letter-spacing: .18em; text-transform: uppercase; color: #9a9aa2; }
+.p-name { margin: .9rem 0 0; font: 500 clamp(2.8rem, 6vw, 6rem)/.9 var(--f); letter-spacing: -.055em; }
+.p-name span { display: block; }
+.p-facts { margin: 0; display: grid; }
+.p-facts div { display: grid; grid-template-columns: 8rem 1fr; gap: 1rem; padding: .95rem 0; border-top: 1px solid rgba(255,255,255,.13); }
+.p-facts dt { font: 400 .64rem/1.9 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: #8d8d95; }
+.p-facts dd { margin: 0; line-height: 1.5; color: #e4e4e6; }
+.p-facts dd.todo { color: #6d6d75; }
 .tags { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; list-style: none; }
-.tags li { font: 400 .66rem var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: .38rem .7rem; border-radius: 99px; border: 1px solid rgba(20,20,20,.25); }
-.more { justify-self: start; color: var(--ink); font: 500 .95rem var(--f); text-decoration: none; display: inline-flex; gap: .5rem; align-items: center; border-bottom: 1px solid currentColor; padding-bottom: .15rem; }
-.more span { transition: transform .3s; } .more:hover span { transform: translateX(4px); }
+.tags li { font: 400 .64rem var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: .38rem .7rem; border-radius: 99px; border: 1px solid rgba(255,255,255,.28); }
+.more { align-self: flex-start; color: #fff; font: 500 .95rem var(--f); text-decoration: none; display: inline-flex; gap: .6rem; align-items: center; padding: .7rem 1.1rem; border-radius: 99px;
+  background: linear-gradient(90deg, var(--a), var(--b)); transition: filter .3s; }
+.more span { transition: transform .3s; } .more:hover span { transform: translateX(4px); } .more:hover { filter: brightness(1.12); }
+.more:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+@media (max-width: 860px) {
+  .person { position: relative; top: auto; height: auto; grid-template-columns: 1fr; margin-bottom: 1.2rem; }
+  .p-art { height: min(52svh, 24rem); }
+  .p-body { padding: 1.2rem 1.4rem 1.6rem; }
+  .p-facts div { grid-template-columns: 1fr; gap: .25rem; }
+}
+@media (prefers-reduced-motion: reduce) { .p-art .orb { animation: none; } }
 
 /* Nos projets : des cartes en grille, comme une galerie */
 .work { padding: 6svh 0 16svh; }
 .cards { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem) clamp(1rem, 2.4vw, 2rem); }
 .card { display: grid; gap: .9rem; color: inherit; text-decoration: none; }
-.card .img { border-radius: 16px; overflow: hidden; aspect-ratio: 16 / 10; background: #c4c4c2; transform: translateZ(0); }
+.card .img { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 16 / 10; background: #c4c4c2; transform: translateZ(0); }
 .card img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s cubic-bezier(.16,1,.3,1); }
 .card:hover img { transform: scale(1.04); }
+/* au survol, l'image prend un voile coloré (bleu, violet, rose) qui glisse */
+.card .img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(120deg, var(--c1), var(--c2) 50%, var(--c3)); mix-blend-mode: color; opacity: 0; transition: opacity .6s; }
+.card:hover .img::after, .card:focus-visible .img::after { opacity: .75; }
+.card .num { font: 400 .64rem var(--mono); letter-spacing: .14em; color: var(--muted); margin-right: .2rem; }
 .card .cap { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
 .card h3 { margin: 0; font: 500 clamp(1.1rem, 1.7vw, 1.4rem) var(--f); letter-spacing: -.02em; display: flex; gap: .6rem; align-items: baseline; }
 .card h3 span { display: inline-block; transition: transform .4s cubic-bezier(.16,1,.3,1); }
@@ -87,7 +138,7 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 @media (prefers-reduced-motion: reduce) { .js .rise, .js .card.rise .img { opacity: 1; transform: none; transition: none; } }
 
 /* Quand le trait passe sous un texte posé sur le mur, il s'interrompt autour des lettres : le texte reste lisible */
-.head h2, .head .label, .card .cap { -webkit-text-stroke: 4px #d8d8d6; paint-order: stroke fill; }
+.head h2, .head .label, .team > .wrap > .label, .card .cap { -webkit-text-stroke: 4px #d8d8d6; paint-order: stroke fill; }
 .head > p { -webkit-text-stroke: 3px #d8d8d6; paint-order: stroke fill; }
 .foot { padding: 3rem 0 calc(env(safe-area-inset-bottom, 0px) + 2.5rem); }
 .foot .wrap { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font: 400 .66rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
@@ -95,8 +146,7 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 
 @media (max-width: 760px) {
   .head { grid-template-columns: 1fr; }
-  .profiles, .cards { grid-template-columns: 1fr; }
-  .profile dl div { grid-template-columns: 1fr; gap: .3rem; }
+  .cards { grid-template-columns: 1fr; }
 }
 
 /* Arrivée sur la page (après l'intro) : tout apparaît en douceur, l'un après l'autre */
@@ -138,6 +188,13 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 .nav-close { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 1rem); right: max(20px, env(safe-area-inset-right, 0px)); border-color: #ededeb; color: #ededeb; }
 .nav-close:hover { background: #ededeb; color: #0d0d0d; }
 @media (prefers-reduced-motion: reduce) { .nav, .nav a { transition: none !important; } }
+
+/* Transition entre les pages : un rideau en dégradé monte du bas avec un bord courbe, puis s'en va par le haut */
+.curtain { position: fixed; left: 0; right: 0; top: 0; height: 100lvh; z-index: 400; pointer-events: none; visibility: hidden;
+  background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); transform: translateY(100%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; }
+.curtain.cover { visibility: visible; transform: none; border-radius: 0; transition: transform .8s cubic-bezier(.76,0,.24,1), border-radius .8s cubic-bezier(.76,0,.24,1); }
+.curtain.leave { visibility: visible; transform: translateY(-100%); border-radius: 0 0 50% 50% / 0 0 14% 14%; transition: transform .9s cubic-bezier(.76,0,.24,1), border-radius .9s cubic-bezier(.76,0,.24,1); }
+.curtain.leave-start { visibility: visible; transform: none; border-radius: 0; transition: none; }
 </style>
 <script>document.documentElement.classList.add('js');</script>
 </head>
@@ -160,66 +217,75 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 
 <section class="fall" id="top" aria-label="Bienvenue">
   <div class="stage">
+    <div class="aura" id="aura" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <p class="hero-x hero-top">Gabriel Aillet &amp; Arthur Goubill</p>
     <h1 id="title" aria-label="bienvenue">bienvenue</h1>
+    <p class="hero-x hero-bl">Obtura Studio<br><b>Web design</b> · Nantes</p>
+    <p class="hero-x hero-br">On crée et on entretient des sites web pour les <b>entreprises</b>.</p>
     <span class="cue" id="cue">Défiler</span>
   </div>
 </section>
 
-<section class="team" id="equipe" aria-labelledby="t-title">
-  <div class="wrap">
-    <div class="head" id="team-head">
-      <div><p class="label">Qui sommes-nous</p><h2 id="t-title">Deux à Nantes,<br>un seul studio.</h2></div>
-      <p>Obtura Studio, c'est Gabriel et Arthur, étudiants à Nantes. On crée et on entretient des sites web pour les entreprises, et on fait tout à deux : le design, le développement et le lien avec vous.</p>
-    </div>
-    <div class="profiles" id="profiles">
-      <article class="profile rise">
-        <div class="who"><span class="mono" aria-hidden="true">GA</span><div><h3>Gabriel Aillet</h3><p class="role">Cofondateur</p></div></div>
-        <dl>
+<section class="team" id="equipe" aria-label="Qui sommes-nous">
+  <div class="wrap" id="team-head">
+    <p class="label">Qui sommes-nous</p>
+    <p class="manifesto" id="manifesto">Deux étudiants à Nantes, <span class="grad">un seul studio.</span> On crée et on entretient des sites web pour les entreprises, et on fait tout à deux : le design, le développement et le lien avec vous.</p>
+  </div>
+  <div class="wrap people" id="profiles">
+    <article class="person" style="--n:0; --a:#2f45ff; --b:#7a3cff; --c:#22c1ff">
+      <div class="p-art" aria-hidden="true"><div class="orb"></div><div class="noise"></div><div class="p-ring"></div><span class="p-ini">GA</span><span class="p-idx">01</span><span class="p-loc">Nantes</span></div>
+      <div class="p-body">
+        <div><p class="p-role">Cofondateur · Obtura Studio</p><h3 class="p-name"><span>Gabriel</span><span>Aillet</span></h3></div>
+        <dl class="p-facts">
           <div><dt>Formation</dt><dd>BUT informatique intégré à Polytech Nantes</dd></div>
           <div><dt>Chez Obtura</dt><dd>Design, développement, démarchage et relation client. A imaginé l'intro 3D de la boutique et ce site.</dd></div>
           <div><dt>Outils</dt><dd><ul class="tags"><li>HTML / CSS</li><li>JavaScript</li><li>PHP / SQL</li><li>Photoshop</li><li>Illustrator</li></ul></dd></div>
         </dl>
         <a class="more" href="https://gabyaillet.github.io/port/">Son portfolio <span aria-hidden="true">→</span></a>
-      </article>
-      <article class="profile rise">
-        <div class="who"><span class="mono" aria-hidden="true">AG</span><div><h3>Arthur Goubill</h3><p class="role">Cofondateur</p></div></div>
-        <dl>
-          <div><dt>Formation</dt><dd>À compléter</dd></div>
+      </div>
+    </article>
+    <article class="person" style="--n:1; --a:#ff4f8b; --b:#ff8a3d; --c:#7a3cff">
+      <div class="p-art" aria-hidden="true"><div class="orb"></div><div class="noise"></div><div class="p-ring"></div><span class="p-ini">AG</span><span class="p-idx">02</span><span class="p-loc">Nantes</span></div>
+      <div class="p-body">
+        <div><p class="p-role">Cofondateur · Obtura Studio</p><h3 class="p-name"><span>Arthur</span><span>Goubill</span></h3></div>
+        <dl class="p-facts">
+          <div><dt>Formation</dt><dd class="todo">À compléter</dd></div>
           <div><dt>Chez Obtura</dt><dd>Design, développement, démarchage et relation client.</dd></div>
-          <div><dt>Outils</dt><dd>À compléter</dd></div>
+          <div><dt>Outils</dt><dd class="todo">À compléter</dd></div>
         </dl>
-      </article>
-    </div>
+      </div>
+    </article>
   </div>
 </section>
 
 <section class="work" id="projets" aria-labelledby="w-title">
   <div class="wrap">
     <div class="head" id="work-head">
-      <div><p class="label">Nos projets</p><h2 id="w-title">Projets en vitrine</h2></div>
+      <div><p class="label">Nos projets</p><h2 id="w-title">Projets en <span class="grad">vitrine</span></h2></div>
       <p>Ce qu'on a déjà fait, en attendant les sites de nos premiers clients.</p>
     </div>
     <div class="cards" id="cards">
       <a class="card rise" href="./">
         <div class="img"><img src="./img/boutique-obtura.jpg" alt="La façade de la boutique Obtura en 3D, avec son enseigne" width="1200" height="750" loading="lazy" decoding="async"></div>
-        <div class="cap"><h3><span aria-hidden="true">→</span>La boutique Obtura</h3><span class="meta">Obtura · Intro 3D</span></div>
+        <div class="cap"><h3><span aria-hidden="true">→</span>La boutique Obtura</h3><span class="meta"><span class="num">01</span> · Obtura · Intro 3D</span></div>
       </a>
       <a class="card rise" href="https://gabyaillet.github.io/port/vitrine/">
         <div class="img"><img src="./img/ville-2cv.jpg" alt="La place d'une petite ville en 3D, avec une 2CV devant les lettres BIENVENUE" width="1200" height="750" loading="lazy" decoding="async"></div>
-        <div class="cap"><h3><span aria-hidden="true">→</span>La ville en 2CV</h3><span class="meta">Gabriel · 3D</span></div>
+        <div class="cap"><h3><span aria-hidden="true">→</span>La ville en 2CV</h3><span class="meta"><span class="num">02</span> · Gabriel · 3D</span></div>
       </a>
       <a class="card rise" href="https://gabyaillet.github.io/port/projets.html">
         <div class="img"><img src="./img/boutique-vins.jpg" alt="Maquette du site Le Cellier : trois bouteilles stylisées et le nom en grand" width="1200" height="750" loading="lazy" decoding="async"></div>
-        <div class="cap"><h3><span aria-hidden="true">→</span>Boutique de vins</h3><span class="meta">Gabriel · Projet d'IUT</span></div>
+        <div class="cap"><h3><span aria-hidden="true">→</span>Boutique de vins</h3><span class="meta"><span class="num">03</span> · Gabriel · Projet d'IUT</span></div>
       </a>
       <a class="card rise" href="https://gabyaillet.github.io/port/projets.html">
         <div class="img"><img src="./img/particules.jpg" alt="Un nuage de particules blanches sur fond noir" width="1200" height="750" loading="lazy" decoding="async"></div>
-        <div class="cap"><h3><span aria-hidden="true">→</span>Générateur de particules</h3><span class="meta">Gabriel · Projet d'IUT</span></div>
+        <div class="cap"><h3><span aria-hidden="true">→</span>Générateur de particules</h3><span class="meta"><span class="num">04</span> · Gabriel · Projet d'IUT</span></div>
       </a>
     </div>
   </div>
 </section>
 
+<div class="curtain" id="curtain" aria-hidden="true"></div>
 <footer class="foot"><div class="wrap"><span>Obtura Studio · Nantes</span><a href="./">Revoir l'intro</a></div></footer>
 
 <script>
@@ -315,6 +381,12 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       out.push(L(B1, B2, t1, t2));
     }
   }
+  // couleur du trait selon la distance parcourue : bleu électrique → violet → rose → orange → bleu…
+  const PAL = ['#2f45ff', '#7a3cff', '#ff4f8b', '#ff8a3d', '#22c1ff', '#2f45ff'].map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)));
+  const colorAt = s => { const u = (s / 2600) % (PAL.length - 1), i = Math.floor(u), f = u - i, a = PAL[i], b = PAL[i + 1];
+    return `rgb(${a.map((v, j) => Math.round(v + (b[j] - v) * f)).join(',')})`; };
+  // à l'arrivée, le début du trait se dessine tout seul
+  let introP = reduce ? 1 : 0;
   function buildRibbon() {
     let s = ribSeed; const R = () => (s = (s * 16807) % 2147483647) / 2147483647;
     const vw = innerWidth, vh = innerHeight, docH = document.documentElement.scrollHeight;
@@ -322,8 +394,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     // les points de passage, toujours plus bas les uns que les autres ; certains font une boucle
     const majors = [], M = (x, y, loop) => { const prev = majors[majors.length - 1]; majors.push({ x, y: prev ? Math.max(y, prev.y + 40) : y, loop }); };
     const fb = docBox(fall), endFall = fb.y + fb.h - vh * .35;
-    M(-60, vh * (TIP + .05), false);
-    let y = vh * (TIP + .05), side = R() < .5 ? -1 : 1;
+    // il entre par la gauche dès l'arrivée, passe sous le mot sans le barrer
+    M(-60, vh * .1, false); M(vw * (.08 + R() * .06), vh * .5, false);
+    let y = vh * .5, side = 1;
     // pendant la chute : il serpente autour du mot, de part et d'autre
     while (y < endFall - vh * .5) { y += vh * (.38 + R() * .18); side = -side; M(vw * (.5 + side * (.14 + R() * .24)), y, R() < .55); }
     const th = docBox(document.getElementById('team-head')), pr = docBox(document.getElementById('profiles'));
@@ -366,17 +439,23 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     }
     // morceaux de ~70 points (environ 280 px de trait)
     rib.textContent = ''; chunks = [];
-    const sw = Math.max(9, Math.min(18, vw * .012));
-    for (let i0 = 0; i0 < n - 1; i0 += 70) {
+    const defs = document.createElementNS(NS, 'defs'); rib.appendChild(defs);
+    const sw = Math.max(10, Math.min(20, vw * .013));
+    // morceaux de ~40 points, chacun avec son petit dégradé : la couleur change en douceur tout le long du trait
+    for (let i0 = 0, ci = 0; i0 < n - 1; i0 += 40, ci++) {
       const i1 = Math.min(n - 1, i0 + 70); let d = `M${X[i0].toFixed(1)} ${Y[i0].toFixed(1)}`;
       for (let i = i0 + 1; i <= i1; i++) d += `L${X[i].toFixed(1)} ${Y[i].toFixed(1)}`;
-      const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.style.strokeWidth = sw; rib.appendChild(p);
+      const gr = document.createElementNS(NS, 'linearGradient'); gr.id = 'rg' + ci; gr.setAttribute('gradientUnits', 'userSpaceOnUse');
+      gr.setAttribute('x1', X[i0].toFixed(1)); gr.setAttribute('y1', Y[i0].toFixed(1)); gr.setAttribute('x2', (X[i1] + (X[i1] === X[i0] && Y[i1] === Y[i0] ? 1 : 0)).toFixed(1)); gr.setAttribute('y2', Y[i1].toFixed(1));
+      gr.innerHTML = `<stop offset="0" stop-color="${colorAt(S[i0])}"/><stop offset="1" stop-color="${colorAt(S[i1])}"/>`; defs.appendChild(gr);
+      const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.style.strokeWidth = sw; p.setAttribute('stroke', `url(#rg${ci})`); rib.appendChild(p);
       chunks.push({ el: p, s0: S[i0], s1: S[i1], len: S[i1] - S[i0], st: '' });
     }
     lastL = -1;
   }
   function drawRibbon(key) {
     const n = K.length; if (!n) return;
+    if (introP < 1) key = K[0] + (key - K[0]) * introP;
     let L;
     if (key <= K[0]) L = 0; else if (key >= K[n - 1]) L = total;
     else { let lo = 0, hi = n - 1; while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (K[mid] <= key) lo = mid; else hi = mid; }
@@ -436,17 +515,73 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     }
     grain.style.transform = `translate3d(0, ${(-((descend * PAR) % 360)).toFixed(1)}px, 0)`;
     cue.style.opacity = k > .02 ? 0 : 1;
+    // la première page s'efface quand les lettres tombent ; la lueur s'éteint en grossissant
+    const hx = clamp(1 - k * 4).toFixed(3); if (hx !== render.hx) { render.hx = hx; heroX.forEach(el => el.style.opacity = hx); }
+    aura.style.opacity = clamp(1 - k * 1.6).toFixed(3); aura.style.transform = `scale(${(1 + k * .6).toFixed(3)})`;
+    const auraOff = k > .64; if (auraOff !== render.auraOff) { render.auraOff = auraOff; aura.style.visibility = auraOff ? 'hidden' : ''; aura.classList.toggle('paused', auraOff); }
+    revealWords(); stackCards();
     drawRibbon(reduce ? 1e9 : yNow + Hs * TIP);
   }
 
   // apparition des profils et des cartes
+  /* ---------- Le manifeste se révèle mot à mot au défilement ---------- */
+  const heroX = [...document.querySelectorAll('.hero-x')], aura = document.getElementById('aura');
+  const man = document.getElementById('manifesto'), words = [];
+  (function split(node) {
+    [...node.childNodes].forEach(c => {
+      if (c.nodeType === 3) { const f = document.createDocumentFragment();
+        c.textContent.split(/(\s+)/).forEach(t => { if (!t) return; if (/^\s+$/.test(t)) f.appendChild(document.createTextNode(t)); else { const w = document.createElement('span'); w.className = 'w'; w.textContent = t; f.appendChild(w); words.push(w); } });
+        c.replaceWith(f); }
+      else if (c.nodeType === 1) split(c);
+    });
+  })(man);
+  // les mots en dégradé gardent leur couleur : le dégradé est porté par chaque mot
+  man.querySelectorAll('.grad .w').forEach(w => { w.classList.add('grad'); });
+  let lastRev = -1;
+  function revealWords() {
+    const r = man.getBoundingClientRect(), vh = innerHeight;
+    const p = reduce ? 1 : clamp((vh * .85 - r.top) / (r.height + vh * .35));
+    const n = Math.round(p * words.length * 1.1 * 100) / 100; if (n === lastRev) return; lastRev = n;
+    words.forEach((w, i) => { w.style.opacity = (.14 + .86 * clamp(n - i)).toFixed(2); });
+  }
+  /* ---------- Nos deux cartes s'empilent : celle de dessous recule et s'assombrit ---------- */
+  const persons = [...document.querySelectorAll('.person')];
+  function stackCards() {
+    if (innerWidth <= 860 || reduce) return;
+    for (let i = 0; i < persons.length - 1; i++) {
+      const a = persons[i], b = persons[i + 1], top = b.getBoundingClientRect().top, stick = parseFloat(getComputedStyle(b).top) || 0;
+      const p = clamp(1 - (top - stick) / (innerHeight * .8));
+      a.style.transform = p > 0 ? `scale(${(1 - p * .05).toFixed(4)})` : ''; a.style.setProperty('--dim', (p * .55).toFixed(3));
+    }
+  }
+
+  /* ---------- Transitions entre les pages : le rideau en dégradé ---------- */
+  const curtain = document.getElementById('curtain');
+  try { if (sessionStorage.getItem('obtura-rideau')) { sessionStorage.removeItem('obtura-rideau'); curtain.classList.add('leave-start');
+    requestAnimationFrame(() => requestAnimationFrame(() => { curtain.classList.remove('leave-start'); curtain.classList.add('leave'); setTimeout(() => curtain.classList.remove('leave'), 1000); })); } } catch (e) {}
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href]'); if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || a.target === '_blank') return;
+    const href = a.getAttribute('href');
+    if (href.startsWith('#')) { const t = document.querySelector(href); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); } return; }
+    if (reduce) return;
+    e.preventDefault(); curtain.classList.remove('leave'); curtain.classList.add('cover');
+    try { const u = new URL(a.href); if (u.origin === location.origin && u.pathname.endsWith('qui-sommes-nous.html')) sessionStorage.setItem('obtura-rideau', '1'); } catch (err) {}
+    setTimeout(() => { location.href = a.href; }, 820);
+  });
+  addEventListener('pageshow', e => { if (e.persisted) curtain.classList.remove('cover', 'leave'); });
+
+  // les lueurs des cartes ne tournent que quand la carte est à l'écran
+  if ('IntersectionObserver' in window) { const po = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('paused', !e.isIntersecting))); document.querySelectorAll('.p-art').forEach(el => po.observe(el)); }
   const rises = document.querySelectorAll('.rise');
   if ('IntersectionObserver' in window && !reduce) {
     const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -12% 0px' });
     rises.forEach(el => io.observe(el));
   } else rises.forEach(el => el.classList.add('on'));
 
-  Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Promise(r => setTimeout(r, 1200))]).then(() => requestAnimationFrame(() => document.body.classList.add('in')));
+  Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Promise(r => setTimeout(r, 1200))]).then(() => requestAnimationFrame(() => {
+    document.body.classList.add('in');
+    if (introP < 1) { const t0 = performance.now() + 700; const step = now => { const t = clamp((now - t0) / 1800); introP = 1 - Math.pow(1 - t, 3); lastL = -1; render(); if (t < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
+  }));
   layout();
   // la page peut changer de hauteur (polices, taille d'écran) : on retrace alors le trait
   let rt = 0; const relayout = () => { clearTimeout(rt); rt = setTimeout(() => { layout(); lastL = -1; render(); }, 120); };
