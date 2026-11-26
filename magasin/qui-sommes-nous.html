@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
 <style>
-/* Un mur d'enduit gris où passent des ombres de feuillage qui bougent un peu ; au défilement, les lettres de « portfolio » tombent une à une et la caméra les suit, puis un fond noir monte et remplace le mur. */
+/* Un mur d'enduit gris où passent des ombres de feuillage qui bougent un peu ; au défilement, les lettres de « portfolio » tombent une à une et la caméra les suit, puis les lamelles d'un obturateur se referment et le logo se dessine sur le noir. */
 :root { --wall: #d2d2d0; --ink: #141414; --muted: #5d5d5a; --f: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; color-scheme: light; }
 * { box-sizing: border-box; }
 html { background: var(--wall); }
@@ -23,7 +23,7 @@ body { margin: 0; color: var(--ink); font-family: var(--f); -webkit-font-smoothi
   background-size: 360px 360px; }
 
 /* Le titre et sa chute */
-.fall { position: relative; z-index: 1; height: 300svh; }
+.fall { position: relative; z-index: 1; height: 360svh; }
 .stage { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; }
 h1 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.2rem)/1 var(--f); letter-spacing: -.02em; display: flex; }
 h1 .l { display: inline-block; will-change: transform, opacity; transform-origin: 50% 60%; }
@@ -34,11 +34,29 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 @media (prefers-reduced-motion: reduce) { .cue::after { animation: none; } }
 /* ---------- Après la chute : le fond change ----------
    Un fond noir monte du bas avec un bord arrondi, qui s'aplatit en remplissant l'écran (on continue de tomber). */
-.dark { position: fixed; inset: 0; z-index: 2; background: #0d0d0d; pointer-events: none; clip-path: ellipse(80% 60% at 50% 160%); }
-.next { position: relative; z-index: 3; min-height: 100svh; background: #0d0d0d; display: grid; place-items: center; color: #8f8f8b; }
-.next span { font: 400 .68rem var(--mono); letter-spacing: .2em; text-transform: uppercase; }
+.iris { position: fixed; inset: 0; z-index: 2; width: 100%; height: 100%; pointer-events: none; display: block; }
+.next { position: relative; z-index: 3; min-height: 100svh; background: #0d0d0d; display: grid; place-items: center; align-content: center; gap: 1.6rem; color: #ededeb; text-align: center; }
+.mark { width: clamp(64px, 9vw, 96px); aspect-ratio: 1; margin: 0; }
+.mark svg { width: 100%; height: 100%; overflow: visible; transform: rotate(-90deg); }
+.mark circle { fill: none; stroke: #ededeb; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 327; stroke-dashoffset: 327; }
+.next h2 { margin: 0; font: 500 clamp(2.4rem, 6vw, 4.8rem)/1 var(--f); letter-spacing: -.045em; display: flex; justify-content: center; overflow: hidden; padding: .06em 0; }
+.next h2 span { display: inline-block; transform: translateY(105%); white-space: pre; }
+.next p { margin: 0; font: 400 .68rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: #8f8f8b; opacity: 0; }
 .topbar { transition: color .5s; }
 .topbar.on-dark { --ink: #ededeb; --wall: #0d0d0d; }
+
+/* Arrivée sur la page (après l'intro) : tout apparaît en douceur, l'un après l'autre */
+body:not(.in) .wall, body:not(.in) .brand, body:not(.in) .pills, body:not(.in) h1 .l, body:not(.in) .cue { opacity: 0; }
+body.in .wall { animation: wall-in 1.6s ease both; }
+body.in .brand { animation: drop-in 1s .55s cubic-bezier(.16,1,.3,1) backwards; }
+body.in .pills { animation: drop-in 1s .7s cubic-bezier(.16,1,.3,1) backwards; }
+body.in h1 .l { animation: letter-in 1.2s calc(.25s + var(--i) * 55ms) cubic-bezier(.16,1,.3,1) backwards; }
+body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
+@keyframes wall-in { from { opacity: 0; } }
+@keyframes drop-in { from { opacity: 0; translate: 0 -8px; } }
+@keyframes letter-in { from { opacity: 0; translate: 0 .35em; filter: blur(6px); } }
+@keyframes fade-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { body.in .wall, body.in .brand, body.in .pills, body.in h1 .l, body.in .cue { animation: none; } }
 
 /* En-tête : la marque à gauche, le menu à droite (même menu plein écran que le portfolio de Gabriel) */
 .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; justify-content: flex-end; gap: 1rem;
@@ -91,8 +109,12 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
   </div>
 </section>
 
-<div class="dark" id="dark" aria-hidden="true"></div>
-<section class="next" id="suite" aria-label="La suite"><span>La suite arrive</span></section>
+<canvas class="iris" id="iris" aria-hidden="true"></canvas>
+<section class="next" id="suite" aria-labelledby="n-title">
+  <figure class="mark" aria-hidden="true"><svg viewBox="0 0 120 120"><circle id="ring" cx="60" cy="60" r="52"/></svg></figure>
+  <h2 id="n-title" aria-label="Obtura Studio">Obtura Studio</h2>
+  <p id="n-sub">La suite arrive</p>
+</section>
 
 
 <script>
@@ -166,11 +188,60 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
      Chaque lettre se décroche à son tour et chute (vitesse qui augmente). La caméra descend
      à la vitesse moyenne de la chute : le mur défile vers le haut, les lettres restent autour du centre. */
   const topbar = document.getElementById('topbar');
-  const dark = document.getElementById('dark');
+  /* ---------- Transition : l'obturateur ----------
+     Clin d'œil au nom : quand les lettres ont disparu, les lamelles d'un diaphragme d'appareil photo
+     tournent et se referment sur le mur, jusqu'au noir. Puis le cercle du logo se dessine. */
+  const iris = document.getElementById('iris'), ig = iris.getContext('2d');
+  let iW = 0, iH = 0, iDpr = 1, lastQ = -1;
+  function irisSize() { iDpr = Math.min(devicePixelRatio || 1, 2); iW = innerWidth; iH = innerHeight; iris.width = iW * iDpr; iris.height = iH * iDpr; lastQ = -1; }
+  irisSize(); addEventListener('resize', irisSize);
+  function drawIris(q) {
+    if (q === lastQ) return; lastQ = q;
+    ig.setTransform(iDpr, 0, 0, iDpr, 0, 0); ig.clearRect(0, 0, iW, iH);
+    if (q <= 0) return;
+    const n = 7, cx = iW / 2, cy = iH / 2, R0 = Math.hypot(iW, iH) * .56, L = Math.hypot(iW, iH) * 2;
+    const e = q < .5 ? 4 * q * q * q : 1 - Math.pow(-2 * q + 2, 3) / 2;   // lent, rapide, lent
+    const r = R0 * (1 - e), rot = .35 + e * 1.25;
+    const v = Array.from({ length: n }, (_, i) => { const a = rot + i * Math.PI * 2 / n; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; });
+    const d = v.map((p, i) => { const o = v[(i + 1) % n], dx = o[0] - p[0], dy = o[1] - p[1], l = Math.hypot(dx, dy) || 1; return r > .5 ? [dx / l, dy / l] : [Math.cos(rot + (i + .5) * Math.PI * 2 / n + Math.PI / 2), Math.sin(rot + (i + .5) * Math.PI * 2 / n + Math.PI / 2)]; });
+    // fond plein avec le trou de l'ouverture (pas de fente possible entre deux lamelles)
+    ig.fillStyle = '#0d0d0d'; ig.beginPath(); ig.rect(0, 0, iW, iH);
+    if (r > .5) { v.forEach((p, i) => i ? ig.lineTo(p[0], p[1]) : ig.moveTo(p[0], p[1])); ig.closePath(); }
+    ig.fill('evenodd');
+    // ombre portée des lamelles sur le mur
+    ig.save(); ig.shadowColor = 'rgba(0,0,0,.35)'; ig.shadowBlur = 40;
+    for (let i = 0; i < n; i++) {
+      const a = v[(i + 1) % n], b = v[(i + 2) % n], da = d[i], db = d[(i + 1) % n];
+      const grd = ig.createLinearGradient(a[0], a[1], a[0] + da[0] * iW * .6, a[1] + da[1] * iW * .6);
+      grd.addColorStop(0, i % 2 ? '#1d1d1f' : '#19191b'); grd.addColorStop(1, '#0d0d0d');
+      ig.fillStyle = grd;
+      ig.beginPath(); ig.moveTo(a[0], a[1]); ig.lineTo(a[0] + da[0] * L, a[1] + da[1] * L); ig.lineTo(b[0] + db[0] * L, b[1] + db[1] * L); ig.lineTo(b[0], b[1]); ig.closePath(); ig.fill();
+    }
+    ig.restore();
+    // arêtes métalliques des lamelles
+    ig.lineWidth = 1; ig.strokeStyle = `rgba(255,255,255,${(.1 * (1 - e * .7)).toFixed(3)})`;
+    for (let i = 0; i < n; i++) { const a = v[(i + 1) % n], da = d[i]; ig.beginPath(); ig.moveTo(a[0], a[1]); ig.lineTo(a[0] + da[0] * L, a[1] + da[1] * L); ig.stroke(); }
+    // une fois fermé, les lamelles se fondent dans le noir
+    if (e > .6) {
+      ig.fillStyle = `rgba(13,13,13,${Math.pow((e - .6) / .4, 2).toFixed(3)})`; ig.beginPath(); ig.rect(0, 0, iW, iH);
+      if (r > .5) { v.forEach((p, i) => i ? ig.lineTo(p[0], p[1]) : ig.moveTo(p[0], p[1])); ig.closePath(); }
+      ig.fill('evenodd');
+    }
+    if (r > 1) { ig.strokeStyle = 'rgba(255,255,255,.22)'; ig.beginPath(); v.forEach((p, i) => i ? ig.lineTo(p[0], p[1]) : ig.moveTo(p[0], p[1])); ig.closePath(); ig.stroke(); }
+  }
+  const ring = document.getElementById('ring'), nTitle = document.getElementById('n-title'), nSub = document.getElementById('n-sub'), next = document.getElementById('suite');
+  nTitle.innerHTML = [...nTitle.textContent].map(c => `<span aria-hidden="true">${c}</span>`).join('');
+  const nLetters = [...nTitle.children];
+  function revealNext() {
+    const t = next.getBoundingClientRect().top, p = clamp((innerHeight - t) / (innerHeight * .9));
+    ring.style.strokeDashoffset = (327 * (1 - clamp(p * 1.4))).toFixed(1);
+    nLetters.forEach((el, i) => { const e = clamp((p - .45 - i * .025) / .35); el.style.transform = `translateY(${((1 - (1 - Math.pow(1 - e, 3))) * 105).toFixed(1)}%)`; });
+    nSub.style.opacity = clamp((p - .85) / .15).toFixed(3);
+  }
   const title = document.getElementById('title'), cue = document.getElementById('cue'), fall = document.querySelector('.fall'), grain = document.querySelector('.grain');
   const word = title.textContent; title.textContent = '';
-  const letters = [...word].map(ch => {
-    const s = document.createElement('span'); s.className = 'l'; s.textContent = ch; s.setAttribute('aria-hidden', 'true'); title.appendChild(s);
+  const letters = [...word].map((ch, i) => {
+    const s = document.createElement('span'); s.className = 'l'; s.textContent = ch; s.setAttribute('aria-hidden', 'true'); title.appendChild(s); s.style.setProperty('--i', i);
     return { el: s, d: Math.random() * .32, g: .85 + Math.random() * .3, rot: (Math.random() < .5 ? -1 : 1) * (40 + Math.random() * 90), drift: (Math.random() - .5) * 2, ph: Math.random() * 6 };
   });
   function update() {
@@ -191,14 +262,14 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
     });
     grain.style.backgroundPositionY = (-descend * PAR).toFixed(1) + 'px';
     cue.style.opacity = k > .02 ? 0 : 1;
-    // le fond noir monte quand les lettres ont disparu : bord bombé au début, plat à la fin
-    const q = clamp((k - .5) / .42), e = q < .5 ? 2 * q * q : 1 - Math.pow(-2 * q + 2, 2) / 2;
-    const ry = 60 + e * 90, top = 100 - e * 112;                 // en % de la hauteur
-    dark.style.clipPath = `ellipse(${(80 + e * 90).toFixed(1)}% ${ry.toFixed(1)}% at 50% ${(top + ry).toFixed(1)}%)`;
-    darkFull = e > .995;
-    topbar.classList.toggle('on-dark', e > .93);
+    const q = clamp((k - .55) / .4);
+    drawIris(q); darkFull = q >= 1;
+    topbar.classList.toggle('on-dark', q > .35);
+    revealNext();
   }
 
+  Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Promise(r => setTimeout(r, 1200))]).then(() => requestAnimationFrame(() => document.body.classList.add('in')));
+  if (reduce) { ring.style.strokeDashoffset = 0; nLetters.forEach(el => el.style.transform = 'none'); nSub.style.opacity = 1; }
   if (!reduce) {
     let ticking = false;
     addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } }, { passive: true });
