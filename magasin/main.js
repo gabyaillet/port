@@ -213,8 +213,11 @@ for (const x of [-4.6, -1.6, 1.6, 4.6]) { // fenêtres d'étage, allumées
 // Enseigne
 const sign = canvasTex(1024, 128, (g, w, h) => {
   g.fillStyle = '#141416'; g.fillRect(0, 0, w, h);
-  g.strokeStyle = '#f3efe6'; g.lineWidth = 7; g.beginPath(); g.arc(70, h / 2, 30, 0, 7); g.stroke();
-  g.fillStyle = '#f3efe6'; g.font = '600 64px "Inter Tight"'; g.textBaseline = 'middle'; g.letterSpacing = '18px'; g.fillText('OBTURA', 135, h / 2 + 3); g.letterSpacing = '0px';
+  g.fillStyle = '#f3efe6'; g.font = '600 64px "Inter Tight"'; g.textBaseline = 'middle'; g.letterSpacing = '18px';
+  // logo + nom centrés sur l'enseigne
+  const tw = g.measureText('OBTURA').width - 18, total = 60 + 42 + tw, x0 = (w - total) / 2;
+  g.strokeStyle = '#f3efe6'; g.lineWidth = 7; g.beginPath(); g.arc(x0 + 30, h / 2, 30, 0, 7); g.stroke();
+  g.fillText('OBTURA', x0 + 102, h / 2 + 3); g.letterSpacing = '0px';
 });
 box(7.2, 0.62, 0.12, mat.black, 0, 3.42, 0.32, { parent: facade, lines: lineDark });
 plane(7, 0.58, new THREE.MeshBasicMaterial({ map: sign }), 0, 3.73, 0.385, 0, facade);

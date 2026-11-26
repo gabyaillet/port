@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
 <style>
-/* Un mur d'enduit gris où passent des ombres de feuillage qui bougent un peu ; au défilement, les lettres de « portfolio » tombent une à une et la caméra les suit : le mur défile, elles restent au centre. */
+/* Un mur d'enduit gris où passent des ombres de feuillage qui bougent un peu ; au défilement, les lettres de « portfolio » tombent une à une et la caméra les suit, puis un fond noir monte et remplace le mur. */
 :root { --wall: #d2d2d0; --ink: #141414; --muted: #5d5d5a; --f: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; color-scheme: light; }
 * { box-sizing: border-box; }
 html { background: var(--wall); }
@@ -23,7 +23,7 @@ body { margin: 0; color: var(--ink); font-family: var(--f); -webkit-font-smoothi
   background-size: 360px 360px; }
 
 /* Le titre et sa chute */
-.fall { position: relative; z-index: 1; height: 260svh; }
+.fall { position: relative; z-index: 1; height: 300svh; }
 .stage { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; }
 h1 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.2rem)/1 var(--f); letter-spacing: -.02em; display: flex; }
 h1 .l { display: inline-block; will-change: transform, opacity; transform-origin: 50% 60%; }
@@ -32,41 +32,20 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 @keyframes cue { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); transform-origin: top; } 50.01% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
 
 @media (prefers-reduced-motion: reduce) { .cue::after { animation: none; } }
-/* ---------- Nos projets : des rangées de cartes en verre qui défilent, courbées comme un cylindre ---------- */
-.work { position: relative; z-index: 1; margin-top: -75svh; padding: clamp(4rem, 12vh, 7rem) 0 clamp(4rem, 12vh, 7rem); overflow: hidden; }
-.work-head { padding: 0 max(20px, 5vw); display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: clamp(2rem, 6vh, 3.5rem); }
-.work-head h2 { margin: 0; font: 500 clamp(2.4rem, 6vw, 5rem)/.95 var(--f); letter-spacing: -.045em; }
-.work-head span { font: 400 .68rem var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
-.rows { display: grid; gap: clamp(1rem, 3vh, 1.8rem); }
-.row { position: relative; height: calc(var(--cw) * .82); perspective: 1300px; perspective-origin: 50% 50%; --cw: clamp(170px, 23vw, 330px); }
-.card { position: absolute; left: 0; top: 0; width: var(--cw); height: 100%; padding: .55rem .55rem .9rem; border-radius: 22px; color: var(--ink); text-decoration: none;
-  display: grid; grid-template-rows: 1fr auto; gap: .7rem; will-change: transform, opacity; backface-visibility: hidden;
-  background: linear-gradient(140deg, rgba(255,255,255,.42), rgba(255,255,255,.12) 45%, rgba(255,255,255,.22));
-  backdrop-filter: blur(18px) saturate(170%) brightness(1.04); -webkit-backdrop-filter: blur(18px) saturate(170%) brightness(1.04);
-  border: 1px solid rgba(255,255,255,.6);
-  box-shadow: inset 0 1px 1px rgba(255,255,255,.95), inset 0 -1px 1px rgba(255,255,255,.25), inset 0 0 18px rgba(255,255,255,.18), 0 18px 40px -18px rgba(0,0,0,.35), 0 4px 10px -6px rgba(0,0,0,.18); }
-.card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(115deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 28%, rgba(255,255,255,0) 72%, rgba(255,255,255,.25) 100%); mix-blend-mode: soft-light; }
-.card .mock { position: relative; border-radius: 15px; overflow: hidden; container-type: inline-size; box-shadow: 0 1px 0 rgba(255,255,255,.6), 0 6px 14px -8px rgba(0,0,0,.35); }
-.card .cap { display: flex; justify-content: space-between; align-items: baseline; padding: 0 .35rem; font: 500 .92rem var(--f); letter-spacing: -.01em; }
-.card .cap i { font: 400 .62rem var(--mono); font-style: normal; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-/* petites maquettes de sites, dessinées en CSS */
-.mock .m { position: absolute; inset: 0; padding: 7cqw; display: grid; align-content: start; gap: 4cqw; }
-.mock b, .mock u, .mock s { display: block; text-decoration: none; border-radius: 1.5cqw; }
-.mock .bar { display: flex; justify-content: space-between; align-items: center; }
-.mock .bar b { width: 18cqw; height: 3cqw; } .mock .bar u { width: 26cqw; height: 2.4cqw; }
-.mock .h { height: 7cqw; width: 70%; } .mock .h2 { height: 7cqw; width: 48%; } .mock .t { height: 2.4cqw; width: 58%; opacity: .6; }
-.mock .img { height: 22cqw; border-radius: 3cqw; } .mock .two { display: grid; grid-template-columns: 1fr 1fr; gap: 3cqw; } .mock .two s { height: 14cqw; border-radius: 2.5cqw; }
-@media (prefers-reduced-motion: reduce) { .card { will-change: auto; } }
+/* ---------- Après la chute : le fond change ----------
+   Un fond noir monte du bas avec un bord arrondi, qui s'aplatit en remplissant l'écran (on continue de tomber). */
+.dark { position: fixed; inset: 0; z-index: 2; background: #0d0d0d; pointer-events: none; clip-path: ellipse(80% 60% at 50% 160%); }
+.next { position: relative; z-index: 3; min-height: 100svh; background: #0d0d0d; display: grid; place-items: center; color: #8f8f8b; }
+.next span { font: 400 .68rem var(--mono); letter-spacing: .2em; text-transform: uppercase; }
+.topbar { transition: color .5s; }
+.topbar.on-dark { --ink: #ededeb; --wall: #0d0d0d; }
 
 /* En-tête : la marque à gauche, le menu à droite (même menu plein écran que le portfolio de Gabriel) */
 .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; justify-content: flex-end; gap: 1rem;
   min-height: 4rem; padding: env(safe-area-inset-top, 0px) max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px)); }
 .brand { position: absolute; left: max(20px, env(safe-area-inset-left, 0px)); top: calc(50% + env(safe-area-inset-top, 0px) / 2); transform: translateY(-50%);
-  transition: left .9s cubic-bezier(.76,0,.24,1), transform .9s cubic-bezier(.76,0,.24,1), font-size .9s cubic-bezier(.76,0,.24,1);
   display: flex; align-items: center; gap: .6rem; color: var(--ink); text-decoration: none; font: 500 1.15rem var(--f); letter-spacing: -.02em; }
 .brand i { width: 1.05rem; height: 1.05rem; border-radius: 50%; border: 2px solid currentColor; }
-.topbar.at-top .brand { left: 50%; transform: translate(-50%, -50%); }
 .pills { display: flex; gap: .5rem; align-items: center; }
 .pill { display: inline-flex; align-items: center; gap: .4rem; font: 500 .72rem var(--mono); letter-spacing: .08em; text-transform: uppercase; text-decoration: none; cursor: pointer;
   padding: .5rem .95rem; border-radius: 999px; border: 1px solid var(--ink); background: transparent; color: var(--ink); transition: background .3s, color .3s; }
@@ -92,7 +71,7 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 </style>
 </head>
 <body>
-<header class="topbar at-top" id="topbar">
+<header class="topbar" id="topbar">
   <a class="brand" href="#top"><i aria-hidden="true"></i>Obtura Studio</a>
   <div class="pills">
     <button class="pill" id="menu-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu <span aria-hidden="true">+</span></button>
@@ -100,7 +79,6 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 </header>
 <ul class="nav" id="nav" data-open="false">
   <li><a href="#top">Qui sommes-nous</a></li>
-  <li><a href="#projets">Nos projets</a></li>
   <li><a href="./">Revoir l'intro</a></li>
   <li class="nav-foot"><button class="pill nav-close" type="button">Fermer ✕</button></li>
 </ul>
@@ -113,14 +91,8 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
   </div>
 </section>
 
-<section class="work" id="projets" aria-labelledby="w-title">
-  <div class="work-head"><h2 id="w-title">Nos projets</h2><span>Bientôt en ligne</span></div>
-  <div class="rows" id="rows">
-    <div class="row" data-dir="-1"></div>
-    <div class="row" data-dir="1"></div>
-    <div class="row" data-dir="-1"></div>
-  </div>
-</section>
+<div class="dark" id="dark" aria-hidden="true"></div>
+<section class="next" id="suite" aria-label="La suite"><span>La suite arrive</span></section>
 
 
 <script>
@@ -152,7 +124,7 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
     { x0: .55, y0: 1.5, x1: -.05, y1: 2.1, w: .02 }, { x0: 1.05, y0: 1.75, x1: .7, y1: 2.35, w: .014 },
   ];
   // la caméra descend : le motif (2,4 écrans de haut) défile et se répète sans couture visible
-  const PER = 2.4; let descend = 0;
+  const PER = 2.4; let descend = 0, darkFull = false;
   // le mur défile moins vite que la chute (parallaxe) : plus doux pour les yeux
   const PAR = .3;
   const wy = y => { const o = y - descend * PAR / innerHeight; return ((o + .7) % PER + PER) % PER - .7; };
@@ -185,7 +157,7 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
   let lastDraw = 0, lastDesc = 0;
   function loop(now) {
     // 30 images/s suffisent pour des ombres lentes
-    if (now - lastDraw > 40 || descend !== lastDesc) { draw(now / 1000); lastDraw = now; lastDesc = descend; }
+    if (!darkFull && (now - lastDraw > 40 || descend !== lastDesc)) { draw(now / 1000); lastDraw = now; lastDesc = descend; }
     requestAnimationFrame(loop);
   }
   if (reduce) draw(0); else requestAnimationFrame(loop);
@@ -193,10 +165,8 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
   /* ---------- Les lettres qui tombent, et la caméra qui les suit ----------
      Chaque lettre se décroche à son tour et chute (vitesse qui augmente). La caméra descend
      à la vitesse moyenne de la chute : le mur défile vers le haut, les lettres restent autour du centre. */
-  // la marque est centrée en haut de page, puis glisse à gauche dès qu'on défile
   const topbar = document.getElementById('topbar');
-  const brandPos = () => topbar.classList.toggle('at-top', scrollY < 40);
-  addEventListener('scroll', brandPos, { passive: true }); brandPos();
+  const dark = document.getElementById('dark');
   const title = document.getElementById('title'), cue = document.getElementById('cue'), fall = document.querySelector('.fall'), grain = document.querySelector('.grain');
   const word = title.textContent; title.textContent = '';
   const letters = [...word].map(ch => {
@@ -221,68 +191,12 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
     });
     grain.style.backgroundPositionY = (-descend * PAR).toFixed(1) + 'px';
     cue.style.opacity = k > .02 ? 0 : 1;
-  }
-
-  /* ---------- Nos projets : rangées de cartes en verre ----------
-     Chaque rangée défile en boucle (une vers la gauche, la suivante vers la droite...).
-     Les cartes sont posées sur un cylindre : plus elles s'éloignent du centre, plus elles tournent,
-     reculent et deviennent transparentes, comme si elles sortaient de l'écran. */
-  const MOCKS = [
-    ['#f3f0ea', '#1c1c1c', '#c9b8a3'], ['#161616', '#ededeb', '#3b3b3b'], ['#e9eef2', '#21313f', '#a8bccb'],
-    ['#efe6dc', '#5a3b2a', '#d1a888'], ['#dfe5dc', '#24301f', '#9fb393'], ['#1d2230', '#e7e2d6', '#4a5470'],
-  ];
-  const mock = (i) => {
-    const [bg, ink, acc] = MOCKS[i % MOCKS.length], v = i % 3;
-    const body = v === 0 ? `<b class="h" style="background:${ink}"></b><b class="h2" style="background:${ink}"></b><u class="t" style="background:${ink}"></u><s class="img" style="background:${acc}"></s>`
-      : v === 1 ? `<s class="img" style="background:${acc}"></s><b class="h" style="background:${ink}"></b><u class="t" style="background:${ink}"></u>`
-      : `<b class="h2" style="background:${ink}"></b><div class="two"><s style="background:${acc}"></s><s style="background:${acc};opacity:.7"></s></div><u class="t" style="background:${ink}"></u>`;
-    return `<div class="mock" style="background:${bg}"><div class="m"><div class="bar"><b style="background:${ink}"></b><u style="background:${ink};opacity:.5"></u></div>${body}</div></div>`;
-  };
-  const rowsEl = [...document.querySelectorAll('.row')];
-  const rows = rowsEl.map((el, r) => ({ el, dir: +el.dataset.dir, off: Math.random() * 400, cards: [], step: 0, span: 0 }));
-  let cardNo = 0;
-  function buildRows() {
-    rows.forEach((R, r) => {
-      const w = R.el.firstElementChild ? R.el.firstElementChild.offsetWidth : 0;
-      const cardW = w || Math.min(330, Math.max(170, innerWidth * .23));
-      R.step = cardW + Math.max(16, cardW * .1);
-      const n = Math.max(6, Math.ceil(innerWidth * 1.5 / R.step) + 2);
-      while (R.cards.length < n) {
-        const k = R.cards.length, idx = (k * 3 + r * 2) % 12;
-        const a = document.createElement('div'); a.className = 'card';
-        a.innerHTML = mock(idx) + `<div class="cap"><span>Projet ${String(idx + 1).padStart(2, '0')}</span><i>À venir</i></div>`;
-        R.el.appendChild(a); R.cards.push(a);
-      }
-      while (R.cards.length > n) R.cards.pop().remove();
-      R.span = R.step * R.cards.length;
-    });
-  }
-  function placeRows() {
-    const W = innerWidth, half = W / 2;
-    rows.forEach(R => {
-      const cw = R.step / 1.1;
-      R.cards.forEach((c, i) => {
-        let x = ((i * R.step + R.off) % R.span + R.span) % R.span - R.step;   // boucle sans fin
-        const d = (x + cw / 2 - half) / half;                               // -1 bord gauche, 0 centre, 1 bord droit
-        const ad = Math.min(Math.abs(d), 1.6);
-        const rot = -Math.sign(d) * Math.min(ad * 52, 80), z = -ad * ad * 340;
-        c.style.transform = `translate3d(${x.toFixed(1)}px, 0, ${z.toFixed(1)}px) rotateY(${rot.toFixed(1)}deg)`;
-        c.style.opacity = clamp(1 - Math.pow(ad, 1.4)).toFixed(3);
-      });
-    });
-  }
-  buildRows(); placeRows();
-  addEventListener('resize', () => { buildRows(); placeRows(); });
-  let workOn = false, lastT = 0, lastY = scrollY, boost = 0;
-  new IntersectionObserver(es => { workOn = es[0].isIntersecting; if (workOn && !reduce) { lastT = 0; requestAnimationFrame(spin); } }).observe(document.getElementById('projets'));
-  function spin(t) {
-    if (!workOn) return;
-    const dt = lastT ? Math.min((t - lastT) / 1000, .05) : 0; lastT = t;
-    const dy = scrollY - lastY; lastY = scrollY;
-    boost += (Math.min(Math.abs(dy), 60) * 6 - boost) * .08;                  // le défilement accélère un peu les rangées
-    rows.forEach(R => { R.off += R.dir * (38 + boost) * dt; });
-    placeRows();
-    requestAnimationFrame(spin);
+    // le fond noir monte quand les lettres ont disparu : bord bombé au début, plat à la fin
+    const q = clamp((k - .5) / .42), e = q < .5 ? 2 * q * q : 1 - Math.pow(-2 * q + 2, 2) / 2;
+    const ry = 60 + e * 90, top = 100 - e * 112;                 // en % de la hauteur
+    dark.style.clipPath = `ellipse(${(80 + e * 90).toFixed(1)}% ${ry.toFixed(1)}% at 50% ${(top + ry).toFixed(1)}%)`;
+    darkFull = e > .995;
+    topbar.classList.toggle('on-dark', e > .93);
   }
 
   if (!reduce) {
