@@ -101,7 +101,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   <li><a href="./">Revoir l'intro</a></li>
   <li class="nav-foot"><button class="pill nav-close" type="button">Fermer ✕</button></li>
 </ul>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="14" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter><filter id="goo-s" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="4.8" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="14" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter><filter id="goo-s" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 16 -6.5"/></filter></svg>
 <div class="wall" aria-hidden="true"><canvas id="light"></canvas><div class="grain"></div></div>
 
 <canvas class="ink" id="ink" aria-hidden="true"></canvas>
@@ -202,9 +202,10 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
      s'étalent et fusionnent (filtre « goo »), puis une flaque monte du bas jusqu'au noir complet. */
   const ink = document.getElementById('ink'), xg = ink.getContext('2d');
   let xW = 0, xH = 0, lastK = -1;
-  const SCALE = .34;                                    // dessinée au tiers de la résolution puis agrandie : l'encre est lisse de toute façon
+  // résolution de l'encre : assez fine pour des bords nets (plus fine sur écran Retina), sans recalculer tout l'écran en pleine définition
+  const SCALE = Math.min(1, (devicePixelRatio || 1) > 1.5 ? .75 : .62);
   const inkOff = document.createElement('canvas'), og = inkOff.getContext('2d');
-  const CANVAS_GOO = 'filter' in xg;
+  const CANVAS_GOO = 'filter' in xg, gooBlur = document.querySelector('#goo-s feGaussianBlur');
   if (!CANVAS_GOO) ink.classList.add('css-goo');
   // la toile déborde de 40 px autour de l'écran : le flou du filtre ne ronge pas les bords
   function inkSize() { xW = innerWidth; xH = innerHeight; inkOff.width = ink.width = Math.round((xW + 80) * SCALE); inkOff.height = ink.height = Math.round((xH + 80) * SCALE); lastK = -1; }
@@ -228,7 +229,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     }
     const up = io(clamp(p * 1.3 - .25));
     c.fillRect(-O, H * (1 - up), W + 2 * O, H * up + 2 * O);
-    if (CANVAS_GOO) { xg.filter = 'url(#goo-s)'; xg.drawImage(inkOff, 0, 0); xg.filter = 'none'; }
+    if (CANVAS_GOO) { gooBlur.setAttribute('stdDeviation', (14 * SCALE).toFixed(1)); xg.filter = 'url(#goo-s)'; xg.drawImage(inkOff, 0, 0); xg.filter = 'none'; }
   }
   const ring = document.getElementById('ring'), nTitle = document.getElementById('n-title'), nSub = document.getElementById('n-sub'), next = document.getElementById('suite');
   nTitle.innerHTML = [...nTitle.textContent].map(c => `<span aria-hidden="true">${c}</span>`).join('');
