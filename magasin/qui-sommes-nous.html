@@ -7,7 +7,7 @@
 <meta name="description" content="Obtura Studio, web design à Nantes : Gabriel Aillet et Arthur Goubill, et nos projets.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400&display=swap">
 <style>
 /* Un mur d'enduit gris où passent des ombres de feuillage ; au défilement, les lettres de « bienvenue » tombent une à une en s'effaçant
    et la caméra les suit. Un trait épais au bout rond se dessine avec le défilement, fait des boucles au hasard, suit la chute
@@ -24,10 +24,9 @@ img { display: block; max-width: 100%; }
 
 /* Le mur : la lumière (canvas) puis le relief de l'enduit par-dessus */
 .wall { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-.wall canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.wall .grain { position: absolute; left: 0; right: 0; top: 0; height: calc(100% + 360px); will-change: transform; mix-blend-mode: multiply; opacity: .22;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeDiffuseLighting lighting-color='%23fff' surfaceScale='1.1'%3E%3CfeDistantLight azimuth='225' elevation='52'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 360px 360px; }
+.wall canvas { position: absolute; left: 0; top: -25%; width: 100%; height: 150%; display: block; will-change: transform; } /* plus haut que l'écran : au défilement on le fait glisser au lieu de le redessiner */
+.wall .grain { position: absolute; left: 0; right: 0; top: 0; height: calc(100% + 360px); will-change: transform;
+  background: url("./img/grain.png") 0 0 / 360px 360px; } /* le relief de l'enduit, déjà assombri : pas de mode de fusion, bien plus léger */
 
 /* Le trait : posé sur la page (il défile avec elle), devant les lettres, derrière les cartes */
 .ribbon { position: absolute; left: 0; top: 0; width: 100%; z-index: 2; pointer-events: none; overflow: visible; display: block; }
@@ -44,12 +43,12 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 @media (prefers-reduced-motion: reduce) { .cue::after { animation: none; } }
 
 /* La première page : une lueur colorée derrière le mot, et quelques lignes autour */
-.aura { position: absolute; left: 50%; top: 50%; width: min(86vmin, 760px); aspect-ratio: 1.5; translate: -50% -50%; pointer-events: none; mix-blend-mode: multiply; will-change: transform, opacity; }
-.aura i { position: absolute; border-radius: 50%; filter: blur(46px); }
-.aura i:nth-child(1) { left: 4%; top: 14%; width: 52%; height: 70%; background: var(--c1); opacity: .5; animation: drift1 15s ease-in-out infinite alternate; }
-.aura i:nth-child(2) { right: 2%; top: 8%; width: 48%; height: 64%; background: var(--c3); opacity: .42; animation: drift2 18s ease-in-out infinite alternate; }
-.aura i:nth-child(3) { left: 30%; bottom: 0; width: 44%; height: 52%; background: var(--c4); opacity: .45; animation: drift3 13s ease-in-out infinite alternate; }
-.aura i:nth-child(4) { left: 34%; top: 0; width: 34%; height: 46%; background: var(--c2); opacity: .4; animation: drift2 21s ease-in-out infinite alternate-reverse; }
+.aura { position: absolute; left: 50%; top: 50%; width: min(96vmin, 860px); aspect-ratio: 1.5; translate: -50% -50%; pointer-events: none; will-change: transform, opacity; }
+.aura i { position: absolute; border-radius: 50%; will-change: transform; } /* dégradés radiaux : doux sans filtre de flou, bien plus léger */
+.aura i:nth-child(1) { left: 4%; top: 14%; width: 52%; height: 70%; background: radial-gradient(closest-side, var(--c1), transparent); opacity: .62; animation: drift1 15s ease-in-out infinite alternate; }
+.aura i:nth-child(2) { right: 2%; top: 8%; width: 48%; height: 64%; background: radial-gradient(closest-side, var(--c3), transparent); opacity: .5; animation: drift2 18s ease-in-out infinite alternate; }
+.aura i:nth-child(3) { left: 30%; bottom: 0; width: 44%; height: 52%; background: radial-gradient(closest-side, var(--c4), transparent); opacity: .55; animation: drift3 13s ease-in-out infinite alternate; }
+.aura i:nth-child(4) { left: 34%; top: 0; width: 34%; height: 46%; background: radial-gradient(closest-side, var(--c2), transparent); opacity: .5; animation: drift2 21s ease-in-out infinite alternate-reverse; }
 @keyframes drift1 { to { transform: translate(12%, 10%) scale(1.12); } }
 @keyframes drift2 { to { transform: translate(-14%, 12%) scale(.9); } }
 @keyframes drift3 { to { transform: translate(10%, -16%) scale(1.15); } }
@@ -61,7 +60,7 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 @media (max-width: 600px) { .hero-bl { display: none; } .hero-br { max-width: 12rem; font-size: .82rem; } .cue { left: max(20px, 5vw); transform: none; } }
 @media (prefers-reduced-motion: reduce) { .aura i { animation: none; } }
 
-/* Qui sommes-nous : un manifeste qui se révèle mot à mot, puis nos deux cartes qui s'empilent */
+/* Qui sommes-nous : un manifeste qui se révèle mot à mot, puis nos deux cartes de membre, à côté de nos noms en grand */
 .team, .work, .foot { position: relative; z-index: 3; }
 .team { padding: 2svh 0 10svh; }
 .head { display: grid; grid-template-columns: 1fr minmax(0, 24rem); gap: 1.5rem 3rem; align-items: end; margin-bottom: clamp(2.5rem, 6vw, 4.5rem); }
@@ -72,44 +71,62 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .manifesto .w { opacity: .14; }
 .grad, .grad .w, .head h2 .grad { -webkit-text-stroke: 0; }   /* pas de contour sur les mots en dégradé */
 .paused, .paused * { animation-play-state: paused !important; }
-.people { display: grid; }
-.person { --dim: 0; position: sticky; top: calc(4.6rem + var(--n) * 1.6rem); height: min(80svh, 44rem); margin-bottom: 10svh; border-radius: 28px; overflow: hidden; isolation: isolate;
-  background: #0e0e11; color: #ededeb; display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); transform-origin: 50% 0; box-shadow: 0 50px 90px -50px rgba(0,0,0,.55); }
-.person:last-child { margin-bottom: 0; }
-.person::after { content: ""; position: absolute; inset: 0; background: #000; opacity: var(--dim); pointer-events: none; z-index: 5; }
-.p-art { position: relative; overflow: hidden; margin: 10px; border-radius: 20px; background: #15151a; }
-.p-art .orb { position: absolute; inset: -25%; filter: blur(42px) saturate(1.15);
-  background: radial-gradient(closest-side at 30% 35%, var(--a), transparent), radial-gradient(closest-side at 72% 58%, var(--b), transparent), radial-gradient(closest-side at 42% 82%, var(--c), transparent);
-  animation: orb 18s ease-in-out infinite alternate; }
-@keyframes orb { to { transform: rotate(50deg) scale(1.18); } }
-.p-art .noise { position: absolute; inset: 0; opacity: .5; mix-blend-mode: overlay;
+.serif { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -.01em; }
+.people { display: grid; gap: clamp(5rem, 16vh, 10rem); }
+.person { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(2rem, 6vw, 6.5rem); align-items: center; }
+.person:nth-child(even) .card-side { order: 2; }
+
+/* La carte de membre : verre sombre, lueur colorée, reflet qui suit la souris, légère inclinaison en 3D */
+.card-side { perspective: 1100px; }
+.idcard { --rx: 0deg; --ry: 0deg; --mx: 30%; --my: 20%; position: relative; width: min(100%, 25rem); aspect-ratio: 5 / 7; margin-inline: auto; border-radius: 22px; overflow: hidden; isolation: isolate;
+  color: #f4f4f2; background: #0f0f13; transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .7s cubic-bezier(.16,1,.3,1);
+  box-shadow: 0 50px 80px -40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.07) inset; }
+.idcard .orb { position: absolute; inset: -30%; will-change: transform;
+  background: radial-gradient(closest-side at 30% 28%, var(--a), transparent), radial-gradient(closest-side at 74% 56%, var(--b), transparent), radial-gradient(closest-side at 38% 84%, var(--c), transparent);
+  animation: orb 22s ease-in-out infinite alternate; }
+@keyframes orb { to { transform: rotate(40deg) scale(1.12); } }
+.idcard .noise { position: absolute; inset: 0; opacity: .16;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-.p-ring { position: absolute; left: 50%; top: 50%; width: min(72%, 26rem); aspect-ratio: 1; border: 1.5px solid rgba(255,255,255,.55); border-radius: 50%; translate: -50% -50%; }
-.p-ini { position: absolute; left: 50%; top: 50%; translate: -50% -52%; font: 500 clamp(5.5rem, 14vw, 13rem)/1 var(--f); letter-spacing: -.06em; color: #fff; mix-blend-mode: overlay; }
-.p-idx, .p-loc { position: absolute; font: 400 .66rem var(--mono); letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.85); }
-.p-idx { left: 1.3rem; top: 1.2rem; } .p-loc { right: 1.3rem; bottom: 1.2rem; }
-.p-body { padding: clamp(1.6rem, 3.4vw, 3rem) clamp(1.4rem, 3.4vw, 3rem) clamp(1.6rem, 3.4vw, 3rem) clamp(.6rem, 2vw, 2rem); display: flex; flex-direction: column; justify-content: space-between; gap: 1.6rem; min-width: 0; }
-.p-role { margin: 0; font: 400 .66rem var(--mono); letter-spacing: .18em; text-transform: uppercase; color: #9a9aa2; }
-.p-name { margin: .9rem 0 0; font: 500 clamp(2.8rem, 6vw, 6rem)/.9 var(--f); letter-spacing: -.055em; }
-.p-name span { display: block; }
-.p-facts { margin: 0; display: grid; }
-.p-facts div { display: grid; grid-template-columns: 8rem 1fr; gap: 1rem; padding: .95rem 0; border-top: 1px solid rgba(255,255,255,.13); }
-.p-facts dt { font: 400 .64rem/1.9 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: #8d8d95; }
-.p-facts dd { margin: 0; line-height: 1.5; color: #e4e4e6; }
-.p-facts dd.todo { color: #6d6d75; }
+.idcard .sheen { position: absolute; inset: 0; background: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.22), transparent 42%); pointer-events: none; }
+.idcard .glass { position: absolute; left: 0; right: 0; bottom: 0; height: 36%; background: linear-gradient(to top, rgba(10,10,14,.72), rgba(10,10,14,0)); }
+.idcard .in { position: absolute; inset: 0; padding: clamp(1.1rem, 2vw, 1.5rem); display: flex; flex-direction: column; justify-content: space-between; }
+.id-top, .id-meta { display: flex; justify-content: space-between; align-items: center; font: 400 .6rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.88); }
+.id-top span { display: inline-flex; align-items: center; gap: .5rem; }
+.id-top i { width: .8rem; height: .8rem; border-radius: 50%; border: 1.5px solid currentColor; }
+.id-ini { align-self: center; font: italic 400 clamp(7rem, 13vw, 11rem)/.8 "Instrument Serif", Georgia, serif; letter-spacing: -.03em; color: #fff; text-shadow: 0 10px 40px rgba(0,0,0,.25); }
+.id-bot { display: grid; gap: .55rem; padding-top: .9rem; border-top: 1px solid rgba(255,255,255,.35); }
+.id-name { font: 500 1.25rem/1 var(--f); letter-spacing: -.02em; }
+
+/* À côté : le nom en grand, puis les infos */
+.p-kicker { margin: 0; display: flex; align-items: center; gap: .9rem; font: 400 .66rem var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.p-kicker::after { content: ""; flex: 0 1 4rem; height: 1px; background: currentColor; opacity: .5; }
+.p-name { margin: 1rem 0 clamp(1.6rem, 4vw, 2.6rem); font: 500 clamp(3.2rem, 7.2vw, 7.4rem)/.86 var(--f); letter-spacing: -.055em; }
+.p-name .serif { display: block; font-size: 1.08em; letter-spacing: -.02em; padding-left: .5em; }
+.p-facts { margin: 0 0 2rem; display: grid; max-width: 36rem; }
+.p-facts div { display: grid; grid-template-columns: 8.5rem 1fr; gap: 1rem; padding: 1rem 0; border-top: 1px solid rgba(20,20,20,.14); }
+.p-facts div:last-child { border-bottom: 1px solid rgba(20,20,20,.14); }
+.p-facts dt { font: 400 .64rem/1.9 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.p-facts dd { margin: 0; line-height: 1.5; }
+.p-facts dd.todo { color: #8a8a87; font-style: italic; }
 .tags { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; list-style: none; }
-.tags li { font: 400 .64rem var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: .38rem .7rem; border-radius: 99px; border: 1px solid rgba(255,255,255,.28); }
-.more { align-self: flex-start; color: #fff; font: 500 .95rem var(--f); text-decoration: none; display: inline-flex; gap: .6rem; align-items: center; padding: .7rem 1.1rem; border-radius: 99px;
-  background: linear-gradient(90deg, var(--a), var(--b)); transition: filter .3s; }
-.more span { transition: transform .3s; } .more:hover span { transform: translateX(4px); } .more:hover { filter: brightness(1.12); }
-.more:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.tags li { font: 400 .62rem var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: .38rem .7rem; border-radius: 99px; border: 1px solid rgba(20,20,20,.25); background: rgba(255,255,255,.18); }
+.more { display: inline-flex; gap: .8rem; align-items: center; padding: .45rem .5rem .45rem 1.2rem; border-radius: 99px; background: var(--ink); color: #f2f2f0; font: 500 .95rem var(--f); text-decoration: none; }
+.more span { display: grid; place-items: center; width: 2rem; aspect-ratio: 1; border-radius: 50%; background: linear-gradient(135deg, var(--a), var(--b)); transition: transform .4s cubic-bezier(.16,1,.3,1); }
+.more:hover span { transform: rotate(-45deg); }
+.more:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.p-name, .p-kicker, .p-facts dt, .p-facts dd { -webkit-text-stroke: 3px #d8d8d6; paint-order: stroke fill; }
+.p-name { -webkit-text-stroke-width: 5px; }
+.js .person .card-side.rise { transform: translateY(80px) rotate(-4deg); }
+.js .person:nth-child(even) .card-side.rise { transform: translateY(80px) rotate(4deg); }
+.js .person .card-side.rise.on, .js .person:nth-child(even) .card-side.rise.on { transform: none; }
+.js .person .info.rise { transition-delay: .12s; }
 @media (max-width: 860px) {
-  .person { position: relative; top: auto; height: auto; grid-template-columns: 1fr; margin-bottom: 1.2rem; }
-  .p-art { height: min(52svh, 24rem); }
-  .p-body { padding: 1.2rem 1.4rem 1.6rem; }
+  .person { grid-template-columns: 1fr; gap: 2.2rem; }
+  .person:nth-child(even) .card-side { order: 0; }
+  .idcard { width: min(82%, 22rem); }
   .p-facts div { grid-template-columns: 1fr; gap: .25rem; }
 }
-@media (prefers-reduced-motion: reduce) { .p-art .orb { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .idcard .orb { animation: none; } }
 
 /* Nos projets : des cartes en grille, comme une galerie */
 .work { padding: 6svh 0 16svh; }
@@ -229,13 +246,22 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 <section class="team" id="equipe" aria-label="Qui sommes-nous">
   <div class="wrap" id="team-head">
     <p class="label">Qui sommes-nous</p>
-    <p class="manifesto" id="manifesto">Deux étudiants à Nantes, <span class="grad">un seul studio.</span> On crée et on entretient des sites web pour les entreprises, et on fait tout à deux : le design, le développement et le lien avec vous.</p>
+    <p class="manifesto" id="manifesto">Deux étudiants à Nantes, <span class="grad serif">un seul studio.</span> On crée et on entretient des sites web pour les entreprises, et on fait tout à deux : le design, le développement et le lien avec vous.</p>
   </div>
   <div class="wrap people" id="profiles">
-    <article class="person" style="--n:0; --a:#2f45ff; --b:#7a3cff; --c:#22c1ff">
-      <div class="p-art" aria-hidden="true"><div class="orb"></div><div class="noise"></div><div class="p-ring"></div><span class="p-ini">GA</span><span class="p-idx">01</span><span class="p-loc">Nantes</span></div>
-      <div class="p-body">
-        <div><p class="p-role">Cofondateur · Obtura Studio</p><h3 class="p-name"><span>Gabriel</span><span>Aillet</span></h3></div>
+    <article class="person" style="--a:#2f45ff; --b:#7a3cff; --c:#22c1ff">
+      <div class="card-side rise">
+        <div class="idcard" aria-hidden="true"><div class="orb"></div><div class="noise"></div><div class="glass"></div><div class="sheen"></div>
+          <div class="in">
+            <div class="id-top"><span><i></i>Obtura Studio</span><span>N° 01</span></div>
+            <div class="id-ini">G.A</div>
+            <div class="id-bot"><div class="id-name">Gabriel Aillet</div><div class="id-meta"><span>Cofondateur</span><span>Nantes</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="info rise">
+        <p class="p-kicker">01 · Cofondateur</p>
+        <h3 class="p-name">Gabriel <span class="serif">Aillet</span></h3>
         <dl class="p-facts">
           <div><dt>Formation</dt><dd>BUT informatique intégré à Polytech Nantes</dd></div>
           <div><dt>Chez Obtura</dt><dd>Design, développement, démarchage et relation client. A imaginé l'intro 3D de la boutique et ce site.</dd></div>
@@ -244,10 +270,19 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         <a class="more" href="https://gabyaillet.github.io/port/">Son portfolio <span aria-hidden="true">→</span></a>
       </div>
     </article>
-    <article class="person" style="--n:1; --a:#ff4f8b; --b:#ff8a3d; --c:#7a3cff">
-      <div class="p-art" aria-hidden="true"><div class="orb"></div><div class="noise"></div><div class="p-ring"></div><span class="p-ini">AG</span><span class="p-idx">02</span><span class="p-loc">Nantes</span></div>
-      <div class="p-body">
-        <div><p class="p-role">Cofondateur · Obtura Studio</p><h3 class="p-name"><span>Arthur</span><span>Goubill</span></h3></div>
+    <article class="person" style="--a:#ff4f8b; --b:#ff8a3d; --c:#7a3cff">
+      <div class="card-side rise">
+        <div class="idcard" aria-hidden="true"><div class="orb"></div><div class="noise"></div><div class="glass"></div><div class="sheen"></div>
+          <div class="in">
+            <div class="id-top"><span><i></i>Obtura Studio</span><span>N° 02</span></div>
+            <div class="id-ini">A.G</div>
+            <div class="id-bot"><div class="id-name">Arthur Goubill</div><div class="id-meta"><span>Cofondateur</span><span>Nantes</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="info rise">
+        <p class="p-kicker">02 · Cofondateur</p>
+        <h3 class="p-name">Arthur <span class="serif">Goubill</span></h3>
         <dl class="p-facts">
           <div><dt>Formation</dt><dd class="todo">À compléter</dd></div>
           <div><dt>Chez Obtura</dt><dd>Design, développement, démarchage et relation client.</dd></div>
@@ -261,7 +296,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 <section class="work" id="projets" aria-labelledby="w-title">
   <div class="wrap">
     <div class="head" id="work-head">
-      <div><p class="label">Nos projets</p><h2 id="w-title">Projets en <span class="grad">vitrine</span></h2></div>
+      <div><p class="label">Nos projets</p><h2 id="w-title">Projets en <span class="grad serif">vitrine</span></h2></div>
       <p>Ce qu'on a déjà fait, en attendant les sites de nos premiers clients.</p>
     </div>
     <div class="cards" id="cards">
@@ -321,41 +356,51 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   const wy = y => { const o = y - descend * PAR / innerHeight; return ((o + .7) % PER + PER) % PER - .7; };
   // deux calques hors écran (taches / feuillage) dessinés nets, puis floutés une seule fois chacun
   const lay1 = document.createElement('canvas'), lay2 = document.createElement('canvas'), g1 = lay1.getContext('2d'), g2 = lay2.getContext('2d');
+  // La toile déborde d'un quart d'écran en haut et en bas. Pendant le défilement, elle est seulement déplacée
+  // (carte graphique, presque gratuit) ; on ne la redessine qu'au rythme lent des feuilles, ou si on a trop glissé.
+  const MARG = .25; let OFF = 0, d0 = 0;
   function size() {
-    W = Math.max(64, Math.round(innerWidth * SC)); H = Math.max(64, Math.round(innerHeight * SC));
-    cv.width = lay1.width = lay2.width = W; cv.height = lay1.height = lay2.height = H;
+    W = Math.max(64, Math.round(innerWidth * SC)); H = Math.max(64, Math.round(innerHeight * SC)); OFF = Math.round(H * MARG);
+    cv.width = lay1.width = lay2.width = W; cv.height = lay1.height = lay2.height = H + 2 * OFF;
   }
   function draw(t) {
+    d0 = descend; cv.style.transform = '';
+    const HH = H + 2 * OFF;
     const m = Math.max(W, H), wind = Math.sin(t * .09) * .6 + Math.sin(t * .031 + 2) * .4;
-    g1.clearRect(0, 0, W, H); g2.clearRect(0, 0, W, H);
+    g1.clearRect(0, 0, W, HH); g2.clearRect(0, 0, W, HH);
     g1.fillStyle = '#e1e1df';
     for (const s of spots) {
       const dx = (Math.sin(t * s.f + s.ph) + Math.sin(t * s.f * 1.7 + s.ph * 2) * .5 + wind * .6) * s.amp, dy = Math.cos(t * s.f * .8 + s.ph) * s.amp;
-      g1.beginPath(); g1.ellipse((s.x + dx) * W, (wy(s.y) + dy) * H, s.rx * m, s.ry * m, s.a + wind * .05, 0, 7); g1.fill();
+      g1.beginPath(); g1.ellipse((s.x + dx) * W, (wy(s.y) + dy) * H + OFF, s.rx * m, s.ry * m, s.a + wind * .05, 0, 7); g1.fill();
     }
     g2.fillStyle = '#cecdcc'; g2.strokeStyle = '#cecdcc'; g2.lineCap = 'round';
     for (const b of branches) {
       const sway = wind * .012;
       const sh = wy((b.y0 + b.y1) / 2) - (b.y0 + b.y1) / 2, y0 = b.y0 + sh, y1 = b.y1 + sh;
-      g2.lineWidth = b.w * m; g2.beginPath(); g2.moveTo(b.x0 * W, y0 * H); g2.quadraticCurveTo(((b.x0 + b.x1) / 2 + sway) * W, ((y0 + y1) / 2 - sway) * H, (b.x1 + sway * 1.5) * W, y1 * H); g2.stroke();
+      g2.lineWidth = b.w * m; g2.beginPath(); g2.moveTo(b.x0 * W, y0 * H + OFF); g2.quadraticCurveTo(((b.x0 + b.x1) / 2 + sway) * W, ((y0 + y1) / 2 - sway) * H + OFF, (b.x1 + sway * 1.5) * W, y1 * H + OFF); g2.stroke();
     }
     for (const l of leaves) {
       const dx = (Math.sin(t * l.f + l.ph) + wind) * l.amp, dy = Math.cos(t * l.f * 1.3 + l.ph) * l.amp;
-      g2.beginPath(); g2.ellipse((l.x + dx) * W, (wy(l.y) + dy) * H, l.r * m, l.r * m * .45, l.a, 0, 7); g2.fill();
+      g2.beginPath(); g2.ellipse((l.x + dx) * W, (wy(l.y) + dy) * H + OFF, l.r * m, l.r * m * .45, l.a, 0, 7); g2.fill();
     }
-    g.filter = 'none'; g.globalAlpha = 1; g.fillStyle = '#d7d7d5'; g.fillRect(0, 0, W, H);
+    g.filter = 'none'; g.globalAlpha = 1; g.fillStyle = '#d7d7d5'; g.fillRect(0, 0, W, HH);
     g.filter = `blur(${Math.round(m * .03)}px)`; g.drawImage(lay1, 0, 0);
     g.filter = `blur(${Math.round(m * .014)}px)`; g.globalAlpha = .45; g.drawImage(lay2, 0, 0);
     g.filter = 'none'; g.globalAlpha = 1;
   }
   size(); addEventListener('resize', () => { size(); if (reduce) draw(0); });
   let lastDraw = 0, lastDesc = 0;
-  // au repos, les ombres sont redessinées 25 fois par seconde (15 sur téléphone) ; à chaque image pendant le défilement
-  const IDLE = matchMedia('(hover: none) and (pointer: coarse)').matches ? 66 : 40;
+  // les ombres sont redessinées 20 fois par seconde (12 sur téléphone) ; entre deux, le défilement ne fait que glisser la toile
+  const IDLE = matchMedia('(hover: none) and (pointer: coarse)').matches ? 83 : 50;
   // Safari ne sait pas flouter dans un canvas : le flou est alors fait par le navigateur sur la toile entière
   if (!('filter' in g)) cv.style.filter = 'blur(14px)';
   function loop(now) {
-    if (now - lastDraw > IDLE || descend !== lastDesc) { draw(now / 1000); lastDraw = now; lastDesc = descend; }
+    if (descend !== lastDesc) {
+      lastDesc = descend; const shift = (descend - d0) * PAR;
+      if (Math.abs(shift) > innerHeight * MARG * .8) { draw(now / 1000); lastDraw = now; }
+      else cv.style.transform = `translate3d(0, ${(-shift).toFixed(1)}px, 0)`;
+    }
+    if (now - lastDraw > IDLE) { draw(now / 1000); lastDraw = now; }
     requestAnimationFrame(loop);
   }
   if (reduce) draw(0); else requestAnimationFrame(loop);
@@ -402,7 +447,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const th = docBox(document.getElementById('team-head')), pr = docBox(document.getElementById('profiles'));
     const wide = vw > 760;
     M(wide ? vw * (.56 + R() * .06) : vw * .8, th.y - vh * .1, true);      // il arrive au-dessus de « Qui sommes-nous », sans barrer le texte
-    M(wide ? vw * .5 : vw * .5, pr.y + pr.h * .5, false);                  // passe entre (ou derrière) les deux profils
+    M(wide ? vw * .44 : vw * .5, pr.y + pr.h * .5, false);                 // passe entre les cartes et les textes (ou derrière les cartes)
     M(vw * (.08 + R() * .1), pr.y + pr.h + vh * .1, R() < .6);
     const wh = docBox(document.getElementById('work-head'));
     M(vw * (.62 + R() * .2), wh.y - vh * .1, true);
@@ -478,7 +523,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     return { el: s, d: Math.random() * .32, g: .85 + Math.random() * .3, rot: (Math.random() < .5 ? -1 : 1) * (40 + Math.random() * 90), drift: (Math.random() - .5) * 2, ph: Math.random() * 6 };
   });
   let fallTop = 0, fallH = 1;
-  function layout() { fallTop = fall.offsetTop; fallH = fall.offsetHeight; buildRibbon(); }
+  let manY = 0, manH = 1;
+  function layout() { fallTop = fall.offsetTop; fallH = fall.offsetHeight; const mb = docBox(document.getElementById('manifesto')); manY = mb.y; manH = mb.h; buildRibbon(); }
 
   // le défilement est lissé : la valeur affichée rattrape la vraie en douceur (plus fluide qu'à la molette brute)
   let yGoal = 0, yNow = -1, smoothing = false, lastF = 0;
@@ -519,7 +565,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const hx = clamp(1 - k * 4).toFixed(3); if (hx !== render.hx) { render.hx = hx; heroX.forEach(el => el.style.opacity = hx); }
     aura.style.opacity = clamp(1 - k * 1.6).toFixed(3); aura.style.transform = `scale(${(1 + k * .6).toFixed(3)})`;
     const auraOff = k > .64; if (auraOff !== render.auraOff) { render.auraOff = auraOff; aura.style.visibility = auraOff ? 'hidden' : ''; aura.classList.toggle('paused', auraOff); }
-    revealWords(); stackCards();
+    revealWords();
     drawRibbon(reduce ? 1e9 : yNow + Hs * TIP);
   }
 
@@ -539,21 +585,18 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   man.querySelectorAll('.grad .w').forEach(w => { w.classList.add('grad'); });
   let lastRev = -1;
   function revealWords() {
-    const r = man.getBoundingClientRect(), vh = innerHeight;
-    const p = reduce ? 1 : clamp((vh * .85 - r.top) / (r.height + vh * .35));
+    const vh = innerHeight, top = manY - scrollY;           // position mémorisée : pas de calcul de mise en page à chaque image
+    const p = reduce ? 1 : clamp((vh * .85 - top) / (manH + vh * .35));
     const n = Math.round(p * words.length * 1.1 * 100) / 100; if (n === lastRev) return; lastRev = n;
     words.forEach((w, i) => { w.style.opacity = (.14 + .86 * clamp(n - i)).toFixed(2); });
   }
-  /* ---------- Nos deux cartes s'empilent : celle de dessous recule et s'assombrit ---------- */
-  const persons = [...document.querySelectorAll('.person')];
-  function stackCards() {
-    if (innerWidth <= 860 || reduce) return;
-    for (let i = 0; i < persons.length - 1; i++) {
-      const a = persons[i], b = persons[i + 1], top = b.getBoundingClientRect().top, stick = parseFloat(getComputedStyle(b).top) || 0;
-      const p = clamp(1 - (top - stick) / (innerHeight * .8));
-      a.style.transform = p > 0 ? `scale(${(1 - p * .05).toFixed(4)})` : ''; a.style.setProperty('--dim', (p * .55).toFixed(3));
-    }
-  }
+  /* ---------- Les cartes de membre : elles s'inclinent vers la souris, le reflet la suit ---------- */
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches && !reduce) document.querySelectorAll('.idcard').forEach(c => {
+    let raf = 0, tx = .5, ty = .5;
+    const apply = () => { raf = 0; c.style.setProperty('--ry', ((tx - .5) * 16).toFixed(2) + 'deg'); c.style.setProperty('--rx', ((.5 - ty) * 12).toFixed(2) + 'deg'); c.style.setProperty('--mx', (tx * 100).toFixed(1) + '%'); c.style.setProperty('--my', (ty * 100).toFixed(1) + '%'); };
+    c.addEventListener('pointermove', e => { const r = c.getBoundingClientRect(); tx = (e.clientX - r.left) / r.width; ty = (e.clientY - r.top) / r.height; if (!raf) raf = requestAnimationFrame(apply); });
+    c.addEventListener('pointerleave', () => { tx = ty = .5; if (!raf) raf = requestAnimationFrame(apply); });
+  });
 
   /* ---------- Transitions entre les pages : le rideau en dégradé ---------- */
   const curtain = document.getElementById('curtain');
@@ -571,7 +614,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   addEventListener('pageshow', e => { if (e.persisted) curtain.classList.remove('cover', 'leave'); });
 
   // les lueurs des cartes ne tournent que quand la carte est à l'écran
-  if ('IntersectionObserver' in window) { const po = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('paused', !e.isIntersecting))); document.querySelectorAll('.p-art').forEach(el => po.observe(el)); }
+  if ('IntersectionObserver' in window) { const po = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('paused', !e.isIntersecting))); document.querySelectorAll('.idcard').forEach(el => po.observe(el)); }
   const rises = document.querySelectorAll('.rise');
   if ('IntersectionObserver' in window && !reduce) {
     const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -12% 0px' });
