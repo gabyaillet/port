@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
 <style>
-/* Un mur d'enduit gris où passent des ombres de feuillage qui bougent un peu ; au défilement, les lettres de « portfolio » tombent une à une. */
+/* Un mur d'enduit gris où passent des ombres de feuillage qui bougent un peu ; au défilement, les lettres de « portfolio » tombent une à une et la caméra les suit : le mur défile, elles restent au centre. */
 :root { --wall: #d2d2d0; --ink: #141414; --muted: #5d5d5a; --f: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; color-scheme: light; }
 * { box-sizing: border-box; }
 html { background: var(--wall); }
@@ -23,7 +23,7 @@ body { margin: 0; color: var(--ink); font-family: var(--f); -webkit-font-smoothi
   background-size: 360px 360px; }
 
 /* Le titre et sa chute */
-.fall { position: relative; z-index: 1; height: 220svh; }
+.fall { position: relative; z-index: 1; height: 420svh; }
 .stage { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; }
 h1 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.2rem)/1 var(--f); letter-spacing: -.02em; display: flex; }
 h1 .l { display: inline-block; will-change: transform, opacity; transform-origin: 50% 60%; }
@@ -31,25 +31,6 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 .cue::after { content: ""; display: block; width: 1px; height: 2.2rem; margin: .8rem auto 0; background: currentColor; transform-origin: top; animation: cue 2.2s cubic-bezier(.65,0,.35,1) infinite; }
 @keyframes cue { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); transform-origin: top; } 50.01% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
 
-/* Le projet sur lequel on tombe (mise en page provisoire) */
-.project { position: relative; z-index: 1; padding: clamp(3rem, 9vh, 6rem) max(20px, 5vw) clamp(4rem, 12vh, 8rem); display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: center; margin-top: -85svh; }
-.meta { display: grid; gap: 1.6rem; align-content: end; }
-.num { font: 400 .7rem var(--mono); letter-spacing: .2em; color: var(--muted); }
-.project h2 { margin: 0; font: 500 clamp(2.2rem, 4.6vw, 4.2rem)/.95 var(--f); letter-spacing: -.045em; }
-.project p { margin: 0; max-width: 38ch; line-height: 1.55; color: #2e2e2c; }
-dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: .55rem 1.4rem; font-size: .9rem; border-top: 1px solid rgba(20,20,20,.18); padding-top: 1.1rem; }
-dt { font: 400 .66rem/1.9 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
-dd { margin: 0; }
-.go { justify-self: start; display: inline-flex; gap: .6rem; align-items: center; padding: .85rem 1.3rem; border-radius: 99px; background: var(--ink); color: #f1f1ef; text-decoration: none; font: 500 .9rem var(--f); transition: transform .3s cubic-bezier(.16,1,.3,1), background .3s; }
-.go:hover { transform: translateY(-2px); background: #000; }
-.go:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
-.shot { margin: 0; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 4px; box-shadow: 0 30px 60px -25px rgba(0,0,0,.45), 0 8px 18px -10px rgba(0,0,0,.25); clip-path: inset(100% 0 0 0); }
-.shot img { width: 100%; height: 115%; object-fit: cover; display: block; will-change: transform; }
-.reveal { opacity: 0; transform: translateY(24px); }
-@media (max-width: 760px) {
-  .project { grid-template-columns: 1fr; align-items: start; margin-top: -80svh; }
-  .shot { order: -1; }
-}
 @media (prefers-reduced-motion: reduce) { .cue::after { animation: none; } }
 /* En-tête : la marque à gauche, le menu à droite (même menu plein écran que le portfolio de Gabriel) */
 .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
@@ -84,13 +65,11 @@ dd { margin: 0; }
 <header class="topbar">
   <a class="brand" href="#top"><i aria-hidden="true"></i>Obtura Studio</a>
   <div class="pills">
-    <a class="pill solid" href="#projet">Nos projets</a>
     <button class="pill" id="menu-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu <span aria-hidden="true">+</span></button>
   </div>
 </header>
 <ul class="nav" id="nav" data-open="false">
   <li><a href="#top">Qui sommes-nous</a></li>
-  <li><a href="#projet">Projets</a></li>
   <li><a href="./">Revoir l'intro</a></li>
   <li class="nav-foot"><button class="pill nav-close" type="button">Fermer ✕</button></li>
 </ul>
@@ -103,20 +82,6 @@ dd { margin: 0; }
   </div>
 </section>
 
-<article class="project" id="projet" aria-labelledby="p-title">
-  <div class="meta">
-    <span class="num reveal">01 — Projet</span>
-    <h2 id="p-title" class="reveal">La ville en 2CV</h2>
-    <p class="reveal">Un petit monde en 3D, de nuit, que l'on parcourt au volant d'une 2CV. Chaque quartier mène à une page : le village, le moulin, le lac.</p>
-    <dl class="reveal">
-      <dt>Année</dt><dd>2026</dd>
-      <dt>Type</dt><dd>Site interactif en 3D</dd>
-      <dt>Outils</dt><dd>Three.js, WebGL</dd>
-    </dl>
-    <a class="go reveal" href="https://gabyaillet.github.io/port/vitrine/">Visiter le projet <span aria-hidden="true">→</span></a>
-  </div>
-  <figure class="shot" id="shot"><img src="./apercu.jpg" alt="La place du village de nuit, avec la 2CV au centre" width="1200" height="750" loading="eager"></figure>
-</article>
 
 <script>
 (() => {
@@ -139,12 +104,16 @@ dd { margin: 0; }
   const SC = 0.25;
   let W = 0, H = 0;
   // formes en coordonnées relatives (0..1), chacune avec son propre petit mouvement
-  const spots = Array.from({ length: 16 }, () => ({ x: rnd(), y: rnd(), rx: .05 + rnd() * .12, ry: .03 + rnd() * .07, a: rnd() * 3, ph: rnd() * 9, f: .04 + rnd() * .06, amp: .004 + rnd() * .005 }));
-  const leaves = Array.from({ length: 70 }, () => ({ x: rnd() * 1.2 - .1, y: rnd() * 1.2 - .1, r: .012 + rnd() * .03, a: rnd() * 3, ph: rnd() * 9, f: .06 + rnd() * .1, amp: .002 + rnd() * .004 }));
+  const spots = Array.from({ length: 34 }, () => ({ x: rnd(), y: rnd() * 2.4, rx: .05 + rnd() * .12, ry: .03 + rnd() * .07, a: rnd() * 3, ph: rnd() * 9, f: .04 + rnd() * .06, amp: .004 + rnd() * .005 }));
+  const leaves = Array.from({ length: 150 }, () => ({ x: rnd() * 1.2 - .1, y: rnd() * 2.4, r: .012 + rnd() * .03, a: rnd() * 3, ph: rnd() * 9, f: .06 + rnd() * .1, amp: .002 + rnd() * .004 }));
   const branches = [
     { x0: -.05, y0: .25, x1: .35, y1: 1.05, w: .022 }, { x0: .78, y0: -.05, x1: 1.05, y1: .55, w: .03 },
     { x0: .6, y0: 1.05, x1: 1.05, y1: .62, w: .016 }, { x0: -.05, y0: .8, x1: .18, y1: .55, w: .012 },
+    { x0: .55, y0: 1.5, x1: -.05, y1: 2.1, w: .02 }, { x0: 1.05, y0: 1.75, x1: .7, y1: 2.35, w: .014 },
   ];
+  // la caméra descend : le motif (2,4 écrans de haut) défile et se répète sans couture visible
+  const PER = 2.4; let descend = 0;
+  const wy = y => { const o = y - descend / innerHeight; return ((o + .7) % PER + PER) % PER - .7; };
   function size() {
     W = Math.max(64, Math.round(innerWidth * SC)); H = Math.max(64, Math.round(innerHeight * SC));
     cv.width = W; cv.height = H;
@@ -156,61 +125,57 @@ dd { margin: 0; }
     g.filter = `blur(${Math.round(m * .03)}px)`; g.fillStyle = '#e6e6e4';
     for (const s of spots) {
       const dx = (Math.sin(t * s.f + s.ph) + Math.sin(t * s.f * 1.7 + s.ph * 2) * .5 + wind * .6) * s.amp, dy = Math.cos(t * s.f * .8 + s.ph) * s.amp;
-      g.beginPath(); g.ellipse((s.x + dx) * W, (s.y + dy) * H, s.rx * m, s.ry * m, s.a + wind * .05, 0, 7); g.fill();
+      g.beginPath(); g.ellipse((s.x + dx) * W, (wy(s.y) + dy) * H, s.rx * m, s.ry * m, s.a + wind * .05, 0, 7); g.fill();
     }
     // feuilles et branches en ombre
     g.filter = `blur(${Math.round(m * .014)}px)`; g.fillStyle = 'rgba(200,200,198,.6)'; g.strokeStyle = 'rgba(200,200,198,.55)'; g.lineCap = 'round';
     for (const b of branches) {
       const sway = wind * .012;
-      g.lineWidth = b.w * m; g.beginPath(); g.moveTo(b.x0 * W, b.y0 * H); g.quadraticCurveTo(((b.x0 + b.x1) / 2 + sway) * W, ((b.y0 + b.y1) / 2 - sway) * H, (b.x1 + sway * 1.5) * W, b.y1 * H); g.stroke();
+      const sh = wy((b.y0 + b.y1) / 2) - (b.y0 + b.y1) / 2, y0 = b.y0 + sh, y1 = b.y1 + sh;
+      g.lineWidth = b.w * m; g.beginPath(); g.moveTo(b.x0 * W, y0 * H); g.quadraticCurveTo(((b.x0 + b.x1) / 2 + sway) * W, ((y0 + y1) / 2 - sway) * H, (b.x1 + sway * 1.5) * W, y1 * H); g.stroke();
     }
     for (const l of leaves) {
       const dx = (Math.sin(t * l.f + l.ph) + wind) * l.amp, dy = Math.cos(t * l.f * 1.3 + l.ph) * l.amp;
-      g.beginPath(); g.ellipse((l.x + dx) * W, (l.y + dy) * H, l.r * m, l.r * m * .45, l.a, 0, 7); g.fill();
+      g.beginPath(); g.ellipse((l.x + dx) * W, (wy(l.y) + dy) * H, l.r * m, l.r * m * .45, l.a, 0, 7); g.fill();
     }
   }
   size(); addEventListener('resize', () => { size(); if (reduce) draw(0); });
-  let lastDraw = 0;
+  let lastDraw = 0, lastDesc = 0;
   function loop(now) {
     // 30 images/s suffisent pour des ombres lentes
-    if (now - lastDraw > 40) { draw(now / 1000); lastDraw = now; }
+    if (now - lastDraw > 40 || descend !== lastDesc) { draw(now / 1000); lastDraw = now; lastDesc = descend; }
     requestAnimationFrame(loop);
   }
   if (reduce) draw(0); else requestAnimationFrame(loop);
 
-  /* ---------- Les lettres qui tombent ---------- */
-  const title = document.getElementById('title'), cue = document.getElementById('cue'), fall = document.querySelector('.fall');
+  /* ---------- Les lettres qui tombent, et la caméra qui les suit ----------
+     Chaque lettre se décroche à son tour et chute (vitesse qui augmente). La caméra descend
+     à la vitesse moyenne de la chute : le mur défile vers le haut, les lettres restent autour du centre. */
+  const title = document.getElementById('title'), cue = document.getElementById('cue'), fall = document.querySelector('.fall'), grain = document.querySelector('.grain');
   const word = title.textContent; title.textContent = '';
   const letters = [...word].map(ch => {
     const s = document.createElement('span'); s.className = 'l'; s.textContent = ch; s.setAttribute('aria-hidden', 'true'); title.appendChild(s);
-    return { el: s, delay: Math.random() * .45, dur: .4 + Math.random() * .15, rot: (Math.random() < .5 ? -1 : 1) * (25 + Math.random() * 70), drift: (Math.random() - .5) * 60, spin: Math.random() * .6 };
+    return { el: s, d: Math.random() * .32, g: .85 + Math.random() * .3, rot: (Math.random() < .5 ? -1 : 1) * (40 + Math.random() * 90), drift: (Math.random() - .5) * 2, ph: Math.random() * 6 };
   });
-  const shot = document.getElementById('shot'), img = shot.querySelector('img'), reveals = [...document.querySelectorAll('.reveal')];
-
   function update() {
-    const r = fall.getBoundingClientRect(), span = r.height - innerHeight * 1.3;
-    const p = clamp(-r.top / span);
-    for (const L of letters) {
-      const k = clamp((p - L.delay) / L.dur);
-      // chute : vitesse qui augmente (gravité), petit balancement au décrochage, rotation qui s'accélère
-      const y = k * k * innerHeight * 1.05, wob = Math.sin(k * Math.PI) * L.drift;
-      const rot = L.rot * (k * .6 + k * k * .4) + Math.sin(k * 6) * L.spin * 8;
-      L.el.style.transform = k ? `translate(${wob}px, ${y}px) rotate(${rot}deg)` : '';
-      L.el.style.opacity = (1 - k * k * .85 - k * .15).toFixed(3);
-    }
-    cue.style.opacity = p > .02 ? 0 : 1;
-    // le projet arrive : l'image se dévoile, puis les infos
-    const pr = shot.getBoundingClientRect(), q = clamp((innerHeight - pr.top) / (innerHeight * .75));
-    shot.style.clipPath = `inset(${(1 - q) * 100}% 0 0 0)`;
-    img.style.transform = `translateY(${-(1 - q) * 8 - q * 4}%)`;
-    reveals.forEach((el, i) => {
-      const e = clamp(q * 1.6 - .5 - i * .1);
-      el.style.opacity = e; el.style.transform = `translateY(${(1 - e) * 24}px)`;
+    const r = fall.getBoundingClientRect(), k = clamp(-r.top / (r.height - innerHeight)), H = innerHeight;
+    const A = 5 * H;
+    const ys = letters.map(L => { const t = Math.max(0, k - L.d); return A * L.g * t * t; });
+    const cam = ys.reduce((a, b) => a + b, 0) / ys.length;
+    descend = cam;
+    letters.forEach((L, i) => {
+      const f = clamp((k - L.d) / (1 - L.d));             // avancement de la chute de cette lettre
+      const rel = ys[i] - cam, lim = Math.min(H * .22, innerWidth * .35);
+      const y = lim * Math.tanh(rel / lim);               // reste autour du centre, jamais hors champ
+      const x = L.drift * (H * .06) * Math.sin(f * 2.2 + L.ph) * f;
+      const rot = L.rot * (f * .5 + f * f * .5);
+      L.el.style.transform = k > L.d ? `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${rot.toFixed(1)}deg)` : `translateY(${y.toFixed(1)}px)`;
+      L.el.style.opacity = (1 - Math.pow(f, 1.4)).toFixed(3);
     });
+    grain.style.backgroundPositionY = (-cam).toFixed(1) + 'px';
+    cue.style.opacity = k > .02 ? 0 : 1;
   }
-  if (reduce) {
-    reveals.forEach(el => { el.style.opacity = 1; el.style.transform = 'none'; }); shot.style.clipPath = 'none';
-  } else {
+  if (!reduce) {
     let ticking = false;
     addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } }, { passive: true });
     addEventListener('resize', update);
