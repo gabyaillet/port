@@ -18,7 +18,7 @@ body { margin: 0; color: var(--ink); font-family: var(--f); -webkit-font-smoothi
 /* Le mur : la lumière (canvas) puis le relief de l'enduit par-dessus */
 .wall { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 .wall canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.wall .grain { position: absolute; inset: 0; mix-blend-mode: multiply; opacity: .22;
+.wall .grain { position: absolute; left: 0; right: 0; top: 0; height: calc(100% + 360px); will-change: transform; mix-blend-mode: multiply; opacity: .22;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeDiffuseLighting lighting-color='%23fff' surfaceScale='1.1'%3E%3CfeDistantLight azimuth='225' elevation='52'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 360px 360px; }
 
@@ -35,7 +35,6 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 /* ---------- Après la chute : le fond change ----------
    Un fond noir monte du bas avec un bord arrondi, qui s'aplatit en remplissant l'écran (on continue de tomber). */
 .ink { position: fixed; left: -40px; top: -40px; width: calc(100% + 80px); height: calc(100% + 80px); pointer-events: none; display: block; }
-.ink.css-goo { filter: url(#goo); } /* repli si le canvas ne sait pas appliquer le filtre lui-même */
 .next { position: relative; z-index: 3; min-height: 100svh; background: #0d0d0d; display: grid; place-items: center; align-content: center; gap: 1.6rem; color: #ededeb; text-align: center; }
 .mark { width: clamp(64px, 9vw, 96px); aspect-ratio: 1; margin: 0; }
 .mark svg { width: 100%; height: 100%; overflow: visible; transform: rotate(-90deg); }
@@ -186,9 +185,13 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   }
   size(); addEventListener('resize', () => { size(); if (reduce) draw(0); });
   let lastDraw = 0, lastDesc = 0;
+  // au repos, les ombres sont redessinées 25 fois par seconde (15 sur téléphone) ; à chaque image pendant le défilement
+  const IDLE = matchMedia('(hover: none) and (pointer: coarse)').matches ? 66 : 40;
+  // Safari ne sait pas flouter dans un canvas : le flou est alors fait par le navigateur sur la toile entière
+  if (!('filter' in g)) cv.style.filter = 'blur(14px)';
   function loop(now) {
     // 30 images/s suffisent pour des ombres lentes
-    if (!darkFull && (now - lastDraw > 40 || descend !== lastDesc)) { draw(now / 1000); lastDraw = now; lastDesc = descend; }
+    if (!darkFull && (now - lastDraw > IDLE || descend !== lastDesc)) { draw(now / 1000); lastDraw = now; lastDesc = descend; }
     requestAnimationFrame(loop);
   }
   if (reduce) draw(0); else requestAnimationFrame(loop);
@@ -205,21 +208,54 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   // résolution de l'encre : assez fine pour des bords nets (plus fine sur écran Retina), sans recalculer tout l'écran en pleine définition
   const SCALE = Math.min(1, (devicePixelRatio || 1) > 1.5 ? .75 : .62);
   const inkOff = document.createElement('canvas'), og = inkOff.getContext('2d');
-  const CANVAS_GOO = 'filter' in xg, gooBlur = document.querySelector('#goo-s feGaussianBlur');
-  if (!CANVAS_GOO) ink.classList.add('css-goo');
+  // Sur téléphone (ou si le canvas ne sait pas filtrer), pas de filtre SVG, trop lourd pour un mobile :
+  // l'encre est calculée en « métaballes » sur une petite grille, puis agrandie en douceur par le navigateur.
+  const MOBILE = matchMedia('(hover: none) and (pointer: coarse)').matches || innerWidth < 760;
+  const CANVAS_GOO = 'filter' in xg && !MOBILE, gooBlur = document.querySelector('#goo-s feGaussianBlur');
+  const CELL = 1.8;                                     // taille d'une case de la grille, en pixels CSS
+  let field = null, img = null;
   // la toile déborde de 40 px autour de l'écran : le flou du filtre ne ronge pas les bords
-  function inkSize() { xW = innerWidth; xH = innerHeight; inkOff.width = ink.width = Math.round((xW + 80) * SCALE); inkOff.height = ink.height = Math.round((xH + 80) * SCALE); lastK = -1; }
+  function inkSize() {
+    xW = innerWidth; xH = innerHeight; lastK = -1;
+    if (CANVAS_GOO) { inkOff.width = ink.width = Math.round((xW + 80) * SCALE); inkOff.height = ink.height = Math.round((xH + 80) * SCALE); return; }
+    ink.width = Math.round((xW + 80) / CELL); ink.height = Math.round((xH + 80) / CELL);
+    field = new Float32Array(ink.width * ink.height); img = xg.createImageData(ink.width, ink.height);
+    for (let i = 0; i < img.data.length; i += 4) { img.data[i] = img.data[i + 1] = img.data[i + 2] = 13; }
+  }
   inkSize(); addEventListener('resize', inkSize);
   // même encre que l'exemple 04 : de grosses gouttes tombent du haut en grossissant et fusionnent, le noir monte du bas
   const inkDrops = Array.from({ length: 9 }, (_, i) => ({ x: .08 + (i / 8) * .84 + (rnd() - .5) * .1, d: rnd() * .35, r: .08 + rnd() * .1 }));
   const io = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  function drawInkGrid(p) {
+    const GW = ink.width, GH = ink.height, O = 40 / CELL, W = GW - 2 * O, H = GH - 2 * O, A = img.data;
+    if (p <= 0) { xg.clearRect(0, 0, GW, GH); return; }
+    field.fill(0);
+    // champ de chaque goutte : (1 - d²/R²)², nul au-delà de R (pas de marche), égal à 1 sur le bord de la goutte
+    const add = (cx, cy, r) => {
+      const R = r * 1.7, R2 = R * R, x0 = Math.max(0, Math.floor(cx - R)), x1 = Math.min(GW - 1, Math.ceil(cx + R)), y0 = Math.max(0, Math.floor(cy - R)), y1 = Math.min(GH - 1, Math.ceil(cy + R));
+      for (let y = y0; y <= y1; y++) { const dy = y - cy, dy2 = dy * dy, row = y * GW; if (dy2 >= R2) continue;
+        for (let x = x0; x <= x1; x++) { const dx = x - cx, q = 1 - (dx * dx + dy2) / R2; if (q > 0) field[row + x] += q * q * 2.695; } }
+    };
+    for (const d of inkDrops) {
+      const k = clamp((p - d.d) / (1 - d.d)); if (k <= 0) continue;
+      const y = (-.15 + io(clamp(k * 1.6)) * .75) * H + O, rr = (d.r + Math.pow(k, 2.2) * 1.1) * W, x = d.x * W + O;
+      add(x, y, rr); if (k < .6) add(x, y - rr * 1.6, rr * .4);
+    }
+    const up = io(clamp(p * 1.3 - .25)), top = O + H * (1 - up), soft = 7;
+    for (let y = 0, i = 0; y < GH; y++) {
+      const dy = top - y, pool = dy <= 0 ? 99 : (soft * soft) / (dy * dy);   // la flaque attire aussi les gouttes proches
+      for (let x = 0; x < GW; x++, i++) { const a = (field[i] + pool - 1) * 18 + .5; A[i * 4 + 3] = a <= 0 ? 0 : a >= 1 ? 255 : a * 255; }
+    }
+    xg.putImageData(img, 0, 0);
+  }
   function drawInk(p) {
     if (p === lastK) return; lastK = p;
+    if (!CANVAS_GOO) return drawInkGrid(p);
     const O = 40 * SCALE, W = ink.width - 2 * O, H = ink.height - 2 * O;
     xg.setTransform(1, 0, 0, 1, 0, 0); xg.clearRect(0, 0, ink.width, ink.height);
     if (p <= 0) return;
-    const c = CANVAS_GOO ? og : xg;
-    if (CANVAS_GOO) og.clearRect(0, 0, inkOff.width, inkOff.height);
+    const c = og;
+    og.clearRect(0, 0, inkOff.width, inkOff.height);
     c.setTransform(1, 0, 0, 1, O, O); c.fillStyle = '#0d0d0d';
     for (const d of inkDrops) {
       const k = clamp((p - d.d) / (1 - d.d)), y = (-.15 + io(clamp(k * 1.6)) * .75) * H, rr = (d.r + Math.pow(k, 2.2) * 1.1) * W;
@@ -229,7 +265,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     }
     const up = io(clamp(p * 1.3 - .25));
     c.fillRect(-O, H * (1 - up), W + 2 * O, H * up + 2 * O);
-    if (CANVAS_GOO) { gooBlur.setAttribute('stdDeviation', (14 * SCALE).toFixed(1)); xg.filter = 'url(#goo-s)'; xg.drawImage(inkOff, 0, 0); xg.filter = 'none'; }
+    gooBlur.setAttribute('stdDeviation', (14 * SCALE).toFixed(1)); xg.filter = 'url(#goo-s)'; xg.drawImage(inkOff, 0, 0); xg.filter = 'none';
   }
   const ring = document.getElementById('ring'), nTitle = document.getElementById('n-title'), nSub = document.getElementById('n-sub'), next = document.getElementById('suite');
   nTitle.innerHTML = [...nTitle.textContent].map(c => `<span aria-hidden="true">${c}</span>`).join('');
@@ -303,7 +339,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         L.el.style.opacity = Math.pow(clamp(1 - f / .5), 1.3).toFixed(3); // les lettres en trop s'effacent
       }
     });
-    grain.style.backgroundPositionY = (-descend * PAR).toFixed(1) + 'px';
+    grain.style.transform = `translate3d(0, ${(-((descend * PAR) % 360)).toFixed(1)}px, 0)`;
     cue.style.opacity = k > .02 ? 0 : 1;
     drawInk(clamp((k - .03) / .72)); darkFull = k > .78;
     revealNext();
