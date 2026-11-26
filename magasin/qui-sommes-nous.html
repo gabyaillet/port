@@ -3,17 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Obtura — Portfolio</title>
-<meta name="description" content="Obtura Studio, web design : portfolio.">
+<title>Obtura Studio — Qui sommes-nous</title>
+<meta name="description" content="Obtura Studio, web design à Nantes : Gabriel Aillet et Arthur Goubill, et nos projets.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
 <style>
-/* Un mur d'enduit gris où passent des ombres de feuillage qui bougent un peu ; au défilement, les lettres de « portfolio » tombent une à une et la caméra les suit, pendant que de l'encre coule et recouvre tout ; puis six lettres se rassemblent en grand pour écrire « profil ». */
-:root { --wall: #d2d2d0; --ink: #141414; --muted: #5d5d5a; --f: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; color-scheme: light; }
+/* Un mur d'enduit gris où passent des ombres de feuillage ; au défilement, les lettres de « bienvenue » tombent une à une en s'effaçant
+   et la caméra les suit. Un trait épais au bout rond se dessine avec le défilement, fait des boucles au hasard, suit la chute
+   puis mène à nos deux profils et à nos projets. */
+:root { --wall: #d2d2d0; --ink: #141414; --muted: #5d5d5a; --card: #e6e6e4; --line: #141414;
+  --f: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; color-scheme: light; }
 * { box-sizing: border-box; }
 html { background: var(--wall); }
 body { margin: 0; color: var(--ink); font-family: var(--f); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+img { display: block; max-width: 100%; }
+.wrap { width: min(78rem, 100%); margin-inline: auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.label { font: 400 .68rem var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: 0 0 1.2rem; }
 
 /* Le mur : la lumière (canvas) puis le relief de l'enduit par-dessus */
 .wall { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
@@ -22,28 +28,76 @@ body { margin: 0; color: var(--ink); font-family: var(--f); -webkit-font-smoothi
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeDiffuseLighting lighting-color='%23fff' surfaceScale='1.1'%3E%3CfeDistantLight azimuth='225' elevation='52'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 360px 360px; }
 
+/* Le trait : posé sur la page (il défile avec elle), devant les lettres, derrière les cartes */
+.ribbon { position: absolute; left: 0; top: 0; width: 100%; z-index: 2; pointer-events: none; overflow: visible; display: block; }
+.ribbon path { fill: none; stroke: var(--line); stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
+
 /* Le titre et sa chute */
-.fall { position: relative; height: 360svh; } /* pas de z-index : les lettres se fondent avec le mur et l'encre */
-.stage { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; mix-blend-mode: difference; color: #fff; } /* mot et indication : sombres sur le mur, clairs sur l'encre */
-h1 { position: relative; margin: 0; font: 500 clamp(2.6rem, 7vw, 5.2rem)/1 var(--f); letter-spacing: -.02em; display: flex; color: #fff; }
+.fall { position: relative; height: 270svh; }
+.stage { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; }
+h1 { position: relative; margin: 0; font: 500 clamp(2.6rem, 7vw, 5.2rem)/1 var(--f); letter-spacing: -.02em; display: flex; }
 h1 .l { display: inline-block; will-change: transform, opacity; transform-origin: 50% 60%; }
-.cue { position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 2rem); transform: translateX(-50%); font: 400 .66rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: #9a9a98; transition: opacity .6s; }
+.cue { position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 2rem); transform: translateX(-50%); font: 400 .66rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: #7a7a78; transition: opacity .6s; }
 .cue::after { content: ""; display: block; width: 1px; height: 2.2rem; margin: .8rem auto 0; background: currentColor; transform-origin: top; animation: cue 2.2s cubic-bezier(.65,0,.35,1) infinite; }
 @keyframes cue { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); transform-origin: top; } 50.01% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
-
 @media (prefers-reduced-motion: reduce) { .cue::after { animation: none; } }
-/* ---------- Après la chute : le fond change ----------
-   Un fond noir monte du bas avec un bord arrondi, qui s'aplatit en remplissant l'écran (on continue de tomber). */
-.ink { position: fixed; left: -40px; top: -40px; width: calc(100% + 80px); height: calc(100% + 80px); pointer-events: none; display: block; }
-.next { position: relative; z-index: 3; min-height: 100svh; background: #0d0d0d; display: grid; place-items: center; align-content: center; gap: 1.6rem; color: #ededeb; text-align: center; }
-.mark { width: clamp(64px, 9vw, 96px); aspect-ratio: 1; margin: 0; }
-.mark svg { width: 100%; height: 100%; overflow: visible; transform: rotate(-90deg); }
-.mark circle { fill: none; stroke: #ededeb; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 327; stroke-dashoffset: 327; }
-.next h2 { margin: 0; font: 500 clamp(2.4rem, 6vw, 4.8rem)/1 var(--f); letter-spacing: -.045em; display: flex; justify-content: center; overflow: hidden; padding: .06em 0; }
-.next h2 span { display: inline-block; transform: translateY(105%); white-space: pre; }
-.next p { margin: 0; font: 400 .68rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: #8f8f8b; opacity: 0; }
-.topbar { transition: color .5s; }
-.topbar { --ink: #fff; --wall: #000; mix-blend-mode: difference; } /* toujours lisible : sombre sur le mur, clair sur l'encre */
+
+/* Qui sommes-nous : nos deux profils */
+.team, .work, .foot { position: relative; z-index: 3; }
+.team { padding: 14svh 0 18svh; }
+.head { display: grid; grid-template-columns: 1fr minmax(0, 24rem); gap: 1.5rem 3rem; align-items: end; margin-bottom: clamp(2.5rem, 6vw, 4.5rem); }
+h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacing: -.045em; }
+.head p { margin: 0; font-size: 1.02rem; line-height: 1.55; color: #3a3a38; }
+.profiles { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 4vw, 4rem); }
+.profile { background: var(--card); border-radius: 20px; padding: clamp(1.4rem, 3vw, 2.2rem); box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 30px 60px -40px rgba(0,0,0,.35);
+  display: grid; gap: 1.4rem; align-content: start; }
+.profile .who { display: flex; align-items: center; gap: 1rem; }
+.mono { flex: none; width: 3.6rem; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--ink); display: grid; place-items: center; font: 500 1rem var(--f); letter-spacing: .02em; }
+.profile h3 { margin: 0; font: 500 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--f); letter-spacing: -.03em; }
+.profile .role { margin: .3rem 0 0; font: 400 .66rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.profile dl { margin: 0; display: grid; gap: .9rem; }
+.profile dl div { display: grid; grid-template-columns: 7.5rem 1fr; gap: 1rem; padding-top: .9rem; border-top: 1px solid rgba(20,20,20,.12); }
+.profile dt { font: 400 .66rem/1.9 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.profile dd { margin: 0; line-height: 1.5; }
+.tags { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; list-style: none; }
+.tags li { font: 400 .66rem var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: .38rem .7rem; border-radius: 99px; border: 1px solid rgba(20,20,20,.25); }
+.more { justify-self: start; color: var(--ink); font: 500 .95rem var(--f); text-decoration: none; display: inline-flex; gap: .5rem; align-items: center; border-bottom: 1px solid currentColor; padding-bottom: .15rem; }
+.more span { transition: transform .3s; } .more:hover span { transform: translateX(4px); }
+
+/* Nos projets : des cartes en grille, comme une galerie */
+.work { padding: 6svh 0 16svh; }
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem) clamp(1rem, 2.4vw, 2rem); }
+.card { display: grid; gap: .9rem; color: inherit; text-decoration: none; }
+.card .img { border-radius: 16px; overflow: hidden; aspect-ratio: 16 / 10; background: #c4c4c2; transform: translateZ(0); }
+.card img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s cubic-bezier(.16,1,.3,1); }
+.card:hover img { transform: scale(1.04); }
+.card .cap { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.card h3 { margin: 0; font: 500 clamp(1.1rem, 1.7vw, 1.4rem) var(--f); letter-spacing: -.02em; display: flex; gap: .6rem; align-items: baseline; }
+.card h3 span { display: inline-block; transition: transform .4s cubic-bezier(.16,1,.3,1); }
+.card:hover h3 span { transform: translateX(5px); }
+.card .meta { font: 400 .64rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.card:focus-visible { outline: 2px solid var(--ink); outline-offset: 6px; border-radius: 16px; }
+
+/* Apparition au défilement : la carte monte, l'image se redresse et se resserre */
+.js .rise { opacity: 0; transform: translateY(70px); transition: opacity 1s ease, transform 1.3s cubic-bezier(.16,1,.3,1); }
+.js .rise.on { opacity: 1; transform: none; }
+.js .card.rise .img { transform: perspective(1200px) rotateX(9deg) scale(.96); transform-origin: 50% 100%; transition: transform 1.5s cubic-bezier(.16,1,.3,1); }
+.js .card.rise.on .img { transform: none; }
+.js .card.rise:nth-child(even) { transition-delay: .12s; }
+@media (prefers-reduced-motion: reduce) { .js .rise, .js .card.rise .img { opacity: 1; transform: none; transition: none; } }
+
+/* Quand le trait passe sous un texte posé sur le mur, il s'interrompt autour des lettres : le texte reste lisible */
+.head h2, .head .label, .card .cap { -webkit-text-stroke: 4px #d8d8d6; paint-order: stroke fill; }
+.head > p { -webkit-text-stroke: 3px #d8d8d6; paint-order: stroke fill; }
+.foot { padding: 3rem 0 calc(env(safe-area-inset-bottom, 0px) + 2.5rem); }
+.foot .wrap { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font: 400 .66rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.foot a { color: var(--ink); }
+
+@media (max-width: 760px) {
+  .head { grid-template-columns: 1fr; }
+  .profiles, .cards { grid-template-columns: 1fr; }
+  .profile dl div { grid-template-columns: 1fr; gap: .3rem; }
+}
 
 /* Arrivée sur la page (après l'intro) : tout apparaît en douceur, l'un après l'autre */
 body:not(.in) .wall, body:not(.in) .brand, body:not(.in) .pills, body:not(.in) h1 .l, body:not(.in) .cue { opacity: 0; }
@@ -58,8 +112,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 @keyframes fade-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { body.in .wall, body.in .brand, body.in .pills, body.in h1 .l, body.in .cue { animation: none; } }
 
-/* En-tête : la marque à gauche, le menu à droite (même menu plein écran que le portfolio de Gabriel) */
-.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; justify-content: flex-end; gap: 1rem;
+/* En-tête : la marque à gauche, le menu à droite (même menu plein écran que le portfolio de Gabriel) ; toujours lisible, sur le mur comme sur les images */
+.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; justify-content: flex-end; gap: 1rem; --ink: #fff; --wall: #000; mix-blend-mode: difference;
   min-height: 4rem; padding: env(safe-area-inset-top, 0px) max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px)); }
 .brand { position: absolute; left: max(20px, env(safe-area-inset-left, 0px)); top: calc(50% + env(safe-area-inset-top, 0px) / 2); transform: translateY(-50%);
   display: flex; align-items: center; gap: .6rem; color: var(--ink); text-decoration: none; font: 500 1.15rem var(--f); letter-spacing: -.02em; }
@@ -83,46 +137,95 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 .nav .nav-foot { display: flex; gap: 1.5rem; align-items: center; margin-top: 2rem; overflow: visible; }
 .nav-close { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 1rem); right: max(20px, env(safe-area-inset-right, 0px)); border-color: #ededeb; color: #ededeb; }
 .nav-close:hover { background: #ededeb; color: #0d0d0d; }
-@media (max-width: 480px) { .pills .pill.solid { display: none; } }
 @media (prefers-reduced-motion: reduce) { .nav, .nav a { transition: none !important; } }
-
 </style>
+<script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
 <header class="topbar" id="topbar">
   <a class="brand" href="#top"><i aria-hidden="true"></i>Obtura Studio</a>
   <div class="pills">
+    <a class="pill" href="#projets">Nos projets</a>
     <button class="pill" id="menu-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu <span aria-hidden="true">+</span></button>
   </div>
 </header>
 <ul class="nav" id="nav" data-open="false">
-  <li><a href="#top">Qui sommes-nous</a></li>
+  <li><a href="#equipe">Qui sommes-nous</a></li>
+  <li><a href="#projets">Nos projets</a></li>
   <li><a href="./">Revoir l'intro</a></li>
   <li class="nav-foot"><button class="pill nav-close" type="button">Fermer ✕</button></li>
 </ul>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="14" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter><filter id="goo-s" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 16 -6.5"/></filter></svg>
 <div class="wall" aria-hidden="true"><canvas id="light"></canvas><div class="grain"></div></div>
+<svg class="ribbon" id="ribbon" aria-hidden="true"></svg>
 
-<canvas class="ink" id="ink" aria-hidden="true"></canvas>
-<section class="fall" id="top" aria-label="Portfolio">
+<section class="fall" id="top" aria-label="Bienvenue">
   <div class="stage">
-    <h1 id="title" aria-label="portfolio">portfolio</h1>
+    <h1 id="title" aria-label="bienvenue">bienvenue</h1>
     <span class="cue" id="cue">Défiler</span>
   </div>
 </section>
 
-<section class="next" id="suite" aria-labelledby="n-title">
-  <figure class="mark" aria-hidden="true"><svg viewBox="0 0 120 120"><circle id="ring" cx="60" cy="60" r="52"/></svg></figure>
-  <h2 id="n-title" aria-label="Obtura Studio">Obtura Studio</h2>
-  <p id="n-sub">La suite arrive</p>
+<section class="team" id="equipe" aria-labelledby="t-title">
+  <div class="wrap">
+    <div class="head" id="team-head">
+      <div><p class="label">Qui sommes-nous</p><h2 id="t-title">Deux à Nantes,<br>un seul studio.</h2></div>
+      <p>Obtura Studio, c'est Gabriel et Arthur, étudiants à Nantes. On crée et on entretient des sites web pour les entreprises, et on fait tout à deux : le design, le développement et le lien avec vous.</p>
+    </div>
+    <div class="profiles" id="profiles">
+      <article class="profile rise">
+        <div class="who"><span class="mono" aria-hidden="true">GA</span><div><h3>Gabriel Aillet</h3><p class="role">Cofondateur</p></div></div>
+        <dl>
+          <div><dt>Formation</dt><dd>BUT informatique intégré à Polytech Nantes</dd></div>
+          <div><dt>Chez Obtura</dt><dd>Design, développement, démarchage et relation client. A imaginé l'intro 3D de la boutique et ce site.</dd></div>
+          <div><dt>Outils</dt><dd><ul class="tags"><li>HTML / CSS</li><li>JavaScript</li><li>PHP / SQL</li><li>Photoshop</li><li>Illustrator</li></ul></dd></div>
+        </dl>
+        <a class="more" href="https://gabyaillet.github.io/port/">Son portfolio <span aria-hidden="true">→</span></a>
+      </article>
+      <article class="profile rise">
+        <div class="who"><span class="mono" aria-hidden="true">AG</span><div><h3>Arthur Goubill</h3><p class="role">Cofondateur</p></div></div>
+        <dl>
+          <div><dt>Formation</dt><dd>À compléter</dd></div>
+          <div><dt>Chez Obtura</dt><dd>Design, développement, démarchage et relation client.</dd></div>
+          <div><dt>Outils</dt><dd>À compléter</dd></div>
+        </dl>
+      </article>
+    </div>
+  </div>
 </section>
 
+<section class="work" id="projets" aria-labelledby="w-title">
+  <div class="wrap">
+    <div class="head" id="work-head">
+      <div><p class="label">Nos projets</p><h2 id="w-title">Projets en vitrine</h2></div>
+      <p>Ce qu'on a déjà fait, en attendant les sites de nos premiers clients.</p>
+    </div>
+    <div class="cards" id="cards">
+      <a class="card rise" href="./">
+        <div class="img"><img src="./img/boutique-obtura.jpg" alt="La façade de la boutique Obtura en 3D, avec son enseigne" width="1200" height="750" loading="lazy" decoding="async"></div>
+        <div class="cap"><h3><span aria-hidden="true">→</span>La boutique Obtura</h3><span class="meta">Obtura · Intro 3D</span></div>
+      </a>
+      <a class="card rise" href="https://gabyaillet.github.io/port/vitrine/">
+        <div class="img"><img src="./img/ville-2cv.jpg" alt="La place d'une petite ville en 3D, avec une 2CV devant les lettres BIENVENUE" width="1200" height="750" loading="lazy" decoding="async"></div>
+        <div class="cap"><h3><span aria-hidden="true">→</span>La ville en 2CV</h3><span class="meta">Gabriel · 3D</span></div>
+      </a>
+      <a class="card rise" href="https://gabyaillet.github.io/port/projets.html">
+        <div class="img"><img src="./img/boutique-vins.jpg" alt="Maquette du site Le Cellier : trois bouteilles stylisées et le nom en grand" width="1200" height="750" loading="lazy" decoding="async"></div>
+        <div class="cap"><h3><span aria-hidden="true">→</span>Boutique de vins</h3><span class="meta">Gabriel · Projet d'IUT</span></div>
+      </a>
+      <a class="card rise" href="https://gabyaillet.github.io/port/projets.html">
+        <div class="img"><img src="./img/particules.jpg" alt="Un nuage de particules blanches sur fond noir" width="1200" height="750" loading="lazy" decoding="async"></div>
+        <div class="cap"><h3><span aria-hidden="true">→</span>Générateur de particules</h3><span class="meta">Gabriel · Projet d'IUT</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="foot"><div class="wrap"><span>Obtura Studio · Nantes</span><a href="./">Revoir l'intro</a></div></footer>
 
 <script>
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-
 
   /* ---------- Menu plein écran ---------- */
   const toggle = document.getElementById('menu-toggle'), nav = document.getElementById('nav');
@@ -138,7 +241,6 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const SC = 0.25;
   let W = 0, H = 0;
-  // formes en coordonnées relatives (0..1), chacune avec son propre petit mouvement
   const spots = Array.from({ length: 34 }, () => ({ x: rnd(), y: rnd() * 2.4, rx: .05 + rnd() * .12, ry: .03 + rnd() * .07, a: rnd() * 3, ph: rnd() * 9, f: .04 + rnd() * .06, amp: .004 + rnd() * .005 }));
   const leaves = Array.from({ length: 150 }, () => ({ x: rnd() * 1.2 - .1, y: rnd() * 2.4, r: .012 + rnd() * .03, a: rnd() * 3, ph: rnd() * 9, f: .06 + rnd() * .1, amp: .002 + rnd() * .004 }));
   const branches = [
@@ -147,27 +249,24 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     { x0: .55, y0: 1.5, x1: -.05, y1: 2.1, w: .02 }, { x0: 1.05, y0: 1.75, x1: .7, y1: 2.35, w: .014 },
   ];
   // la caméra descend : le motif (2,4 écrans de haut) défile et se répète sans couture visible
-  const PER = 2.4; let descend = 0, darkFull = false;
-  // le mur défile moins vite que la chute (parallaxe) : plus doux pour les yeux
+  const PER = 2.4; let descend = 0;
+  // le mur défile moins vite que la page (parallaxe) : plus doux pour les yeux
   const PAR = .3;
   const wy = y => { const o = y - descend * PAR / innerHeight; return ((o + .7) % PER + PER) % PER - .7; };
-  // deux calques hors écran (taches / feuillage) dessinés nets, puis floutés une seule fois chacun :
-  // bien plus léger que de flouter chaque forme une par une
+  // deux calques hors écran (taches / feuillage) dessinés nets, puis floutés une seule fois chacun
   const lay1 = document.createElement('canvas'), lay2 = document.createElement('canvas'), g1 = lay1.getContext('2d'), g2 = lay2.getContext('2d');
   function size() {
     W = Math.max(64, Math.round(innerWidth * SC)); H = Math.max(64, Math.round(innerHeight * SC));
     cv.width = lay1.width = lay2.width = W; cv.height = lay1.height = lay2.height = H;
   }
   function draw(t) {
-    const m = Math.max(W, H), wind = Math.sin(t * .09) * .6 + Math.sin(t * .031 + 2) * .4; // rafale lente
+    const m = Math.max(W, H), wind = Math.sin(t * .09) * .6 + Math.sin(t * .031 + 2) * .4;
     g1.clearRect(0, 0, W, H); g2.clearRect(0, 0, W, H);
-    // taches de soleil
     g1.fillStyle = '#e1e1df';
     for (const s of spots) {
       const dx = (Math.sin(t * s.f + s.ph) + Math.sin(t * s.f * 1.7 + s.ph * 2) * .5 + wind * .6) * s.amp, dy = Math.cos(t * s.f * .8 + s.ph) * s.amp;
       g1.beginPath(); g1.ellipse((s.x + dx) * W, (wy(s.y) + dy) * H, s.rx * m, s.ry * m, s.a + wind * .05, 0, 7); g1.fill();
     }
-    // feuilles et branches en ombre
     g2.fillStyle = '#cecdcc'; g2.strokeStyle = '#cecdcc'; g2.lineCap = 'round';
     for (const b of branches) {
       const sway = wind * .012;
@@ -190,168 +289,172 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   // Safari ne sait pas flouter dans un canvas : le flou est alors fait par le navigateur sur la toile entière
   if (!('filter' in g)) cv.style.filter = 'blur(14px)';
   function loop(now) {
-    // 30 images/s suffisent pour des ombres lentes
-    if (!darkFull && (now - lastDraw > IDLE || descend !== lastDesc)) { draw(now / 1000); lastDraw = now; lastDesc = descend; }
+    if (now - lastDraw > IDLE || descend !== lastDesc) { draw(now / 1000); lastDraw = now; lastDesc = descend; }
     requestAnimationFrame(loop);
   }
   if (reduce) draw(0); else requestAnimationFrame(loop);
 
+  /* ---------- Le trait ----------
+     Un tracé au hasard à chaque visite : il serpente, fait des boucles, suit la chute des lettres puis passe
+     par nos profils et entre les cartes des projets. Il se dessine avec le défilement : son bout (rond) reste
+     vers le bas de l'écran, juste devant ce qu'on regarde. Découpé en morceaux : seul celui du bout change. */
+  const NS = 'http://www.w3.org/2000/svg', rib = document.getElementById('ribbon');
+  const TIP = .64;                                       // hauteur du bout du trait dans l'écran
+  const ribSeed = 1 + Math.floor(Math.random() * 2147483000);
+  let X = [], Y = [], S = [], K = [], chunks = [], total = 0, lastL = -1;
+  const fall = document.querySelector('.fall');
+  // position dans la page sans tenir compte des animations d'apparition (offsetTop ignore les transformations)
+  const docBox = el => { let x = 0, y = 0, e = el; while (e) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return { x, y, w: el.offsetWidth, h: el.offsetHeight }; };
+  function catmull(p0, p1, p2, p3, out) {                // Catmull-Rom centripète : courbe douce, sans boucle parasite
+    const d = (a, b) => Math.pow(Math.hypot(b.x - a.x, b.y - a.y) || 1e-3, .5);
+    const t0 = 0, t1 = d(p0, p1), t2 = t1 + d(p1, p2), t3 = t2 + d(p2, p3);
+    const n = Math.max(2, Math.ceil(Math.hypot(p2.x - p1.x, p2.y - p1.y) / 4));
+    for (let i = 1; i <= n; i++) {
+      const t = t1 + (t2 - t1) * i / n, L = (a, b, ta, tb) => ({ x: (tb - t) / (tb - ta) * a.x + (t - ta) / (tb - ta) * b.x, y: (tb - t) / (tb - ta) * a.y + (t - ta) / (tb - ta) * b.y });
+      const A1 = L(p0, p1, t0, t1), A2 = L(p1, p2, t1, t2), A3 = L(p2, p3, t2, t3), B1 = L(A1, A2, t0, t2), B2 = L(A2, A3, t1, t3);
+      out.push(L(B1, B2, t1, t2));
+    }
+  }
+  function buildRibbon() {
+    let s = ribSeed; const R = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    const vw = innerWidth, vh = innerHeight, docH = document.documentElement.scrollHeight;
+    rib.setAttribute('viewBox', `0 0 ${vw} ${docH}`); rib.style.height = docH + 'px';
+    // les points de passage, toujours plus bas les uns que les autres ; certains font une boucle
+    const majors = [], M = (x, y, loop) => { const prev = majors[majors.length - 1]; majors.push({ x, y: prev ? Math.max(y, prev.y + 40) : y, loop }); };
+    const fb = docBox(fall), endFall = fb.y + fb.h - vh * .35;
+    M(-60, vh * (TIP + .05), false);
+    let y = vh * (TIP + .05), side = R() < .5 ? -1 : 1;
+    // pendant la chute : il serpente autour du mot, de part et d'autre
+    while (y < endFall - vh * .5) { y += vh * (.38 + R() * .18); side = -side; M(vw * (.5 + side * (.14 + R() * .24)), y, R() < .55); }
+    const th = docBox(document.getElementById('team-head')), pr = docBox(document.getElementById('profiles'));
+    const wide = vw > 760;
+    M(wide ? vw * (.56 + R() * .06) : vw * .8, th.y - vh * .1, true);      // il arrive au-dessus de « Qui sommes-nous », sans barrer le texte
+    M(wide ? vw * .5 : vw * .5, pr.y + pr.h * .5, false);                  // passe entre (ou derrière) les deux profils
+    M(vw * (.08 + R() * .1), pr.y + pr.h + vh * .1, R() < .6);
+    const wh = docBox(document.getElementById('work-head'));
+    M(vw * (.62 + R() * .2), wh.y - vh * .1, true);
+    // entre les rangées de cartes : au milieu, puis sur un côté avec une boucle
+    const rows = [...new Set([...document.querySelectorAll('.card .img')].map(el => Math.round(docBox(el).y)))].sort((a, b) => a - b);
+    const ih = docBox(document.querySelector('.card .img')).h;
+    rows.forEach((ry, i) => {
+      M(vw * (.5 + (R() - .5) * .04), ry + ih * .5, false);
+      M(vw * (i % 2 ? .08 + R() * .08 : .84 + R() * .08), ry + ih + vh * .06, R() < .7);
+    });
+    M(vw + 80, docH - vh * .2, false);
+    // on transforme ça en une courbe : les boucles sont des cercles insérés après le point de passage
+    const pts = [], majIdx = [];
+    majors.forEach((m, i) => {
+      majIdx.push(pts.length); pts.push({ x: m.x, y: m.y });
+      if (m.loop && i > 0 && i < majors.length - 1) {
+        const pv = majors[i - 1], dir = Math.atan2(m.y - pv.y, m.x - pv.x), sg = R() < .5 ? -1 : 1;
+        const r = Math.min(vw, vh) * (.07 + R() * .06), a0 = dir - sg * Math.PI / 2, cx = m.x - r * Math.cos(a0), cy = m.y - r * Math.sin(a0);
+        for (let j = 1; j <= 6; j++) { const a = a0 + sg * j * Math.PI * 2 / 6; pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) + (j === 6 ? 2 : 0) }); }
+      }
+    });
+    const smp = [pts[0]], smpMaj = [0]; const ptToSmp = [0];
+    for (let i = 0; i < pts.length - 1; i++) {
+      catmull(pts[Math.max(0, i - 1)], pts[i], pts[i + 1], pts[Math.min(pts.length - 1, i + 2)], smp);
+      ptToSmp.push(smp.length - 1);
+    }
+    const n = smp.length; X = new Float32Array(n); Y = new Float32Array(n); S = new Float32Array(n); K = new Float32Array(n);
+    for (let i = 0; i < n; i++) { X[i] = smp[i].x; Y[i] = smp[i].y; S[i] = i ? S[i - 1] + Math.hypot(X[i] - X[i - 1], Y[i] - Y[i - 1]) : 0; }
+    total = S[n - 1];
+    // le bout du trait avance au rythme du défilement : entre deux points de passage, à vitesse régulière le long de la courbe
+    for (let m = 0; m < majIdx.length - 1; m++) {
+      const a = ptToSmp[majIdx[m]], b = ptToSmp[majIdx[m + 1]], ya = majors[m].y, yb = majors[m + 1].y, sa = S[a], sb = S[b] || sa + 1;
+      for (let i = a; i <= b; i++) K[i] = ya + (yb - ya) * (S[i] - sa) / Math.max(1, sb - sa);
+    }
+    // morceaux de ~70 points (environ 280 px de trait)
+    rib.textContent = ''; chunks = [];
+    const sw = Math.max(9, Math.min(18, vw * .012));
+    for (let i0 = 0; i0 < n - 1; i0 += 70) {
+      const i1 = Math.min(n - 1, i0 + 70); let d = `M${X[i0].toFixed(1)} ${Y[i0].toFixed(1)}`;
+      for (let i = i0 + 1; i <= i1; i++) d += `L${X[i].toFixed(1)} ${Y[i].toFixed(1)}`;
+      const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.style.strokeWidth = sw; rib.appendChild(p);
+      chunks.push({ el: p, s0: S[i0], s1: S[i1], len: S[i1] - S[i0], st: '' });
+    }
+    lastL = -1;
+  }
+  function drawRibbon(key) {
+    const n = K.length; if (!n) return;
+    let L;
+    if (key <= K[0]) L = 0; else if (key >= K[n - 1]) L = total;
+    else { let lo = 0, hi = n - 1; while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (K[mid] <= key) lo = mid; else hi = mid; }
+      L = S[lo] + (S[hi] - S[lo]) * (key - K[lo]) / Math.max(1e-3, K[hi] - K[lo]); }
+    if (Math.abs(L - lastL) < .3) return; lastL = L;
+    for (const c of chunks) {
+      if (L >= c.s1) { if (c.st !== 'full') { c.st = 'full'; c.el.style.visibility = 'visible'; c.el.style.strokeDasharray = 'none'; } }
+      else if (L <= c.s0 + .5) { if (c.st !== 'off') { c.st = 'off'; c.el.style.visibility = 'hidden'; } }
+      else { c.st = 'part'; c.el.style.visibility = 'visible'; c.el.style.strokeDasharray = `${c.len.toFixed(1)} ${(c.len + 40).toFixed(1)}`; c.el.style.strokeDashoffset = (c.len - (L - c.s0)).toFixed(1); }
+    }
+  }
+
   /* ---------- Les lettres qui tombent, et la caméra qui les suit ----------
-     Chaque lettre se décroche à son tour et chute (vitesse qui augmente). La caméra descend
-     à la vitesse moyenne de la chute : le mur défile vers le haut, les lettres restent autour du centre. */
-  const topbar = document.getElementById('topbar');
-  /* ---------- Transition : l'encre ----------
-     Dès que les lettres se décrochent, des gouttes d'encre tombent avec elles, s'écrasent,
-     s'étalent et fusionnent (filtre « goo »), puis une flaque monte du bas jusqu'au noir complet. */
-  const ink = document.getElementById('ink'), xg = ink.getContext('2d');
-  let xW = 0, xH = 0, lastK = -1;
-  // résolution de l'encre : assez fine pour des bords nets (plus fine sur écran Retina), sans recalculer tout l'écran en pleine définition
-  const SCALE = Math.min(1, (devicePixelRatio || 1) > 1.5 ? .75 : .62);
-  const inkOff = document.createElement('canvas'), og = inkOff.getContext('2d');
-  // Sur téléphone (ou si le canvas ne sait pas filtrer), pas de filtre SVG, trop lourd pour un mobile :
-  // l'encre est calculée en « métaballes » sur une petite grille, puis agrandie en douceur par le navigateur.
-  const MOBILE = matchMedia('(hover: none) and (pointer: coarse)').matches || innerWidth < 760;
-  const CANVAS_GOO = 'filter' in xg && !MOBILE, gooBlur = document.querySelector('#goo-s feGaussianBlur');
-  const CELL = 1.8;                                     // taille d'une case de la grille, en pixels CSS
-  let field = null, img = null;
-  // la toile déborde de 40 px autour de l'écran : le flou du filtre ne ronge pas les bords
-  function inkSize() {
-    xW = innerWidth; xH = innerHeight; lastK = -1;
-    if (CANVAS_GOO) { inkOff.width = ink.width = Math.round((xW + 80) * SCALE); inkOff.height = ink.height = Math.round((xH + 80) * SCALE); return; }
-    ink.width = Math.round((xW + 80) / CELL); ink.height = Math.round((xH + 80) / CELL);
-    field = new Float32Array(ink.width * ink.height); img = xg.createImageData(ink.width, ink.height);
-    for (let i = 0; i < img.data.length; i += 4) { img.data[i] = img.data[i + 1] = img.data[i + 2] = 13; }
-  }
-  inkSize(); addEventListener('resize', inkSize);
-  // même encre que l'exemple 04 : de grosses gouttes tombent du haut en grossissant et fusionnent, le noir monte du bas
-  const inkDrops = Array.from({ length: 9 }, (_, i) => ({ x: .08 + (i / 8) * .84 + (rnd() - .5) * .1, d: rnd() * .35, r: .08 + rnd() * .1 }));
-  const io = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  function drawInkGrid(p) {
-    const GW = ink.width, GH = ink.height, O = 40 / CELL, W = GW - 2 * O, H = GH - 2 * O, A = img.data;
-    if (p <= 0) { xg.clearRect(0, 0, GW, GH); return; }
-    field.fill(0);
-    // champ de chaque goutte : (1 - d²/R²)², nul au-delà de R (pas de marche), égal à 1 sur le bord de la goutte
-    const add = (cx, cy, r) => {
-      const R = r * 1.7, R2 = R * R, x0 = Math.max(0, Math.floor(cx - R)), x1 = Math.min(GW - 1, Math.ceil(cx + R)), y0 = Math.max(0, Math.floor(cy - R)), y1 = Math.min(GH - 1, Math.ceil(cy + R));
-      for (let y = y0; y <= y1; y++) { const dy = y - cy, dy2 = dy * dy, row = y * GW; if (dy2 >= R2) continue;
-        for (let x = x0; x <= x1; x++) { const dx = x - cx, q = 1 - (dx * dx + dy2) / R2; if (q > 0) field[row + x] += q * q * 2.695; } }
-    };
-    for (const d of inkDrops) {
-      const k = clamp((p - d.d) / (1 - d.d)); if (k <= 0) continue;
-      const y = (-.15 + io(clamp(k * 1.6)) * .75) * H + O, rr = (d.r + Math.pow(k, 2.2) * 1.1) * W, x = d.x * W + O;
-      add(x, y, rr); if (k < .6) add(x, y - rr * 1.6, rr * .4);
-    }
-    const up = io(clamp(p * 1.3 - .25)), top = O + H * (1 - up), soft = 7;
-    for (let y = 0, i = 0; y < GH; y++) {
-      const dy = top - y, pool = dy <= 0 ? 99 : (soft * soft) / (dy * dy);   // la flaque attire aussi les gouttes proches
-      for (let x = 0; x < GW; x++, i++) { const a = (field[i] + pool - 1) * 18 + .5; A[i * 4 + 3] = a <= 0 ? 0 : a >= 1 ? 255 : a * 255; }
-    }
-    xg.putImageData(img, 0, 0);
-  }
-  function drawInk(p) {
-    if (p === lastK) return; lastK = p;
-    if (!CANVAS_GOO) return drawInkGrid(p);
-    const O = 40 * SCALE, W = ink.width - 2 * O, H = ink.height - 2 * O;
-    xg.setTransform(1, 0, 0, 1, 0, 0); xg.clearRect(0, 0, ink.width, ink.height);
-    if (p <= 0) return;
-    const c = og;
-    og.clearRect(0, 0, inkOff.width, inkOff.height);
-    c.setTransform(1, 0, 0, 1, O, O); c.fillStyle = '#0d0d0d';
-    for (const d of inkDrops) {
-      const k = clamp((p - d.d) / (1 - d.d)), y = (-.15 + io(clamp(k * 1.6)) * .75) * H, rr = (d.r + Math.pow(k, 2.2) * 1.1) * W;
-      if (k <= 0) continue;
-      c.beginPath(); c.arc(d.x * W, y, rr, 0, 7); c.fill();
-      if (k < .6) { c.beginPath(); c.arc(d.x * W, y - rr * 1.6, rr * .4, 0, 7); c.fill(); }
-    }
-    const up = io(clamp(p * 1.3 - .25));
-    c.fillRect(-O, H * (1 - up), W + 2 * O, H * up + 2 * O);
-    gooBlur.setAttribute('stdDeviation', (14 * SCALE).toFixed(1)); xg.filter = 'url(#goo-s)'; xg.drawImage(inkOff, 0, 0); xg.filter = 'none';
-  }
-  const ring = document.getElementById('ring'), nTitle = document.getElementById('n-title'), nSub = document.getElementById('n-sub'), next = document.getElementById('suite');
-  nTitle.innerHTML = [...nTitle.textContent].map(c => `<span aria-hidden="true">${c}</span>`).join('');
-  const nLetters = [...nTitle.children];
-  function revealNext() {
-    const t = next.getBoundingClientRect().top, p = clamp((innerHeight - t) / (innerHeight * .9));
-    ring.style.strokeDashoffset = (327 * (1 - clamp(p * 1.4))).toFixed(1);
-    nLetters.forEach((el, i) => { const e = clamp((p - .45 - i * .025) / .35); el.style.transform = `translateY(${((1 - (1 - Math.pow(1 - e, 3))) * 105).toFixed(1)}%)`; });
-    nSub.style.opacity = clamp((p - .85) / .15).toFixed(3);
-  }
-  const title = document.getElementById('title'), cue = document.getElementById('cue'), fall = document.querySelector('.fall'), grain = document.querySelector('.grain');
+     Chaque lettre se décroche à son tour, tourne et chute en s'effaçant. La caméra descend à la vitesse
+     moyenne de la chute : le mur défile vers le haut, les lettres restent autour du centre. */
+  const title = document.getElementById('title'), cue = document.getElementById('cue'), grain = document.querySelector('.grain');
   const word = title.textContent; title.textContent = '';
   const letters = [...word].map((ch, i) => {
     const s = document.createElement('span'); s.className = 'l'; s.textContent = ch; s.setAttribute('aria-hidden', 'true'); title.appendChild(s); s.style.setProperty('--i', i);
     return { el: s, d: Math.random() * .32, g: .85 + Math.random() * .3, rot: (Math.random() < .5 ? -1 : 1) * (40 + Math.random() * 90), drift: (Math.random() - .5) * 2, ph: Math.random() * 6 };
   });
-  // « profil » : p r o f i l, pris dans « portfolio » (indices 0, 2, 1, 4, 7, 6)
-  const PROFIL = [0, 2, 1, 4, 7, 6];
-  let target = [];
-  function measure() {
-    target = [];
-    const hw = title.offsetWidth / 2, lh = letters[0].el.offsetHeight;
-    const ws = PROFIL.map(i => letters[i].el.offsetWidth), sum = ws.reduce((a, b) => a + b, 0);
-    // plus petit, calé à gauche (marge du site), centré en hauteur
-    const narrow = innerWidth < 700, S = Math.min(innerWidth * (narrow ? .62 : .36) / sum, innerHeight * .2 / lh);
-    let acc = -innerWidth / 2 + Math.max(20, innerWidth * .05);
-    PROFIL.forEach((i, j) => {
-      const el = letters[i].el, cx = el.offsetLeft + el.offsetWidth / 2 - hw;
-      target[i] = { x: acc + ws[j] * S / 2 - cx, s: S }; acc += ws[j] * S;
-    });
-  }
-  measure(); addEventListener('resize', measure);
-  if (document.fonts) document.fonts.ready.then(() => { measure(); update(); });
+  let fallTop = 0, fallH = 1;
+  function layout() { fallTop = fall.offsetTop; fallH = fall.offsetHeight; buildRibbon(); }
+
   // le défilement est lissé : la valeur affichée rattrape la vraie en douceur (plus fluide qu'à la molette brute)
-  let kGoal = 0, kNow = -1, overNow = 0, smoothing = false, lastF = 0;
+  let yGoal = 0, yNow = -1, smoothing = false, lastF = 0;
   function update() {
-    const r = fall.getBoundingClientRect();
-    kGoal = clamp(-r.top / (r.height - innerHeight)); overNow = Math.max(0, -r.top - (r.height - innerHeight));
-    if (kNow < 0) { kNow = kGoal; render(); }
+    yGoal = scrollY;
+    if (yNow < 0) { yNow = yGoal; render(); }
     if (!smoothing) { smoothing = true; lastF = 0; requestAnimationFrame(smooth); }
   }
   function smooth(t) {
     const dt = lastF ? Math.min((t - lastF) / 1000, .05) : 1 / 60; lastF = t;
-    kNow += (kGoal - kNow) * (1 - Math.exp(-dt * 10));
-    if (Math.abs(kGoal - kNow) < .0003) kNow = kGoal;
+    yNow += (yGoal - yNow) * (1 - Math.exp(-dt * 10));
+    if (Math.abs(yGoal - yNow) < .3) yNow = yGoal;
     render();
-    if (kNow !== kGoal) requestAnimationFrame(smooth); else smoothing = false;
+    if (yNow !== yGoal) requestAnimationFrame(smooth); else smoothing = false;
   }
   function render() {
-    const k = kNow, H = innerHeight;
-    const A = 5 * H;
+    const Hs = innerHeight, run = Math.max(1, fallH - Hs);
+    const k = clamp((yNow - fallTop) / run), overNow = Math.max(0, yNow - fallTop - run);
+    const A = 5 * Hs;
     const ys = letters.map(L => { const t = Math.max(0, k - L.d); return A * L.g * t * t; });
     const cam = ys.reduce((a, b) => a + b, 0) / ys.length;
-    // après la chute, le mur continue de défiler avec la page
-    descend = cam + overNow;
-    // à la fin de la chute, six lettres se rassemblent en grand pour écrire « profil » ; t, o, o s'en vont
-    const a = io(clamp((k - .72) / .24));
-    letters.forEach((L, i) => {
-      const f = clamp((k - L.d) / (1 - L.d));             // avancement de la chute de cette lettre
-      const rel = ys[i] - cam, lim = Math.min(H * .22, innerWidth * .35);
-      const y = lim * Math.tanh(rel / lim);               // reste autour du centre, jamais hors champ
-      const x = L.drift * (H * .06) * Math.sin(f * 2.2 + L.ph) * f;
-      const rot = L.rot * (f * .5 + f * f * .5);
-      const T = target[i];
-      if (T) {
-        const X = x + (T.x - x) * a, Y = y * (1 - a), R = rot * (1 - a), Sc = 1 + (T.s - 1) * a;
-        L.el.style.transform = `translate(${X.toFixed(1)}px, ${Y.toFixed(1)}px) rotate(${R.toFixed(1)}deg) scale(${Sc.toFixed(3)})`;
-        L.el.style.opacity = 1; L.el.style.willChange = a > 0 ? 'auto' : ''; // net une fois agrandie
-      } else {
+    descend = cam + overNow;                              // après la chute, le mur continue de défiler avec la page
+    if (k < 1 || !render.done) {
+      letters.forEach((L, i) => {
+        const f = clamp((k - L.d) / (1 - L.d));
+        const rel = ys[i] - cam, lim = Math.min(Hs * .22, innerWidth * .35);
+        const y = lim * Math.tanh(rel / lim);             // reste autour du centre, jamais hors champ
+        const x = L.drift * (Hs * .06) * Math.sin(f * 2.2 + L.ph) * f;
+        const rot = L.rot * (f * .5 + f * f * .5);
         L.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${rot.toFixed(1)}deg)`;
-        L.el.style.opacity = Math.pow(clamp(1 - f / .5), 1.3).toFixed(3); // les lettres en trop s'effacent
-      }
-    });
+        L.el.style.opacity = Math.pow(clamp(1 - f / .55), 1.3).toFixed(3);  // plus elle tombe, plus elle devient transparente
+      });
+      render.done = k >= 1;
+    }
     grain.style.transform = `translate3d(0, ${(-((descend * PAR) % 360)).toFixed(1)}px, 0)`;
     cue.style.opacity = k > .02 ? 0 : 1;
-    drawInk(clamp((k - .03) / .72)); darkFull = k > .78;
-    revealNext();
+    drawRibbon(reduce ? 1e9 : yNow + Hs * TIP);
   }
 
+  // apparition des profils et des cartes
+  const rises = document.querySelectorAll('.rise');
+  if ('IntersectionObserver' in window && !reduce) {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -12% 0px' });
+    rises.forEach(el => io.observe(el));
+  } else rises.forEach(el => el.classList.add('on'));
+
   Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Promise(r => setTimeout(r, 1200))]).then(() => requestAnimationFrame(() => document.body.classList.add('in')));
-  if (reduce) { ring.style.strokeDashoffset = 0; nLetters.forEach(el => el.style.transform = 'none'); nSub.style.opacity = 1; }
-  if (!reduce) {
-    addEventListener('scroll', update, { passive: true });
-    addEventListener('resize', update);
-    update();
-  }
+  layout();
+  // la page peut changer de hauteur (polices, taille d'écran) : on retrace alors le trait
+  let rt = 0; const relayout = () => { clearTimeout(rt); rt = setTimeout(() => { layout(); lastL = -1; render(); }, 120); };
+  addEventListener('resize', relayout);
+  if (document.fonts) document.fonts.ready.then(relayout);
+  if ('ResizeObserver' in window) { let lastH = 0; new ResizeObserver(() => { const h = document.documentElement.scrollHeight; if (h !== lastH) { lastH = h; relayout(); } }).observe(document.body); }
+  if (reduce) { yNow = scrollY; render(); addEventListener('scroll', () => { yNow = scrollY; render(); }, { passive: true }); }
+  else { addEventListener('scroll', update, { passive: true }); update(); }
 })();
 </script>
 </body>
