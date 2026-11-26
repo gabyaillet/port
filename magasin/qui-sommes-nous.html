@@ -34,7 +34,8 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 @media (prefers-reduced-motion: reduce) { .cue::after { animation: none; } }
 /* ---------- Après la chute : le fond change ----------
    Un fond noir monte du bas avec un bord arrondi, qui s'aplatit en remplissant l'écran (on continue de tomber). */
-.ink { position: fixed; left: -40px; top: -40px; width: calc(100% + 80px); height: calc(100% + 80px); pointer-events: none; display: block; filter: url(#goo); }
+.ink { position: fixed; left: -40px; top: -40px; width: calc(100% + 80px); height: calc(100% + 80px); pointer-events: none; display: block; }
+.ink.css-goo { filter: url(#goo); } /* repli si le canvas ne sait pas appliquer le filtre lui-même */
 .next { position: relative; z-index: 3; min-height: 100svh; background: #0d0d0d; display: grid; place-items: center; align-content: center; gap: 1.6rem; color: #ededeb; text-align: center; }
 .mark { width: clamp(64px, 9vw, 96px); aspect-ratio: 1; margin: 0; }
 .mark svg { width: 100%; height: 100%; overflow: visible; transform: rotate(-90deg); }
@@ -100,7 +101,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   <li><a href="./">Revoir l'intro</a></li>
   <li class="nav-foot"><button class="pill nav-close" type="button">Fermer ✕</button></li>
 </ul>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="14" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="14" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter><filter id="goo-s" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="4.8" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter></svg>
 <div class="wall" aria-hidden="true"><canvas id="light"></canvas><div class="grain"></div></div>
 
 <canvas class="ink" id="ink" aria-hidden="true"></canvas>
@@ -151,30 +152,37 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   // le mur défile moins vite que la chute (parallaxe) : plus doux pour les yeux
   const PAR = .3;
   const wy = y => { const o = y - descend * PAR / innerHeight; return ((o + .7) % PER + PER) % PER - .7; };
+  // deux calques hors écran (taches / feuillage) dessinés nets, puis floutés une seule fois chacun :
+  // bien plus léger que de flouter chaque forme une par une
+  const lay1 = document.createElement('canvas'), lay2 = document.createElement('canvas'), g1 = lay1.getContext('2d'), g2 = lay2.getContext('2d');
   function size() {
     W = Math.max(64, Math.round(innerWidth * SC)); H = Math.max(64, Math.round(innerHeight * SC));
-    cv.width = W; cv.height = H;
+    cv.width = lay1.width = lay2.width = W; cv.height = lay1.height = lay2.height = H;
   }
   function draw(t) {
     const m = Math.max(W, H), wind = Math.sin(t * .09) * .6 + Math.sin(t * .031 + 2) * .4; // rafale lente
-    g.filter = 'none'; g.fillStyle = '#d7d7d5'; g.fillRect(0, 0, W, H);
+    g1.clearRect(0, 0, W, H); g2.clearRect(0, 0, W, H);
     // taches de soleil
-    g.filter = `blur(${Math.round(m * .03)}px)`; g.fillStyle = '#e1e1df';
+    g1.fillStyle = '#e1e1df';
     for (const s of spots) {
       const dx = (Math.sin(t * s.f + s.ph) + Math.sin(t * s.f * 1.7 + s.ph * 2) * .5 + wind * .6) * s.amp, dy = Math.cos(t * s.f * .8 + s.ph) * s.amp;
-      g.beginPath(); g.ellipse((s.x + dx) * W, (wy(s.y) + dy) * H, s.rx * m, s.ry * m, s.a + wind * .05, 0, 7); g.fill();
+      g1.beginPath(); g1.ellipse((s.x + dx) * W, (wy(s.y) + dy) * H, s.rx * m, s.ry * m, s.a + wind * .05, 0, 7); g1.fill();
     }
     // feuilles et branches en ombre
-    g.filter = `blur(${Math.round(m * .014)}px)`; g.fillStyle = 'rgba(206,206,204,.45)'; g.strokeStyle = 'rgba(206,206,204,.4)'; g.lineCap = 'round';
+    g2.fillStyle = '#cecdcc'; g2.strokeStyle = '#cecdcc'; g2.lineCap = 'round';
     for (const b of branches) {
       const sway = wind * .012;
       const sh = wy((b.y0 + b.y1) / 2) - (b.y0 + b.y1) / 2, y0 = b.y0 + sh, y1 = b.y1 + sh;
-      g.lineWidth = b.w * m; g.beginPath(); g.moveTo(b.x0 * W, y0 * H); g.quadraticCurveTo(((b.x0 + b.x1) / 2 + sway) * W, ((y0 + y1) / 2 - sway) * H, (b.x1 + sway * 1.5) * W, y1 * H); g.stroke();
+      g2.lineWidth = b.w * m; g2.beginPath(); g2.moveTo(b.x0 * W, y0 * H); g2.quadraticCurveTo(((b.x0 + b.x1) / 2 + sway) * W, ((y0 + y1) / 2 - sway) * H, (b.x1 + sway * 1.5) * W, y1 * H); g2.stroke();
     }
     for (const l of leaves) {
       const dx = (Math.sin(t * l.f + l.ph) + wind) * l.amp, dy = Math.cos(t * l.f * 1.3 + l.ph) * l.amp;
-      g.beginPath(); g.ellipse((l.x + dx) * W, (wy(l.y) + dy) * H, l.r * m, l.r * m * .45, l.a, 0, 7); g.fill();
+      g2.beginPath(); g2.ellipse((l.x + dx) * W, (wy(l.y) + dy) * H, l.r * m, l.r * m * .45, l.a, 0, 7); g2.fill();
     }
+    g.filter = 'none'; g.globalAlpha = 1; g.fillStyle = '#d7d7d5'; g.fillRect(0, 0, W, H);
+    g.filter = `blur(${Math.round(m * .03)}px)`; g.drawImage(lay1, 0, 0);
+    g.filter = `blur(${Math.round(m * .014)}px)`; g.globalAlpha = .45; g.drawImage(lay2, 0, 0);
+    g.filter = 'none'; g.globalAlpha = 1;
   }
   size(); addEventListener('resize', () => { size(); if (reduce) draw(0); });
   let lastDraw = 0, lastDesc = 0;
@@ -194,9 +202,12 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
      s'étalent et fusionnent (filtre « goo »), puis une flaque monte du bas jusqu'au noir complet. */
   const ink = document.getElementById('ink'), xg = ink.getContext('2d');
   let xW = 0, xH = 0, lastK = -1;
-  const SCALE = .5;                                     // dessinée à mi-résolution : l'encre est floue de toute façon
+  const SCALE = .34;                                    // dessinée au tiers de la résolution puis agrandie : l'encre est lisse de toute façon
+  const inkOff = document.createElement('canvas'), og = inkOff.getContext('2d');
+  const CANVAS_GOO = 'filter' in xg;
+  if (!CANVAS_GOO) ink.classList.add('css-goo');
   // la toile déborde de 40 px autour de l'écran : le flou du filtre ne ronge pas les bords
-  function inkSize() { xW = innerWidth; xH = innerHeight; ink.width = Math.round((xW + 80) * SCALE); ink.height = Math.round((xH + 80) * SCALE); lastK = -1; }
+  function inkSize() { xW = innerWidth; xH = innerHeight; inkOff.width = ink.width = Math.round((xW + 80) * SCALE); inkOff.height = ink.height = Math.round((xH + 80) * SCALE); lastK = -1; }
   inkSize(); addEventListener('resize', inkSize);
   // même encre que l'exemple 04 : de grosses gouttes tombent du haut en grossissant et fusionnent, le noir monte du bas
   const inkDrops = Array.from({ length: 9 }, (_, i) => ({ x: .08 + (i / 8) * .84 + (rnd() - .5) * .1, d: rnd() * .35, r: .08 + rnd() * .1 }));
@@ -206,15 +217,18 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const O = 40 * SCALE, W = ink.width - 2 * O, H = ink.height - 2 * O;
     xg.setTransform(1, 0, 0, 1, 0, 0); xg.clearRect(0, 0, ink.width, ink.height);
     if (p <= 0) return;
-    xg.translate(O, O); xg.fillStyle = '#0d0d0d';
+    const c = CANVAS_GOO ? og : xg;
+    if (CANVAS_GOO) og.clearRect(0, 0, inkOff.width, inkOff.height);
+    c.setTransform(1, 0, 0, 1, O, O); c.fillStyle = '#0d0d0d';
     for (const d of inkDrops) {
       const k = clamp((p - d.d) / (1 - d.d)), y = (-.15 + io(clamp(k * 1.6)) * .75) * H, rr = (d.r + Math.pow(k, 2.2) * 1.1) * W;
       if (k <= 0) continue;
-      xg.beginPath(); xg.arc(d.x * W, y, rr, 0, 7); xg.fill();
-      if (k < .6) { xg.beginPath(); xg.arc(d.x * W, y - rr * 1.6, rr * .4, 0, 7); xg.fill(); }
+      c.beginPath(); c.arc(d.x * W, y, rr, 0, 7); c.fill();
+      if (k < .6) { c.beginPath(); c.arc(d.x * W, y - rr * 1.6, rr * .4, 0, 7); c.fill(); }
     }
     const up = io(clamp(p * 1.3 - .25));
-    xg.fillRect(-O, H * (1 - up), W + 2 * O, H * up + 2 * O);
+    c.fillRect(-O, H * (1 - up), W + 2 * O, H * up + 2 * O);
+    if (CANVAS_GOO) { xg.filter = 'url(#goo-s)'; xg.drawImage(inkOff, 0, 0); xg.filter = 'none'; }
   }
   const ring = document.getElementById('ring'), nTitle = document.getElementById('n-title'), nSub = document.getElementById('n-sub'), next = document.getElementById('suite');
   nTitle.innerHTML = [...nTitle.textContent].map(c => `<span aria-hidden="true">${c}</span>`).join('');
@@ -247,13 +261,28 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   }
   measure(); addEventListener('resize', measure);
   if (document.fonts) document.fonts.ready.then(() => { measure(); update(); });
+  // le défilement est lissé : la valeur affichée rattrape la vraie en douceur (plus fluide qu'à la molette brute)
+  let kGoal = 0, kNow = -1, overNow = 0, smoothing = false, lastF = 0;
   function update() {
-    const r = fall.getBoundingClientRect(), k = clamp(-r.top / (r.height - innerHeight)), H = innerHeight;
+    const r = fall.getBoundingClientRect();
+    kGoal = clamp(-r.top / (r.height - innerHeight)); overNow = Math.max(0, -r.top - (r.height - innerHeight));
+    if (kNow < 0) { kNow = kGoal; render(); }
+    if (!smoothing) { smoothing = true; lastF = 0; requestAnimationFrame(smooth); }
+  }
+  function smooth(t) {
+    const dt = lastF ? Math.min((t - lastF) / 1000, .05) : 1 / 60; lastF = t;
+    kNow += (kGoal - kNow) * (1 - Math.exp(-dt * 10));
+    if (Math.abs(kGoal - kNow) < .0003) kNow = kGoal;
+    render();
+    if (kNow !== kGoal) requestAnimationFrame(smooth); else smoothing = false;
+  }
+  function render() {
+    const k = kNow, H = innerHeight;
     const A = 5 * H;
     const ys = letters.map(L => { const t = Math.max(0, k - L.d); return A * L.g * t * t; });
     const cam = ys.reduce((a, b) => a + b, 0) / ys.length;
     // après la chute, le mur continue de défiler avec la page
-    descend = cam + Math.max(0, -r.top - (r.height - H));
+    descend = cam + overNow;
     // à la fin de la chute, six lettres se rassemblent en grand pour écrire « profil » ; t, o, o s'en vont
     const a = io(clamp((k - .72) / .24));
     letters.forEach((L, i) => {
@@ -281,8 +310,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Promise(r => setTimeout(r, 1200))]).then(() => requestAnimationFrame(() => document.body.classList.add('in')));
   if (reduce) { ring.style.strokeDashoffset = 0; nLetters.forEach(el => el.style.transform = 'none'); nSub.style.opacity = 1; }
   if (!reduce) {
-    let ticking = false;
-    addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } }, { passive: true });
+    addEventListener('scroll', update, { passive: true });
     addEventListener('resize', update);
     update();
   }
