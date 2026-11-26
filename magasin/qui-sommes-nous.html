@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
 <style>
-/* Un mur d'enduit gris où passent des ombres de feuillage qui bougent un peu ; au défilement, les lettres de « portfolio » tombent une à une et la caméra les suit, pendant que de l'encre tombe avec elles et finit par tout recouvrir ; le logo se dessine ensuite sur le noir. */
+/* Un mur d'enduit gris où passent des ombres de feuillage qui bougent un peu ; au défilement, les lettres de « portfolio » tombent une à une et la caméra les suit, pendant que de l'encre coule et recouvre tout ; puis six lettres se rassemblent en grand pour écrire « profil ». */
 :root { --wall: #d2d2d0; --ink: #141414; --muted: #5d5d5a; --f: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; color-scheme: light; }
 * { box-sizing: border-box; }
 html { background: var(--wall); }
@@ -100,7 +100,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   <li><a href="./">Revoir l'intro</a></li>
   <li class="nav-foot"><button class="pill nav-close" type="button">Fermer ✕</button></li>
 </ul>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -10"/></filter></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceGraphic" stdDeviation="14" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter></svg>
 <div class="wall" aria-hidden="true"><canvas id="light"></canvas><div class="grain"></div></div>
 
 <canvas class="ink" id="ink" aria-hidden="true"></canvas>
@@ -198,38 +198,23 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   // la toile déborde de 40 px autour de l'écran : le flou du filtre ne ronge pas les bords
   function inkSize() { xW = innerWidth; xH = innerHeight; ink.width = Math.round((xW + 80) * SCALE); ink.height = Math.round((xH + 80) * SCALE); lastK = -1; }
   inkSize(); addEventListener('resize', inkSize);
-  const drops = Array.from({ length: 11 }, (_, i) => ({ x: .06 + (i / 10) * .88 + (rnd() - .5) * .08, s: .03 + rnd() * .36, ty: .25 + rnd() * .6, r: .018 + rnd() * .022, dur: .2 + rnd() * .12 }));
-  const bumps = Array.from({ length: 9 }, () => ({ x: rnd(), r: .07 + rnd() * .09, ph: rnd() * 6 }));
-  const easeOut = t => 1 - Math.pow(1 - t, 3);
-  function drawInk(k) {
-    if (k === lastK) return; lastK = k;
-    const O = 40 * SCALE, W = ink.width - 2 * O, H = ink.height - 2 * O, m = Math.max(W, H);
+  // même encre que l'exemple 04 : de grosses gouttes tombent du haut en grossissant et fusionnent, le noir monte du bas
+  const inkDrops = Array.from({ length: 9 }, (_, i) => ({ x: .08 + (i / 8) * .84 + (rnd() - .5) * .1, d: rnd() * .35, r: .08 + rnd() * .1 }));
+  const io = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  function drawInk(p) {
+    if (p === lastK) return; lastK = p;
+    const O = 40 * SCALE, W = ink.width - 2 * O, H = ink.height - 2 * O;
     xg.setTransform(1, 0, 0, 1, 0, 0); xg.clearRect(0, 0, ink.width, ink.height);
-    if (k <= .03) return;
-    xg.translate(O, O);
-    xg.fillStyle = '#0d0d0d';
-    for (const d of drops) {
-      const t = (k - d.s) / d.dur; if (t <= 0) continue;
-      const fall = clamp(t / .55), land = clamp((t - .55) / .45), y = (-.08 + (d.ty + .08) * fall * fall) * H, x = d.x * W;
-      if (land <= 0) {
-        // goutte en chute : étirée, avec une petite queue
-        const r = d.r * m;
-        xg.beginPath(); xg.ellipse(x, y, r * .8, r * 1.35, 0, 0, 7); xg.fill();
-        xg.beginPath(); xg.arc(x, y - r * 2.4, r * .45, 0, 7); xg.fill();
-      } else {
-        // écrasée : elle s'étale, quelques éclaboussures autour, puis continue de s'élargir doucement
-        const grow = easeOut(land), late = Math.max(0, k - d.s - d.dur);
-        const r = d.r * m * (1.2 + grow * 3.2) + late * m * .9;
-        xg.beginPath(); xg.ellipse(x, y, r * 1.12, r * .92, 0, 0, 7); xg.fill();
-        if (land < .8) for (let j = 0; j < 5; j++) { const a = j * 1.26 + d.x * 9, dd = r * (1.3 + grow * .5); xg.beginPath(); xg.arc(x + Math.cos(a) * dd, y + Math.sin(a) * dd * .8, d.r * m * .35 * (1 - land), 0, 7); xg.fill(); }
-      }
+    if (p <= 0) return;
+    xg.translate(O, O); xg.fillStyle = '#0d0d0d';
+    for (const d of inkDrops) {
+      const k = clamp((p - d.d) / (1 - d.d)), y = (-.15 + io(clamp(k * 1.6)) * .75) * H, rr = (d.r + Math.pow(k, 2.2) * 1.1) * W;
+      if (k <= 0) continue;
+      xg.beginPath(); xg.arc(d.x * W, y, rr, 0, 7); xg.fill();
+      if (k < .6) { xg.beginPath(); xg.arc(d.x * W, y - rr * 1.6, rr * .4, 0, 7); xg.fill(); }
     }
-    // la flaque qui monte du bas, au bord ondulé
-    const pool = easeOut(clamp((k - .42) / .5)), top = H * (1.05 - pool * 1.2);
-    if (pool > 0) {
-      xg.fillRect(-O, top, W + 2 * O, H - top + 2 * O);
-      for (const b of bumps) { xg.beginPath(); xg.arc(b.x * W, top, b.r * m * (.6 + .4 * Math.sin(k * 9 + b.ph)), 0, 7); xg.fill(); }
-    }
+    const up = io(clamp(p * 1.3 - .25));
+    xg.fillRect(-O, H * (1 - up), W + 2 * O, H * up + 2 * O);
   }
   const ring = document.getElementById('ring'), nTitle = document.getElementById('n-title'), nSub = document.getElementById('n-sub'), next = document.getElementById('suite');
   nTitle.innerHTML = [...nTitle.textContent].map(c => `<span aria-hidden="true">${c}</span>`).join('');
@@ -246,6 +231,22 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const s = document.createElement('span'); s.className = 'l'; s.textContent = ch; s.setAttribute('aria-hidden', 'true'); title.appendChild(s); s.style.setProperty('--i', i);
     return { el: s, d: Math.random() * .32, g: .85 + Math.random() * .3, rot: (Math.random() < .5 ? -1 : 1) * (40 + Math.random() * 90), drift: (Math.random() - .5) * 2, ph: Math.random() * 6 };
   });
+  // « profil » : p r o f i l, pris dans « portfolio » (indices 0, 2, 1, 4, 7, 6)
+  const PROFIL = [0, 2, 1, 4, 7, 6];
+  let target = [];
+  function measure() {
+    target = [];
+    const hw = title.offsetWidth / 2, lh = letters[0].el.offsetHeight;
+    const ws = PROFIL.map(i => letters[i].el.offsetWidth), sum = ws.reduce((a, b) => a + b, 0);
+    const S = Math.min(innerWidth * .84 / sum, innerHeight * .34 / lh);
+    let acc = -sum * S / 2;
+    PROFIL.forEach((i, j) => {
+      const el = letters[i].el, cx = el.offsetLeft + el.offsetWidth / 2 - hw;
+      target[i] = { x: acc + ws[j] * S / 2 - cx, s: S }; acc += ws[j] * S;
+    });
+  }
+  measure(); addEventListener('resize', measure);
+  if (document.fonts) document.fonts.ready.then(() => { measure(); update(); });
   function update() {
     const r = fall.getBoundingClientRect(), k = clamp(-r.top / (r.height - innerHeight)), H = innerHeight;
     const A = 5 * H;
@@ -253,18 +254,27 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const cam = ys.reduce((a, b) => a + b, 0) / ys.length;
     // après la chute, le mur continue de défiler avec la page
     descend = cam + Math.max(0, -r.top - (r.height - H));
+    // à la fin de la chute, six lettres se rassemblent en grand pour écrire « profil » ; t, o, o s'en vont
+    const a = io(clamp((k - .72) / .24));
     letters.forEach((L, i) => {
       const f = clamp((k - L.d) / (1 - L.d));             // avancement de la chute de cette lettre
       const rel = ys[i] - cam, lim = Math.min(H * .22, innerWidth * .35);
       const y = lim * Math.tanh(rel / lim);               // reste autour du centre, jamais hors champ
       const x = L.drift * (H * .06) * Math.sin(f * 2.2 + L.ph) * f;
       const rot = L.rot * (f * .5 + f * f * .5);
-      L.el.style.transform = k > L.d ? `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${rot.toFixed(1)}deg)` : `translateY(${y.toFixed(1)}px)`;
-      L.el.style.opacity = Math.pow(clamp(1 - f / .42), 1.3).toFixed(3); // transparente vite, avant la fin de la chute
+      const T = target[i];
+      if (T) {
+        const X = x + (T.x - x) * a, Y = y * (1 - a), R = rot * (1 - a), Sc = 1 + (T.s - 1) * a;
+        L.el.style.transform = `translate(${X.toFixed(1)}px, ${Y.toFixed(1)}px) rotate(${R.toFixed(1)}deg) scale(${Sc.toFixed(3)})`;
+        L.el.style.opacity = 1; L.el.style.willChange = a > 0 ? 'auto' : ''; // net une fois agrandie
+      } else {
+        L.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${rot.toFixed(1)}deg)`;
+        L.el.style.opacity = Math.pow(clamp(1 - f / .5), 1.3).toFixed(3); // les lettres en trop s'effacent
+      }
     });
     grain.style.backgroundPositionY = (-descend * PAR).toFixed(1) + 'px';
     cue.style.opacity = k > .02 ? 0 : 1;
-    drawInk(k); darkFull = k > .93;
+    drawInk(clamp((k - .03) / .72)); darkFull = k > .78;
     revealNext();
   }
 
