@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Gabriel Aillet — Entrée</title>
+<meta name="description" content="Entrée du portfolio de Gabriel Aillet : on pousse la porte d'une petite boutique, on passe derrière le comptoir et on entre dans l'écran.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Intro : une boutique dessinée en 3D, la caméra entre, passe derrière le comptoir et plonge dans l'écran du PC. */
+:root { --ink: #0d0d0d; --paper: #ededeb; --f: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--ink); color: var(--paper); font-family: var(--f); -webkit-font-smoothing: antialiased; }
+canvas#shop { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* Fondu d'ouverture */
+.veil { position: fixed; inset: 0; z-index: 20; background: var(--ink); transition: opacity 1.4s ease; pointer-events: none; }
+.veil.off { opacity: 0; }
+
+/* Passer l'intro */
+.skip { position: fixed; z-index: 40; right: max(18px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  font: 500 .68rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--paper); background: rgba(13,13,13,.45);
+  border: 1px solid rgba(237,237,235,.3); border-radius: 99px; padding: .7rem 1.1rem; cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  opacity: 0; transition: opacity .8s, background .3s, color .3s; }
+.skip.show { opacity: 1; }
+.skip:hover { background: var(--paper); color: var(--ink); }
+.skip:focus-visible { outline: 1px solid var(--paper); outline-offset: 3px; }
+
+/* L'écran du PC, repris en HTML puis agrandi à tout l'écran */
+.pc { position: fixed; z-index: 30; display: none; overflow: hidden; container-type: size; background: #121214; opacity: 0;
+  transition: opacity .25s linear; }
+.pc.on { display: block; }
+.pc.vis { opacity: 1; }
+.pc.grow { transition: left .95s cubic-bezier(.77,0,.18,1), top .95s cubic-bezier(.77,0,.18,1), width .95s cubic-bezier(.77,0,.18,1), height .95s cubic-bezier(.77,0,.18,1), border-radius .95s; }
+.chrome { position: absolute; left: 0; right: 0; top: 0; background: #1d1d20; transition: transform .7s cubic-bezier(.77,0,.18,1); }
+.chrome.up { transform: translateY(-100%); }
+.tabs { display: flex; align-items: flex-end; gap: .4cqw; height: max(5cqw, 34px); padding: 0 1.2cqw; }
+.dots { display: flex; gap: max(.55cqw, 6px); align-self: center; margin-right: 1cqw; }
+.dots i { width: max(.9cqw, 9px); height: max(.9cqw, 9px); border-radius: 50%; background: #3a3a3f; }
+.tab { position: relative; display: flex; align-items: center; gap: max(.7cqw, 7px); height: 78%; width: max(19cqw, 120px); min-width: 0; padding: 0 1.1cqw;
+  border-radius: max(.8cqw, 8px) max(.8cqw, 8px) 0 0; font: 500 max(1.15cqw, 11px)/1 var(--f); color: #9b9ba1; white-space: nowrap; overflow: hidden; transition: background .2s, color .2s; }
+.tab span { overflow: hidden; text-overflow: ellipsis; }
+.tab.on { background: #2b2b30; color: #ededeb; }
+.tab .fav { flex: none; width: max(1.2cqw, 12px); height: max(1.2cqw, 12px); border-radius: 50%; border: max(.18cqw, 2px) solid currentColor; }
+.tab .fav.plain { border-radius: 3px; border: 0; background: #4a4a52; }
+.tab.press { background: #34343a; }
+.bar { display: flex; align-items: center; gap: 1cqw; height: max(4.4cqw, 34px); padding: 0 1.4cqw; background: #2b2b30; }
+.nav { display: flex; gap: max(1cqw, 10px); color: #6c6c73; font: 400 max(1.3cqw, 13px)/1 var(--f); }
+.url { flex: 1; height: 68%; display: flex; align-items: center; padding: 0 1.3cqw; border-radius: 99px; background: #18181b; color: #9b9ba1; font: 400 max(1.1cqw, 11px)/1 var(--mono); letter-spacing: .02em; overflow: hidden; white-space: nowrap; }
+.url b { font-weight: 400; color: #ededeb; }
+.page { position: absolute; inset: 0; display: grid; place-items: center; background: #121214; transition: background .45s; }
+.home { display: grid; justify-items: center; gap: 2.4cqw; transition: opacity .3s; transform: translateY(3cqw); }
+.home .logo { width: max(7cqw, 56px); aspect-ratio: 1; border-radius: 50%; border: max(.35cqw, 3px) solid #ededeb; }
+.home .search { width: max(38cqw, 240px); height: max(3.8cqw, 34px); border-radius: 99px; background: #1f1f23; border: 1px solid #2e2e34; display: flex; align-items: center; padding: 0 1.6cqw; color: #6c6c73; font: 400 max(1.15cqw, 12px)/1 var(--f); }
+.page.go { background: #0d0d0d; }
+.page.go .home { opacity: 0; }
+.load { position: absolute; left: 0; top: 0; height: 2px; width: 0; background: #ededeb; }
+.load.run { width: 100%; transition: width .75s cubic-bezier(.3,.6,.2,1); }
+
+.cursor { position: absolute; left: 0; top: 0; width: max(1.9cqw, 18px); height: auto; z-index: 3; pointer-events: none; transform-origin: 2px 2px; opacity: 0;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
+.ripple { position: absolute; z-index: 2; width: max(3cqw, 30px); aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(237,237,235,.8); transform: translate(-50%,-50%) scale(.2); opacity: 0; pointer-events: none; }
+.ripple.pop { animation: pop .55s ease-out forwards; }
+@keyframes pop { 0% { opacity: 1; transform: translate(-50%,-50%) scale(.2); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.4); } }
+
+.err { position: fixed; inset: 0; display: grid; place-items: center; text-align: center; z-index: 50; background: var(--ink); font: 400 1rem var(--f); }
+.err a { color: var(--paper); }
+</style>
+<script type="importmap">{ "imports": { "three": "../vitrine/vendor/three.module.min.js", "three/addons/": "../vitrine/vendor/addons/" } }</script>
+</head>
+<body>
+<canvas id="shop" aria-label="Animation : la caméra entre dans une boutique, passe derrière le comptoir et entre dans l'écran de l'ordinateur"></canvas>
+<div class="veil" id="veil"></div>
+
+<div class="pc" id="pc" aria-hidden="true">
+  <div class="page" id="page"><div class="load" id="load"></div>
+    <div class="home"><div class="logo"></div><div class="search">Rechercher ou saisir une adresse</div></div>
+  </div>
+  <div class="chrome" id="chrome">
+    <div class="tabs">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="tab on" id="tab1"><i class="fav plain"></i><span>Nouvel onglet</span></div>
+      <div class="tab" id="tab2"><i class="fav"></i><span>Gabriel Aillet — Portfolio</span></div>
+    </div>
+    <div class="bar"><div class="nav"><span>←</span><span>→</span><span>↻</span></div><div class="url" id="url">Rechercher ou saisir une adresse</div></div>
+  </div>
+  <svg class="cursor" id="cursor" viewBox="0 0 20 28" aria-hidden="true"><path d="M2 2 L2 22 L7.2 17.2 L10.6 25.4 L14 24 L10.6 15.9 L17.6 15.9 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>
+  <div class="ripple" id="ripple"></div>
+</div>
+
+<button class="skip" id="skip" type="button">Passer l'intro →</button>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>
