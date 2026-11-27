@@ -64,8 +64,8 @@ const M = (color, o = {}) => {
 };
 const mat = {
   white: M('#f3f1ec'), wall: M('#efece6'), black: M('#1c1c1e', { roughness: 0.6 }), grey: M('#6c6c70'), darkGrey: M('#46464a'),
-  steel: M('#2a2a2d', { roughness: 0.4, metalness: 0.5 }), green: M('#4d7a3c', { flatShading: true }), green2: M('#3c6630', { flatShading: true }),
-  green3: M('#5f8f45', { flatShading: true }), pot: M('#ece9e2'), terracotta: M('#b86b4b'), oak: M('#c49a6c'),
+  steel: M('#2a2a2d', { roughness: 0.4, metalness: 0.5 }), green: M('#4d7a3c', { roughness: 0.62 }), green2: M('#3c6630', { roughness: 0.62 }),
+  green3: M('#5f8f45', { roughness: 0.62 }), pot: M('#ece9e2'), terracotta: M('#b86b4b'), oak: M('#c49a6c'),
   glass: new THREE.MeshStandardMaterial({ color: '#cfe0e4', roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.16, depthWrite: false }),
   glassCase: new THREE.MeshStandardMaterial({ color: '#e6f0f2', roughness: 0.05, transparent: true, opacity: 0.2, depthWrite: false }),
   bulb: new THREE.MeshBasicMaterial({ color: '#ffe3b8' }), panel: new THREE.MeshBasicMaterial({ color: '#fff4e2' }),
@@ -137,8 +137,12 @@ function poster(kind) {
 
 /* ---------- Petits outils de construction ---------- */
 function outline(mesh, m = lineMat) { mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry, 30), m)); return mesh; }
+// qualité « PS2 » : les boîtes ont des arêtes légèrement arrondies, qui accrochent la lumière (calculé une fois)
+const BEVEL = (w, h, d) => Math.min(0.018, Math.min(w, h, d) * 0.22);
 function box(w, h, d, material, x, y, z, o = {}) {
-  const m = new THREE.Mesh(o.round ? new RoundedBoxGeometry(w, h, d, 2, o.round) : new THREE.BoxGeometry(w, h, d), material);
+  const bv = o.round || (Math.min(w, h, d) > 0.012 ? BEVEL(w, h, d) : 0);
+  const m = new THREE.Mesh(bv ? new RoundedBoxGeometry(w, h, d, LITE ? 1 : 2, bv) : new THREE.BoxGeometry(w, h, d), material);
+  if (!o.round && bv) o = { ...o, round: bv };
   m.position.set(x, y + h / 2, z); if (o.ry) m.rotation.y = o.ry;
   m.castShadow = o.cast !== false; m.receiveShadow = true;
   if (o.edges !== false && !o.round) outline(m, o.lines);
@@ -152,6 +156,15 @@ function cyl(rt, rb, h, material, x, y, z, o = {}) {
 function plane(w, h, material, x, y, z, ry = 0, parent = scene) {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), material); m.position.set(x, y, z); m.rotation.y = ry; m.receiveShadow = true; parent.add(m); return m;
 }
+// une touffe de feuilles : une sphère bosselée (bruit), lisse, avec un peu de couleur qui varie
+const leafGeo = (() => { const cache = []; return r => {
+  const i = cache.length < 6 ? cache.length : Math.floor(rnd() * 6);
+  if (!cache[i]) { const g = new THREE.IcosahedronGeometry(1, LITE ? 1 : 2), p = g.attributes.position, v = new THREE.Vector3(), ph = [rnd() * 9, rnd() * 9, rnd() * 9];
+    for (let k = 0; k < p.count; k++) { v.fromBufferAttribute(p, k).normalize();
+      const n = 1 + .16 * Math.sin(v.x * 5.3 + ph[0]) * Math.sin(v.y * 4.7 + ph[1]) + .1 * Math.sin(v.z * 7.1 + ph[2]) + .06 * Math.sin((v.x + v.y) * 11 + ph[0]);
+      p.setXYZ(k, v.x * n, v.y * n * .9, v.z * n); }
+    g.computeVertexNormals(); cache[i] = g; }
+  const g = cache[i].clone(); g.scale(r, r, r); return g; }; })();
 function plant(x, z, s = 1, potKind = 'black') {
   const g = new THREE.Group(); g.position.set(x, 0, z); scene.add(g);
   if (potKind === 'black') box(0.5 * s, 0.55 * s, 0.5 * s, mat.black, 0, 0, 0, { parent: g });
@@ -160,7 +173,7 @@ function plant(x, z, s = 1, potKind = 'black') {
   const n = 14 + Math.floor(rnd() * 6);
   for (let i = 0; i < n; i++) {
     const r = (0.13 + rnd() * 0.12) * s, a = rnd() * 6.28, d = rnd() * 0.24 * s;
-    const leaf = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 0), greens[i % 3]);
+    const leaf = new THREE.Mesh(leafGeo(r), greens[i % 3]);
     leaf.position.set(Math.cos(a) * d, top + 0.14 * s + rnd() * 0.5 * s, Math.sin(a) * d);
     leaf.rotation.set(rnd() * 3, rnd() * 3, 0); leaf.castShadow = true; g.add(leaf);
   }
@@ -171,7 +184,7 @@ function tree(x, z, s = 1) {
   cyl(0.035 * s, 0.05 * s, 1.3 * s, mat.oak, 0, 0.5 * s, 0, { parent: g, seg: 8 });
   for (let i = 0; i < 30; i++) {
     const r = (0.17 + rnd() * 0.14) * s, a = rnd() * 6.28, d = rnd() * 0.5 * s;
-    const leaf = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 0), [mat.green, mat.green2, mat.green3][i % 3]);
+    const leaf = new THREE.Mesh(leafGeo(r), [mat.green, mat.green2, mat.green3][i % 3]);
     leaf.position.set(Math.cos(a) * d, 1.6 * s + rnd() * 0.9 * s, Math.sin(a) * d); leaf.castShadow = true; g.add(leaf);
   }
 }
@@ -185,7 +198,7 @@ function frame(tex, w, h, x, y, z, ry) {
    Pièce : x de -7 à 7, z de -12 (fond) à 0 (vitrine), hauteur 3.6 */
 const W = 7, D = -12, HT = 3.6;
 // Sol, plafond, murs
-const floor = plane(14, 12, new THREE.MeshStandardMaterial({ map: woodFloor, roughness: 0.7 }), 0, 0, -6); floor.rotation.x = -Math.PI / 2;
+const floor = plane(14, 12, new THREE.MeshStandardMaterial({ map: woodFloor, roughness: 0.42 }), 0, 0, -6); floor.rotation.x = -Math.PI / 2;
 const ceil = plane(14, 12, M('#f3f1ec', { emissive: '#d9d3c8', emissiveIntensity: 0.55 }), 0, HT, -6); ceil.rotation.x = Math.PI / 2;
 box(14.4, HT, 0.2, mat.wall, 0, 0, D - 0.1, { edges: false, cast: false });
 box(0.2, HT, 12, mat.wall, -W - 0.1, 0, -6, { edges: false, cast: false });
@@ -245,7 +258,7 @@ const road = plane(120, 60, M('#2a2a2d'), 0, -0.12, 36); road.rotation.x = -Math
 box(40, 0.14, 0.3, M('#7a7a7e'), 0, -0.12, 6.1, { edges: false });
 for (const s of [-1, 1]) {
   box(2.4, 0.5, 0.6, mat.black, s * 2.7, 0, 0.75, { lines: lineDark });
-  for (let i = 0; i < 9; i++) { const l = new THREE.Mesh(new THREE.IcosahedronGeometry(0.2 + rnd() * 0.08, 0), [mat.green, mat.green2, mat.green3][i % 3]); l.position.set(s * 2.7 - 1 + i * 0.25, 0.6 + rnd() * 0.12, 0.75 + (rnd() - .5) * 0.25); l.castShadow = true; scene.add(l); }
+  for (let i = 0; i < 9; i++) { const l = new THREE.Mesh(leafGeo(0.2 + rnd() * 0.08), [mat.green, mat.green2, mat.green3][i % 3]); l.position.set(s * 2.7 - 1 + i * 0.25, 0.6 + rnd() * 0.12, 0.75 + (rnd() - .5) * 0.25); l.castShadow = true; scene.add(l); }
 }
 // Bâtiments voisins
 box(9, 9, 1, M('#3f3f44'), -12.1, 0, 0.3, { edges: false });
@@ -361,10 +374,16 @@ cyl(0.2, 0.2, 0.05, mat.black, 3.9, 0.7, -9.3, { seg: 20 }); cyl(0.025, 0.025, 0
 cyl(0.2, 0.22, 0.02, mat.steel, 3.9, 0, -9.3, { seg: 20 });
 
 /* ---------- Lumière ---------- */
-scene.add(new THREE.HemisphereLight('#fff7ec', '#8a6d52', 1.25));
+scene.add(new THREE.HemisphereLight('#fff7ec', '#8a6d52', 0.85));
+{ // une petite pièce lumineuse, floutée une fois par la carte graphique : reflets doux sur le sol, le verre, le métal
+  const env = new THREE.Scene(), em = c => new THREE.MeshBasicMaterial({ color: c, side: THREE.BackSide });
+  env.add(new THREE.Mesh(new THREE.BoxGeometry(20, 10, 20), em('#5a5048')));
+  const lamp = (w, h, x, y, z, c) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: c, side: THREE.DoubleSide })); m.position.set(x, y, z); m.lookAt(0, 0, 0); env.add(m); };
+  lamp(8, 2, 0, 4.9, 0, '#fff1dc'); lamp(6, 3, 9.9, 1, 0, '#ffe3c0'); lamp(6, 3, -9.9, 1.5, 2, '#d8e2ff'); lamp(10, 2, 0, 0.5, -9.9, '#ffd9b0');
+  const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(env, 0.04).texture; scene.environmentIntensity = 0.55; pm.dispose(); }
 const sun = new THREE.DirectionalLight('#fff2dd', 1.6);
 sun.position.set(3, 9, 1); sun.target.position.set(-0.5, 0, -6.5); scene.add(sun, sun.target);
-sun.castShadow = true; sun.shadow.mapSize.set(LITE ? 1024 : 2048, LITE ? 1024 : 2048);
+sun.castShadow = true; sun.shadow.mapSize.set(LITE ? 2048 : 4096, LITE ? 2048 : 4096); sun.shadow.radius = 3;   // ombre calculée une fois : plus fine sans coûter à chaque image
 Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 22 }); sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.02;
 // le plafond et les murs ne doivent pas faire d'ombre au soleil intérieur
 const warm1 = new THREE.PointLight('#ffcf94', 6, 7, 1.6); warm1.position.set(3.6, 2.3, -3.3); scene.add(warm1);
