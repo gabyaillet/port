@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400&display=swap">
 <style>
+html.lenis, html.lenis body { height: auto; } .lenis.lenis-smooth { scroll-behavior: auto !important; } .lenis.lenis-stopped { overflow: hidden; }
 /* Un mur d'enduit gris où passent des ombres de feuillage ; au défilement, les lettres de « bienvenue » tombent une à une en s'effaçant
    et la caméra les suit. Un trait épais au bout rond se dessine avec le défilement, fait des boucles au hasard, suit la chute
    puis mène à nos deux profils. Couleurs vives et transitions en rideau, dans l'esprit de lusion.co et unseen.co. */
@@ -185,6 +186,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 .curtain.leave-start { visibility: visible; transform: none; border-radius: 0; transition: none; }
 </style>
 <script>document.documentElement.classList.add('js');</script>
+<!-- défilement adouci sur ordinateur (même bibliothèque que le portfolio de Gabriel) -->
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
 </head>
 <body>
 <header class="topbar" id="topbar">
@@ -257,7 +260,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 
   /* ---------- Menu plein écran ---------- */
   const toggle = document.getElementById('menu-toggle'), nav = document.getElementById('nav');
-  const setMenu = o => { nav.dataset.open = String(o); toggle.setAttribute('aria-expanded', String(o)); if (o) nav.querySelector('a').focus({ preventScroll: true }); };
+  const setMenu = o => { if (window.__lenis) window.__lenis[o ? 'stop' : 'start'](); nav.dataset.open = String(o); toggle.setAttribute('aria-expanded', String(o)); if (o) nav.querySelector('a').focus({ preventScroll: true }); };
   toggle.addEventListener('click', () => setMenu(nav.dataset.open !== 'true'));
   nav.querySelector('.nav-close').addEventListener('click', () => { setMenu(false); toggle.focus(); });
   nav.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
@@ -407,16 +410,23 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         majIdx.push(pts.length); pts.push({ x: m.x, y: m.y });
         if (m.loop && i > 0 && i < majors.length - 1) {
           const pv = majors[i - 1], dir = Math.atan2(m.y - pv.y, m.x - pv.x), sg = R() < .5 ? -1 : 1;
-          const r = Math.min(vw, vh) * (.09 + R() * .05), a0 = dir - sg * Math.PI / 2, cx = m.x - r * Math.cos(a0), cy = m.y - r * Math.sin(a0);
+          const r = Math.min(vw, vh) * (.12 + R() * .04), a0 = dir - sg * Math.PI / 2, cx = m.x - r * Math.cos(a0), cy = m.y - r * Math.sin(a0);
           for (let j = 1; j <= 10; j++) { const a = a0 + sg * j * Math.PI * 2 / 10, rr = r * (1 + j * .025); pts.push({ x: cx + rr * Math.cos(a) + j * r * .03 * Math.cos(dir), y: cy + rr * Math.sin(a) + j * r * .03 * Math.sin(dir) }); }
         }
       });
-      const smp = [pts[0]], ptToSmp = [0];
-      for (let i = 0; i < pts.length - 1; i++) { catmull(pts[Math.max(0, i - 1)], pts[i], pts[i + 1], pts[Math.min(pts.length - 1, i + 2)], smp); ptToSmp.push(smp.length - 1); }
-      // lissage (plus aucun angle), puis on l'écarte des textes, en relissant à chaque fois
-      smooth(smp, 4, 8);
-      for (let it = 0; it < 5; it++) { push(smp); smooth(smp, 2, 6); }
-      return { smp, idx: majIdx.map(k => ptToSmp[k]), majors };
+      const raw = [pts[0]], ptToSmp = [0];
+      for (let i = 0; i < pts.length - 1; i++) { catmull(pts[Math.max(0, i - 1)], pts[i], pts[i + 1], pts[Math.min(pts.length - 1, i + 2)], raw); ptToSmp.push(raw.length - 1); }
+      // on repart de points régulièrement espacés (tous les 4 px) : le lissage agit alors pareil partout
+      const L0 = [0]; for (let i = 1; i < raw.length; i++) L0.push(L0[i - 1] + Math.hypot(raw[i].x - raw[i - 1].x, raw[i].y - raw[i - 1].y));
+      const tot = L0[L0.length - 1] || 1, m = Math.max(2, Math.ceil(tot / 4)), smp = [];
+      for (let k = 0, j = 0; k <= m; k++) { const t = tot * k / m; while (j < raw.length - 2 && L0[j + 1] < t) j++;
+        const f = (t - L0[j]) / ((L0[j + 1] - L0[j]) || 1); smp.push({ x: raw[j].x + (raw[j + 1].x - raw[j].x) * f, y: raw[j].y + (raw[j + 1].y - raw[j].y) * f }); }
+      // lissage large (≈ 90 px) : les virages deviennent de grandes courbes, plus aucun angle ;
+      // puis on l'écarte des textes, en relissant à chaque fois pour ne pas recréer de coin
+      smooth(smp, 3, 22);
+      for (let it = 0; it < 6; it++) { push(smp); smooth(smp, 1, 14); }
+      smooth(smp, 2, 10);
+      return { smp, idx: majIdx.map(k => Math.round(L0[ptToSmp[k]] / tot * m)), majors };
     }
     const parts = [build(A), build(B)];
     let n = 0; parts.forEach(P => n += P.smp.length);
@@ -483,6 +493,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   let yGoal = 0, yNow = -1, smoothing = false, lastF = 0;
   function update() {
     yGoal = scrollY;
+    if (window.__lenis) { yNow = yGoal; render(); return; }   // déjà lissé par Lenis
     if (yNow < 0) { yNow = yGoal; render(); }
     if (!smoothing) { smoothing = true; lastF = 0; requestAnimationFrame(smooth); }
   }
@@ -549,7 +560,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   document.addEventListener('click', e => {
     const a = e.target.closest('a[href]'); if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || a.target === '_blank') return;
     const href = a.getAttribute('href');
-    if (href.startsWith('#')) { const t = document.querySelector(href); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); } return; }
+    if (href.startsWith('#')) { const t = document.querySelector(href); if (t) { e.preventDefault(); if (window.__lenis) window.__lenis.scrollTo(t, { duration: 1.4 }); else t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); } return; }
     if (reduce) return;
     e.preventDefault(); curtain.classList.remove('leave'); curtain.classList.add('cover');
     try { const u = new URL(a.href); if (u.origin === location.origin && u.pathname.endsWith('qui-sommes-nous.html')) sessionStorage.setItem('obtura-rideau', '1'); } catch (err) {}
@@ -602,12 +613,17 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       varying vec2 vUv; varying float vZ;
       float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
       float sdRR(vec2 p, vec2 b, float r) { vec2 q = abs(p) - b + r; return length(max(q, 0.)) + min(max(q.x, q.y), 0.) - r; }
-      uniform float uLiq; uniform float uSeed;
+      uniform float uLiq; uniform float uSeed; uniform float uRip;
       // la forme du panneau : un rectangle arrondi qui, pendant l'ouverture, devient une goutte qui ondule
       float shape(vec2 c) {
-        float m = min(uSize.x, uSize.y), amp = uLiq * m * .085, ang = atan(c.y, c.x), t = uTime;
-        float w = sin(ang * 2. + t * 1.4 + uSeed) * .45 + sin(ang * 3. - t * 2.1 + uSeed * 1.7) * .33 + sin(ang * 5. + t * 2.9 + uSeed * 2.3) * .22;
-        return sdRR(c, uSize * .5 - amp, mix(uRad, m * .32, uLiq)) - w * amp;
+        float m = min(uSize.x, uSize.y), amp = uLiq * m * .06;
+        // les côtés se bombent comme une goutte sous tension (surtout au milieu de chaque côté)
+        vec2 q = c / (uSize * .5);
+        float along = (uSize.x * .5 - abs(c.x) < uSize.y * .5 - abs(c.y)) ? q.y : q.x;
+        float bul = amp * (1. - along * along);
+        // et le bord tremble très légèrement, comme la surface d'un liquide
+        float trem = uLiq * m * .01 * sin(atan(c.y, c.x) * 4. + uTime * 3. + uSeed);
+        return sdRR(c, uSize * .5 - amp, mix(uRad, m * .2, uLiq)) - bul - trem;
       }
       void main() {
         vec2 px = vUv * uSize;
@@ -641,9 +657,12 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
           float bw = min(uSize.x, uSize.y) * .1, edge = smoothstep(-bw, 0., d);   // 0 au centre, 1 sur le bord
           // le verre courbe l'image près des bords (comme une lentille) et ondule doucement
           vec2 flow = vec2(sin(vUv.y * 9. + uTime * .9) + sin(vUv.y * 23. - uTime * 1.3) * .4, cos(vUv.x * 7. - uTime * .7) + cos(vUv.x * 19. + uTime) * .4) * .0035;
-          // pendant l'ouverture, la matière se tord comme un liquide qu'on remue
-          vec2 slosh = uLiq * vec2(sin(vUv.y * 5. + uTime * 2.1 + uSeed) + sin(vUv.y * 11. - uTime * 2.7) * .35, cos(vUv.x * 4. - uTime * 1.7 + uSeed) + cos(vUv.x * 9. + uTime * 2.3) * .35) * .03;
-          vec2 uv = vUv - n * edge * edge * (.07 + uLiq * .05) + flow + slosh, ca = n * edge * (.008 + uLiq * .008);
+          // pendant l'ouverture : des ondes circulaires partent du centre, comme une goutte tombée dans l'eau ;
+          // elles déforment l'image (réfraction), avec une petite séparation des couleurs sur les crêtes
+          float rr = length(c) / min(uSize.x, uSize.y), ph = rr * 24. - uTime * 4.5 + uSeed;
+          float env = uRip * smoothstep(0., .12, rr) * exp(-rr * 1.4);
+          vec2 rip = c / max(length(c), 1.) * sin(ph) * env * .016;
+          vec2 uv = vUv - n * edge * edge * (.07 + uLiq * .04) + flow + rip, ca = n * edge * (.008 + uLiq * .006) + rip * .6;
           col = vec3(texture2D(uTex, uv + ca).r, texture2D(uTex, uv).g, texture2D(uTex, uv - ca).b);
           col *= 1. - .6 * smoothstep(.42, 1., vUv.y);       // plus sombre en bas, pour lire le texte
           // reflets : un liseré clair sur le bord, plus vif du côté de la lumière (en haut à gauche), et une lueur qui glisse
@@ -656,6 +675,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
           // reflet doux en haut à gauche, et une lueur qui glisse lentement en diagonale
           col += smoothstep(.55, 0., length((vUv - vec2(.12, .08)) * vec2(uSize.x / uSize.y, 1.) * .9)) * .1;
           col += smoothstep(.12, 0., abs(vUv.x * .7 + vUv.y * .3 - fract(uTime * .04) * 1.8 + .4)) * .08;
+          col += pow(max(0., cos(ph)), 10.) * env * .16;     // petits reflets sur les crêtes des ondes
           col += (hash(px + fract(uTime) * 91.) - .5) * .045;
         }
         // la teinte violette (bichromie) du début
@@ -694,7 +714,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     catch (e) { root.classList.add('no-gl'); return; }
     gl.useProgram(prog);
     root.classList.add('gl');
-    const U = {}; ['uLiq', 'uSeed', 'uWarp', 'uTwist', 'uRect', 'uRes', 'uBend', 'uVel', 'uApp', 'uTex', 'uMode', 'uSize', 'uRad', 'uTime', 'uA', 'uB', 'uC', 'uTint', 'uMouse', 'uHover', 'uDpr'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+    const U = {}; ['uRip', 'uLiq', 'uSeed', 'uWarp', 'uTwist', 'uRect', 'uRes', 'uBend', 'uVel', 'uApp', 'uTex', 'uMode', 'uSize', 'uRad', 'uTime', 'uA', 'uB', 'uC', 'uTint', 'uMouse', 'uHover', 'uDpr'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
     // maillage 32 × 32 : assez fin pour des courbes lisses
     const N = 32, uvs = [], idx = [];
     for (let y = 0; y <= N; y++) for (let x = 0; x <= N; x++) uvs.push(x / N, y / N);
@@ -716,7 +736,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     // les présentations
     const people = [...document.querySelectorAll('.pp')].map(el => ({ el, over: el.querySelector('.pp-over'), intro: el.querySelector('.pp-intro'),
       a: hex(el.dataset.a), b: hex(el.dataset.b), c: hex(el.dataset.c), y: 0, h: 1, end: null, oo: -1, io: -1, right: el.classList.contains('right'),
-      warp: [1, 0, 0, 0, 0], seed: Math.random() * 6.283 }));
+      warp: [1, 0, 0, 0, 0], seed: Math.random() * 6.283, sp: -1, sv: 0, tg: 0 }));
     // les projets
     const projects = [...document.querySelectorAll('.card')].map(card => {
       const box = card.querySelector('.img'), img = box.querySelector('img');
@@ -760,12 +780,12 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 
     const lerp = (a, b, t) => a + (b - a) * t, ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
-    let lastSy = scrollY, vel = 0, lastVelCss = '', t0 = performance.now(), drew = false, lastT = 0, lightTop = false;
+    let lastSy = scrollY, vel = 0, lastVelCss = '', t0 = performance.now(), drew = false, lastT = 0, lastSpT = 0, lightTop = false;
     const NOWARP = [1, 0, 0, 0, 0];
     function plane(r, o) {
       gl.uniform4f(U.uRect, r.x, r.y, r.w, r.h); gl.uniform2f(U.uSize, r.w, r.h); gl.uniform1f(U.uRad, o.rad);
       const W = o.warp || NOWARP; gl.uniform4f(U.uWarp, W[0], W[1], W[2], W[3]); gl.uniform1f(U.uTwist, W[4]);
-      gl.uniform1f(U.uBend, o.bend || 0); gl.uniform1f(U.uLiq, o.liq || 0); gl.uniform1f(U.uSeed, o.seed || 0); gl.uniform1f(U.uVel, o.vel || 0); gl.uniform1f(U.uApp, o.app == null ? 1 : o.app);
+      gl.uniform1f(U.uBend, o.bend || 0); gl.uniform1f(U.uLiq, o.liq || 0); gl.uniform1f(U.uSeed, o.seed || 0); gl.uniform1f(U.uRip, o.rip || 0); gl.uniform1f(U.uVel, o.vel || 0); gl.uniform1f(U.uApp, o.app == null ? 1 : o.app);
       gl.uniform1f(U.uMode, o.mode); gl.uniform1f(U.uTint, o.tint || 0); gl.uniform1f(U.uHover, o.hover || 0); gl.uniform2f(U.uMouse, o.mx || 0, o.my || 0);
       if (o.pal) { gl.uniform3fv(U.uA, o.pal[0]); gl.uniform3fv(U.uB, o.pal[1]); gl.uniform3fv(U.uC, o.pal[2]); }
       gl.bindTexture(gl.TEXTURE_2D, o.tex || blank);
@@ -785,7 +805,16 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       if (!any) { if (window.__wallHidden) window.__wallHidden = false; if (lightTop) { lightTop = false; topbarEl.classList.remove('light'); } }
       if (!any && !drew) return;
       // rien ne bouge (ni défilement, ni survol) : la matière colorée est redessinée 30 fois par seconde, pas 60
-      const busy = dy !== 0 || vel !== 0 || projects.some(P => Math.abs(P.hoverT - P.hover) > .002);
+      // le ressort des panneaux : la taille suit le défilement avec de l'inertie, comme un liquide qui a du poids
+      const dts = Math.min(.05, lastSpT ? (now - lastSpT) / 1000 : 1 / 60); lastSpT = now;
+      for (const P of people) {
+        P.tg = ease(clamp((sy - P.y) / (vh * .95)));
+        if (P.sp < 0 || reduce) { P.sp = P.tg; P.sv = 0; continue; }
+        const steps = Math.max(1, Math.ceil(dts / .008)), h = dts / steps;
+        for (let i = 0; i < steps; i++) { const acc = 150 * (P.tg - P.sp) - 15 * P.sv; P.sv += acc * h; P.sp += P.sv * h; }
+        if (Math.abs(P.tg - P.sp) < .0005 && Math.abs(P.sv) < .002) { P.sp = P.tg; P.sv = 0; }
+      }
+      const busy = dy !== 0 || vel !== 0 || projects.some(P => Math.abs(P.hoverT - P.hover) > .002) || people.some(P => P.sv !== 0);
       if (any && drew && !busy && now - lastT < 32) return;
       lastT = now;
       // d'abord, la matière des présentations visibles (au plus 30 fois par seconde), dans leurs petites images
@@ -794,7 +823,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         if (!(P.y - sy < vh && P.y + P.h - sy > 0) || now - P.artT < 30) continue;
         if (!artOn) { artOn = true; useArt(); gl.disable(gl.BLEND); }
         P.artT = now;
-        const e = ease(clamp((sy - P.y) / (vh * .95))), w = lerp(P.start.w, P.end.w, e), h = lerp(P.start.h, P.end.h, e);
+        const e = clamp(P.sp, 0, 1.04), w = lerp(P.start.w, P.end.w, e), h = lerp(P.start.h, P.end.h, e);
         gl.bindFramebuffer(gl.FRAMEBUFFER, P.fb); gl.viewport(0, 0, P.fw, P.fh);
         gl.uniform1f(AU.uTime, tsec); gl.uniform1f(AU.uAspect, w / h); gl.uniform3fv(AU.uA, P.a); gl.uniform3fv(AU.uB, P.b); gl.uniform3fv(AU.uC, P.c);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -806,13 +835,13 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       gl.uniform2f(U.uRes, vw, vh); gl.uniform1f(U.uTime, (now - t0) / 1000); gl.uniform1f(U.uDpr, dpr);
       for (const P of people) {
         if (!(P.y - sy < vh && P.y + P.h - sy > 0)) { if (P.oo !== 0) { P.oo = 0; P.over.style.opacity = 0; P.over.classList.remove('on'); } continue; }
-        const g = clamp((sy - P.y) / (vh * .95)), e = ease(g);
+        const g = clamp((sy - P.y) / (vh * .95)), e = clamp(P.sp, 0, 1.04), ec = clamp(e);
         // le décor collant : en haut tant qu'on est dans la section, puis il remonte avec la page
         const stTop = sy < P.y ? P.y - sy : Math.min(0, P.y + P.h - vh - sy);
         const S = P.start, E = P.end;
         const r = { x: lerp(S.x, E.x, e), y: lerp(S.y, E.y, e) + stTop, w: lerp(S.w, E.w, e), h: lerp(S.h, E.h, e) };
-        plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(14, 24, e), bend: 0, liq: Math.pow(Math.sin(Math.PI * e), .7), seed: P.seed, tint: 1 - sstep(.25, .9, e), pal: [P.a, P.b, P.c] });
-        if (e > .97 && stTop === 0) cover = true;
+        plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(14, 24, ec), bend: 0, liq: clamp(Math.sin(Math.PI * ec) * .55 + Math.abs(P.sv) * .18), rip: Math.sin(Math.PI * ec), seed: P.seed, tint: 1 - sstep(.25, .9, ec), pal: [P.a, P.b, P.c] });
+        if (ec > .97 && stTop === 0) cover = true;
         if (r.y < 60 && r.y + r.h > 20) dark = true;
         const oo = clamp((g - .84) / .14), io = clamp(1 - g * 2.6);
         if (Math.abs(oo - P.oo) > .002) { P.oo = oo; P.over.style.opacity = oo.toFixed(3); P.over.classList.toggle('on', oo > .5); }
@@ -848,7 +877,17 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   if (document.fonts) document.fonts.ready.then(relayout);
   if ('ResizeObserver' in window) { let lastH = 0; new ResizeObserver(() => { const h = document.documentElement.scrollHeight; if (h !== lastH) { lastH = h; relayout(); } }).observe(document.body); }
   if (reduce) { yNow = scrollY; render(); addEventListener('scroll', () => { yNow = scrollY; render(); }, { passive: true }); }
-  else { addEventListener('scroll', update, { passive: true }); update(); }
+  else {
+    addEventListener('scroll', update, { passive: true }); update();
+    // Lenis (souris et pavé tactile seulement : sur téléphone, le défilement natif est déjà doux)
+    const startLenis = () => {
+      if (!window.Lenis || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      const lenis = new Lenis({ lerp: .1, wheelMultiplier: 1, smoothWheel: true });
+      window.__lenis = lenis; lenis.on('scroll', update);
+      const raf = now => { lenis.raf(now); requestAnimationFrame(raf); }; requestAnimationFrame(raf);
+    };
+    if (window.Lenis) startLenis(); else addEventListener('load', startLenis);
+  }
 })();
 </script>
 </body>
