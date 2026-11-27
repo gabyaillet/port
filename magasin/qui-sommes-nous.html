@@ -138,7 +138,17 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .fin-stage > * { pointer-events: auto; }
 /* Le mur en dégradé monte avec un texte ; puis tout glisse vers la gauche et une page blanche arrive :
    nos projets en deux colonnes sur les côtés (celle de gauche monte, celle de droite descend) et, au centre, les catégories */
-.works { position: absolute; inset: 0; overflow: hidden; background: #f0f0ee; color: #141414; transform: translateX(100%); will-change: transform; }
+.works { position: absolute; inset: 0; overflow: hidden; color: #141414; opacity: 0; visibility: hidden; will-change: opacity, transform; }   /* même fond que le reste du site : le mur reste visible derrière */
+/* Le mot « Projets » : un trait entre « Pro » et « jets » s'ouvre en capsule où passent nos projets, puis elle grandit jusqu'à tout l'écran */
+.pj { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #141414; transform: translateX(100%); will-change: transform; }
+.pj-w { display: flex; align-items: center; font: 500 clamp(4.6rem, 16vw, 17rem)/1 var(--f); letter-spacing: -.055em; white-space: nowrap; }
+.pj-w .sf { font: italic 400 1.14em/1 "Instrument Serif", Georgia, serif; letter-spacing: -.02em; }
+.pj-a, .pj-b { will-change: transform; }
+.pj-cap { position: relative; flex: none; width: 2px; height: 0; margin: 0 .06em; border-radius: 999px; overflow: hidden; background: #141414; will-change: width, height; }
+.pj-cap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.12); transition: opacity .7s, transform 1.6s cubic-bezier(.2,.7,.2,1); }
+.pj-cap img.on { opacity: 1; transform: scale(1); }
+.pj-note { position: absolute; left: max(20px, 6vw); bottom: calc(env(safe-area-inset-bottom, 0px) + 8svh); margin: 0; max-width: 22rem; font: 400 .95rem/1.45 var(--f); color: var(--muted); opacity: 0; }
+.pj-num { position: absolute; right: max(20px, 6vw); bottom: calc(env(safe-area-inset-bottom, 0px) + 8svh); margin: 0; font: 400 .7rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); opacity: 0; }
 /* comme la photo : deux larges colonnes décalées, images en paysage dans un fin cadre blanc, catégories à gauche du centre */
 .wk-col { position: absolute; top: 0; width: 33vw; display: grid; gap: 15svh; will-change: transform; }
 .wk-col.l { left: 4vw; } .wk-col.r { right: 3vw; }
@@ -149,7 +159,7 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .wk img { position: absolute; left: 0; top: -8%; width: 100%; height: 116%; object-fit: cover; will-change: transform; }   /* l'image glisse un peu dans son cadre */
 .wk .cap { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 1rem; }
 .wk h3 { margin: 0; font: 400 clamp(1.25rem, 1.75vw, 1.7rem) "Instrument Serif", Georgia, serif; letter-spacing: -.005em; }
-.wk .mt { font: 400 .8rem var(--f); color: #6d6d6a; white-space: nowrap; display: flex; gap: .7rem; }
+.wk .mt { font: 400 .8rem var(--f); color: #5d5d5a; white-space: nowrap; display: flex; gap: .7rem; }
 .wk .fr::after { content: ""; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background .6s; }
 .wk:hover .fr::after { background: rgba(255,255,255,.08); }
 /* les projets à venir : des cartes blanches, avec seulement le petit cercle d'Obtura et un numéro */
@@ -158,13 +168,13 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .wk.blank .fr b { position: absolute; left: 14px; top: 12px; font: 400 .62rem var(--mono); letter-spacing: .18em; color: #b9b9b6; }
 .wk.blank h3 { color: #9a9a97; }
 .wk-cats { position: absolute; left: 41.5vw; top: 50%; transform: translateY(-50%); margin: 0; padding: 0; list-style: none; display: grid; gap: .05rem; }
-.wk-cats button { all: unset; cursor: pointer; font: 400 clamp(1.6rem, 2.35vw, 2.5rem)/1.22 var(--f); letter-spacing: -.035em; color: #cfcfcc; transition: color .6s; white-space: nowrap; }
+.wk-cats button { all: unset; cursor: pointer; font: 400 clamp(1.6rem, 2.35vw, 2.5rem)/1.22 var(--f); letter-spacing: -.035em; color: rgba(20,20,20,.22); transition: color .6s; white-space: nowrap; }
 .wk-cats button sup { font: 400 .36em "Instrument Serif", Georgia, serif; letter-spacing: .02em; margin-left: .35em; vertical-align: .95em; }
 .wk-cats button.on, .wk-cats button:hover { color: #141414; }
 .wk-cats button:focus-visible { outline: 1px solid #141414; outline-offset: 4px; }
 @media (max-width: 760px) {
   .wk-col { width: 45vw; gap: 9svh; } .wk-col.l { left: 3vw; } .wk-col.r { right: 3vw; }
-  .wk-cats { left: 50%; top: calc(env(safe-area-inset-top, 0px) + 4.2rem); transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .8rem; width: 94vw; z-index: 2; background: #f0f0ee; padding: .4rem 0 .7rem; }
+  .wk-cats { left: 50%; top: calc(env(safe-area-inset-top, 0px) + 4.2rem); transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .8rem; width: 100vw; z-index: 2; background: rgba(210,210,208,.82); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); padding: .4rem 3vw .7rem; }
   .wk-cats button { font-size: 1.05rem; }
   .wk .cap { flex-direction: column; gap: .2rem; margin-top: .6rem; } .wk h3 { font-size: 1.05rem; } .wk .mt { font-size: .7rem; }
 }
@@ -327,6 +337,11 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 <div class="curtain" id="curtain" aria-hidden="true"></div>
 <section class="finale" id="fin" aria-label="Nos projets et contact">
   <div class="fin-stage">
+    <div class="pj" id="pj" aria-hidden="true">
+      <div class="pj-w"><span class="pj-a">Pro</span><span class="pj-cap" id="pj-cap"><img src="./img/boutique-obtura.jpg" alt="" decoding="async"><img src="./img/ville-2cv.jpg" alt="" decoding="async"><img src="./img/boutique-vins.jpg" alt="" decoding="async"><img src="./img/particules.jpg" alt="" decoding="async"></span><span class="pj-b sf">jets</span></div>
+      <p class="pj-note">Ce qu'on a déjà fait, en attendant les sites de nos premiers clients.</p>
+      <p class="pj-num">Nos projets</p>
+    </div>
     <div class="works" id="works">
       <div class="wk-col l" id="wk-l"></div>
       <ul class="wk-cats" id="wk-cats"></ul>
@@ -656,7 +671,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   let lastRev = -1;
   function revealWords() {
     const vh = innerHeight, top = manY - scrollY;           // position mémorisée : pas de calcul de mise en page à chaque image
-    const p = reduce ? 1 : clamp((vh * .85 - top) / (manH + vh * .35));
+    const p = reduce ? 1 : clamp((vh * .85 - top) / (vh * .55));   // fini quand le texte arrive en haut de l'écran (sa page)
     const n = Math.round(p * words.length * 1.1 * 100) / 100; if (n === lastRev) return; lastRev = n;
     words.forEach((w, i) => { w.style.opacity = (.14 + .86 * clamp(n - i)).toFixed(2); });
   }
@@ -1009,6 +1024,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   (function finale() {
     const fin = document.getElementById('fin'), wallEl = document.getElementById('fin-wall'), topbarEl = document.getElementById('topbar');
     const worksEl = document.getElementById('works'), arthur = document.querySelector('.pp.last .pp-stage');
+    const pjEl = document.getElementById('pj'), pjW = pjEl.querySelector('.pj-w'), pjCap = document.getElementById('pj-cap'), pjImgs = [...pjCap.querySelectorAll('img')];
+    const pjNote = pjEl.querySelector('.pj-note'), pjNum = pjEl.querySelector('.pj-num'); let lastShow = -2;
     const colL = document.getElementById('wk-l'), colR = document.getElementById('wk-r'), cats = [];
     const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, C = v => Math.max(0, Math.min(1, v));
     let lastLight = false, lastDark = false, lastR = -1, G = null, filter = null, lastCat = '';
@@ -1039,41 +1056,65 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       // comme la photo : les colonnes couvrent tout l'écran du début à la fin (des projets coupés en haut et en bas)
       const hL = colL.offsetHeight, hR = colR.offsetHeight, edge = H * .2;
       const trL = Math.max(H * .5, hL - H - 2 * edge), trR = Math.max(H * .5, hR - H - 2 * edge), travel = Math.max(trL, trR);
-      G = { H, slide: H * .9, travel, top0, hL, hR, edge, trL, trR, rise: H * .9 };
-      fin.style.height = (H + G.slide + travel + G.rise) + 'px';
+      // glissement, ouverture de la capsule, capsule en plein écran, défilement des projets, mur
+      G = { H, slide: H * .9, open: H * .75, exp: H * .9, travel, top0, hL, hR, edge, trL, trR, rise: H * .9 };
+      G.w0 = G.slide + G.open + G.exp;
+      G.fs = parseFloat(getComputedStyle(pjW).fontSize);
+      fin.style.height = (H + G.w0 + travel + G.rise) + 'px';
     }
     finLayout(); addEventListener('resize', finLayout); addEventListener('load', finLayout);
     window.__finStops = () => { if (!G) return []; let y = 0, e = fin; while (e) { y += e.offsetTop; e = e.offsetParent; }
-      return [y + G.slide, y + G.slide + G.travel * .5, y + G.slide + G.travel, y + G.slide + G.travel + G.rise]; };
+      return [y + G.slide + G.open, y + G.w0, y + G.w0 + G.travel * .5, y + G.w0 + G.travel, y + G.w0 + G.travel + G.rise]; };
     cats.forEach(b => b.addEventListener('click', () => { filter = b.dataset.f === 'all' ? null : b.dataset.f;
       works.forEach(w => w.classList.toggle('dim', !!filter && w.dataset.cat !== filter)); lastCat = ''; }));
     (function frame() {
       requestAnimationFrame(frame);
       const H = innerHeight, r = fin.getBoundingClientRect(), on = r.top < H && r.bottom > 0;
       const rel = Math.max(0, -r.top), sp = G ? ease(C(rel / G.slide)) : 0;
-      window.__finCover = on && r.top <= 0 && sp > .99;
+      window.__finCover = false;
       window.__slideX = on && r.top <= 0 ? -sp * innerWidth : 0;   // la carte d'Arthur (WebGL) part vers la gauche
       if (arthur) arthur.style.transform = window.__slideX ? `translate3d(${window.__slideX.toFixed(1)}px, 0, 0)` : '';
       if (!on || !G) { if (lastLight) { lastLight = false; topbarEl.classList.remove('light2'); } if (lastDark) { lastDark = false; topbarEl.classList.remove('dark2'); } return; }
-      const cp = C((rel - G.slide) / G.travel), wp = C((rel - G.slide - G.travel) / G.rise);
-      // la page des projets arrive de la droite pendant que la carte d'Arthur part à gauche
-      worksEl.style.transform = `translate3d(${((1 - (r.top <= 0 ? sp : 0)) * 100).toFixed(3)}%, 0, 0)`;
+      const cp = C((rel - G.w0) / G.travel), wp = C((rel - G.w0 - G.travel) / G.rise);
+      // le mot « Projets » arrive de la droite pendant que la carte d'Arthur part à gauche ; un trait se dessine entre « Pro » et « jets »
+      const sx = r.top <= 0 ? sp : 0, lp = ease(C((rel - G.slide * .55) / (G.slide * .45)));
+      const op = ease(C((rel - G.slide) / G.open)), ep = C((rel - G.slide - G.open) / G.exp), ee = ease(C(ep / .75)), fade = C((ep - .62) / .38);
+      pjEl.style.transform = `translate3d(${((1 - sx) * 100).toFixed(3)}%, 0, 0)`;
+      // le trait s'ouvre en capsule (comme la vidéo), puis la capsule grandit jusqu'à tout l'écran
+      const fs = G.fs, narrow = innerWidth < 760;
+      const pw = (narrow ? .34 : .3) * innerWidth, ph = fs * .8;
+      const cw = 2 + op * (pw - 2) + ee * (innerWidth + 4 - pw), chh = ph * lp + ee * (H + 4 - ph);
+      pjCap.style.width = cw.toFixed(1) + 'px'; pjCap.style.height = chh.toFixed(1) + 'px';
+      pjCap.style.borderRadius = ee > 0 ? `${((1 - ee) * ph / 2).toFixed(1)}px` : '';
+      // les lettres sont poussées par la capsule ; en plein écran elles sortent de l'écran
+      pjCap.style.background = op > .02 ? '#e9e9e7' : '#141414';
+      pjNote.style.opacity = pjNum.style.opacity = (C((op - .4) / .6) * (1 - C(ep * 3))).toFixed(3);
+      // les projets passent dans la capsule, un à un
+      const show = ep > 0 ? (lastShow < 0 ? 0 : lastShow) : op > .15 ? Math.floor(performance.now() / 1150) % pjImgs.length : (op > 0 ? 0 : -1);   // en grandissant, on garde le projet affiché
+      if (show !== lastShow) { lastShow = show; pjImgs.forEach((im, k) => im.classList.toggle('on', k === show)); }
+      // une fois la capsule en plein écran, elle s'efface sur la page des projets
+      // une fois en plein écran, l'image remonte comme un rideau et découvre la page des projets
+      const wipe = ease(fade);
+      pjEl.style.clipPath = wipe > 0 ? `inset(0 0 ${(wipe * 100).toFixed(2)}% 0)` : ''; pjEl.style.visibility = fade >= 1 ? 'hidden' : '';
+      worksEl.style.opacity = fade > 0 ? '1' : '0'; worksEl.style.visibility = fade > 0 ? 'visible' : 'hidden';
+      worksEl.style.transform = `translate3d(0, ${((1 - wipe) * 6).toFixed(2)}svh, 0)`;
       // à la fin, le mur en dégradé monte, son bord du haut arrondi s'aplatit en montant
       const we = ease(wp), rr = +(1 - we).toFixed(3);
       wallEl.style.transform = `translate3d(0, ${((1 - we) * 101).toFixed(2)}%, 0)`;
       if (rr !== lastR) { lastR = rr; wallEl.style.borderRadius = `${50 * rr}% ${50 * rr}% 0 0 / ${14 * rr}% ${14 * rr}% 0 0`; }
-      const light = we > .92, dark = sp > .5 && !light;
+      const light = we > .92 || (ee > .5 && fade < .6), dark = sp > .5 && !light;
+      window.__finCover = we > .995;   // le mur des contacts couvre tout : inutile de dessiner le mur derrière
       if (light !== lastLight) { lastLight = light; topbarEl.classList.toggle('light2', light); }
       if (dark !== lastDark) { lastDark = dark; topbarEl.classList.toggle('dark2', dark); }
       // les colonnes : celle de gauche monte, celle de droite descend (comme la photo)
       const tL = -G.edge - cp * G.trL, tR = -G.edge - G.trR + cp * G.trR;
       colL.style.transform = `translate3d(0, ${tL.toFixed(1)}px, 0)`; colR.style.transform = `translate3d(0, ${tR.toFixed(1)}px, 0)`;
       // dans chaque cadre, l'image glisse un peu (parallaxe), dans le sens inverse de sa colonne
-      if (sp > .02) works.forEach((w, k) => { const im = imgs[k]; if (!im) return; const b = w.getBoundingClientRect();
+      if (fade > 0) works.forEach((w, k) => { const im = imgs[k]; if (!im) return; const b = w.getBoundingClientRect();
         if (b.bottom < -50 || b.top > H + 50) return; const d = (b.top + b.height / 2 - H / 2) / H; im.style.transform = `translate3d(0, ${(d * -7).toFixed(2)}%, 0)`; });
       // au centre, la catégorie du projet le plus proche du milieu de l'écran s'allume (ou celle choisie)
       let cat = filter || 'all';
-      if (!filter && sp > .9) { let best = 1e9;
+      if (!filter && fade > .5) { let best = 1e9;
         works.forEach(w => { const b = w.getBoundingClientRect(), d = Math.abs(b.top + b.height / 2 - H / 2); if (d < best) { best = d; cat = w.dataset.cat; } }); }
       if (cat !== lastCat) { lastCat = cat; cats.forEach(b => b.classList.toggle('on', b.dataset.f === cat)); }
     })();
