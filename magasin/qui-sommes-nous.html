@@ -1234,7 +1234,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       knots.push(to);
       const inZone = (a, c) => zones.some(([z0, z1]) => Math.min(a, c) >= z0 - 2 && Math.max(a, c) <= z1 + 2);
       const segs = []; for (let i = 0; i < knots.length - 1; i++) { const d = Math.abs(knots[i + 1] - knots[i]) / vh;
-        segs.push({ a: knots[i], b: knots[i + 1], T: !fast ? (inZone(knots[i], knots[i + 1]) ? Math.max(1.2, 2.8 * d / .8) : Math.max(.5, .45 + d * .5)) * (dir > 0 ? 1 : .8) : Math.max(.3, .25 + d * .28) }); }   // en remontant : pareil, 20 % plus vite ; en enchaînant : vite
+        segs.push({ a: knots[i], b: knots[i + 1], T: !fast ? Math.max(.5, .45 + d * .5) * (dir > 0 ? 1 : .8) : Math.max(.3, .25 + d * .28) }); }   // en remontant : pareil, 20 % plus vite ; en enchaînant : vite
       if (segs.length === 1) segs[0].T = Math.min(3.4, Math.max(!fast ? 1 : .8, segs[0].T + (!fast ? .3 : .2)));
       // le glissement vers la gauche (carte d'Arthur → mosaïque → « Projets ») : vitesse régulière, comme la vidéo
       const fr = window.__finSlide && window.__finSlide();
