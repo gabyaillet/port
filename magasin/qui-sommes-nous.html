@@ -732,7 +732,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
           float lead = (uDirX > 0. ? aUv.x : 1. - aUv.x) * .8 + (1. - aUv.y) * .2;
           float D = .4, dl = (1. - lead) * D;   // le bout avant part loin devant, le coin arrière traîne
           float lt = clamp((uProg - dl) / (1. - D), 0., 1.);
-          lt = lt < .5 ? 4. * lt * lt * lt : 1. - pow(-2. * lt + 2., 3.) / 2.;
+          lt = lt * lt * (3. - 2. * lt);   // déploiement régulier, sans accélération brusque au milieu
           vec2 pm = mix(uStart.xy + aUv * uStart.zw, uEnd.xy + aUv * uEnd.zw, lt);
           // comme la vidéo : l'image ne s'étire pas, elle reste fixe (rapportée à la carte finale) et la forme s'ouvre autour
           vArt = (pm - uEnd.xy) / uEnd.zw; vLt = lt;
@@ -970,10 +970,10 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       // le ressort des panneaux : la taille suit le défilement avec de l'inertie, comme un liquide qui a du poids
       const dts = Math.min(.05, lastSpT ? (now - lastSpT) / 1000 : 1 / 60); lastSpT = now;
       for (const P of people) {
-        P.tg = ease(clamp((sy - P.y) / (vh * .8)));
+        P.tg = (u => u * u * (3 - 2 * u))(clamp((sy - P.y + vh * .45) / (vh * 1.25)));   // le déploiement commence bien avant que la carte se fixe, et dure plus longtemps
         if (P.sp < 0 || reduce) { P.sp = P.tg; P.sv = 0; continue; }
         const steps = Math.max(1, Math.ceil(dts / .008)), h = dts / steps;
-        for (let i = 0; i < steps; i++) { const acc = 260 * (P.tg - P.sp) - 27 * P.sv; P.sv += acc * h; P.sp += P.sv * h; }
+        for (let i = 0; i < steps; i++) { const acc = 170 * (P.tg - P.sp) - 22 * P.sv; P.sv += acc * h; P.sp += P.sv * h; }
         if (Math.abs(P.tg - P.sp) < .0005 && Math.abs(P.sv) < .002) { P.sp = P.tg; P.sv = 0; }
       }
       const busy = dy !== 0 || vel !== 0 || projects.some(P => Math.abs(P.hoverT - P.hover) > .002) || people.some(P => P.sv !== 0);
@@ -985,7 +985,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         if (!(P.y - sy < vh && P.y + P.h - sy > 0) || now - P.artT < 30) continue;
         if (!artOn) { artOn = true; useArt(); gl.disable(gl.BLEND); }
         P.artT = now;
-        const e = Math.min(1.04, Math.max(0, P.sp - .12) / .6), w = lerp(P.start.w, P.end.w, e), h = lerp(P.start.h, P.end.h, e);
+        const e = Math.min(1.04, Math.max(0, P.sp - .04) / .86), w = lerp(P.start.w, P.end.w, e), h = lerp(P.start.h, P.end.h, e);
         gl.bindFramebuffer(gl.FRAMEBUFFER, P.fb); gl.viewport(0, 0, P.fw, P.fh);
         gl.uniform1f(AU.uTime, tsec); gl.uniform1f(AU.uAspect, w / h); gl.uniform3fv(AU.uA, P.a); gl.uniform3fv(AU.uB, P.b); gl.uniform3fv(AU.uC, P.c);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -997,7 +997,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       gl.uniform2f(U.uRes, vw, vh); gl.uniform1f(U.uTime, (now - t0) / 1000); gl.uniform1f(U.uDpr, dpr);
       for (const P of people) {
         if (!(P.y - sy < vh && P.y + P.h - sy > 0)) { if (P.oo !== 0) { P.oo = 0; P.over.style.opacity = 0; P.over.classList.remove('on'); } continue; }
-        const g = clamp((sy - P.y) / (vh * .8)), ec = clamp(P.sp, 0, 1.04), e = Math.min(1.04, Math.max(0, P.sp - .12) / .6), em = clamp(e);   // la forme se transforme plus vite (sur 72 % du trajet), le reste suit le défilement
+        const g = clamp((sy - P.y) / (vh * .8)), ec = clamp(P.sp, 0, 1.04), e = Math.min(1.04, Math.max(0, P.sp - .04) / .86), em = clamp(e);   // la forme se transforme plus vite (sur 72 % du trajet), le reste suit le défilement
         // le décor collant : en haut tant qu'on est dans la section, puis il remonte avec la page
         const stTop = sy < P.y ? P.y - sy : Math.min(0, P.y + P.h - vh - sy);
         // à la fin, la carte d'Arthur part vers la gauche pendant que la page des projets arrive
