@@ -1119,7 +1119,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const q = X / G.track;
         mzCols.forEach((c, i) => { const d = i % 2 ? 1 : -1, off = -H * .6 - (+c.dataset.shift || 0) + d * (q - .5) * H * .9; c.style.transform = `translate3d(0, ${off.toFixed(1)}px, 0)`; }); }
       else mz.style.visibility = 'hidden';
-      const mzDark = mx < 60 && mx + G.M > 60;   // la mosaïque noire est sous l'en-tête : il passe en clair
+      const mzDark = mx < 60 && mx + G.M > W - 60;   // l'en-tête ne passe en clair que si la mosaïque est sous tout l'en-tête   // la mosaïque noire est sous l'en-tête : il passe en clair
       // le trait s'ouvre en capsule (comme la vidéo), puis la capsule grandit jusqu'à tout l'écran
       const fs = G.fs, narrow = innerWidth < 760;
       const pw = (narrow ? .34 : .3) * innerWidth, ph = fs * .8;
