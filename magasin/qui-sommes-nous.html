@@ -7,7 +7,7 @@
 <meta name="description" content="Obtura Studio, web design à Nantes : Gabriel Aillet et Arthur Goubill.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400&display=swap">
 <style>
 html.lenis, html.lenis body { height: auto; } .lenis.lenis-smooth { scroll-behavior: auto !important; } .lenis.lenis-stopped { overflow: hidden; }
 /* Un mur d'enduit gris où passent des ombres de feuillage ; au défilement, les lettres de « bienvenue » tombent une à une en s'effaçant
@@ -89,7 +89,7 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .pp-intro .p-name, .pp-intro .p-kicker { -webkit-text-stroke: 4px #e8e7e4; paint-order: stroke fill; }
 .pp-intro .p-name .serif { -webkit-text-stroke-width: 4px; }
 .pp-big { position: absolute; display: flex; justify-content: space-between; align-items: center; padding: 0 clamp(1rem, 3vw, 2.6rem); pointer-events: none; opacity: 0; z-index: 1;
-  font: 400 clamp(2.6rem, 9.5vw, 9.5rem)/1 var(--f); letter-spacing: -.04em; text-transform: uppercase; color: #fff; will-change: opacity; }   /* comme « PLAY / REEL » sur la vidéo */
+  font: 300 clamp(2.6rem, 9.5vw, 9.5rem)/1 var(--f); letter-spacing: -.03em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 3px rgba(20,20,20,.16); will-change: opacity, transform; }   /* comme « PLAY / REEL » sur la vidéo */
 .pp-big span { display: inline-block; will-change: transform; }
 .pp-pill { display: grid; place-items: center; width: 1.05em; height: .62em; border-radius: 99px; background: #fff; transform: scale(0); will-change: transform; }
 .pp-pill b { width: .22em; height: .22em; border-radius: 50%; border: .045em solid #141414; }   /* le cercle d'Obtura */
@@ -836,7 +836,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         float lum = dot(col, vec3(.299, .587, .114));
         // la couleur revient d'abord du côté qui arrive en premier (comme la vidéo), le reste reste violet un peu plus
         float tnt = uMorph > .5 ? uTint * (1. - smoothstep(.55, 1., vLt)) : uTint;
-        col = mix(col, mix(vec3(.36, .31, .9), vec3(.9, .89, .99), smoothstep(0., .8, lum)), tnt);
+        col = mix(col, mix(vec3(.16, .1, .98), vec3(.86, .84, 1.), smoothstep(.16, .62, lum)), tnt);   // bleu profond, comme la vidéo
         col *= 1. - vZ * .12;
         col = mix(col, vec3(.95, .95, .97), uWhite);   // la carte sort du blanc en arrivant
         gl_FragColor = vec4(col * a, a);
@@ -923,8 +923,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const eh = narrow ? vh - top - 14 : Math.min(vh - 2 * top, Math.max(460, Math.round(vh * .66)));
         P.end = { x: gut, y: narrow ? top : Math.round((vh - eh) / 2 + 18), w: vw - 2 * gut, h: eh };
         // départ : la petite carte collée au bord de l'écran, en bas, comme sur la vidéo
-        P.start = narrow ? { x: 0, y: vh * .5, w: vw * .62 } : { x: 0, y: vh * .5, w: vw * .38 }; P.start.h = P.start.w * .58;
-        if (P.right) P.start.x = vw - P.start.w;   // ce panneau-là part du bord droit
+        // départ (comme la vidéo IMG_4912) : une carte assez grande, un peu en retrait du bord, au milieu de l'écran
+        P.start = narrow ? { x: vw * .05, w: vw * .7 } : { x: vw * .065, w: vw * .39 }; P.start.h = P.start.w / 1.75; P.start.y = vh * .55 - P.start.h / 2;
+        if (P.right) P.start.x = vw - P.start.x - P.start.w;   // la carte d'Arthur, en miroir
         Object.assign(P.over.style, { left: P.end.x + 'px', top: P.end.y + 'px', width: P.end.w + 'px', height: P.end.h + 'px' });
         Object.assign(P.big.style, { left: P.end.x + 'px', top: P.end.y + 'px', width: P.end.w + 'px', height: P.end.h + 'px' });
         // la petite image où se calcule la matière : ~512 px de large, selon la forme finale du panneau
@@ -984,7 +985,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         if (!(P.y - sy < vh && P.y + P.h - sy > 0) || now - P.artT < 30) continue;
         if (!artOn) { artOn = true; useArt(); gl.disable(gl.BLEND); }
         P.artT = now;
-        const e = Math.min(1.04, Math.max(0, P.sp) / .72), w = lerp(P.start.w, P.end.w, e), h = lerp(P.start.h, P.end.h, e);
+        const e = Math.min(1.04, Math.max(0, P.sp - .12) / .6), w = lerp(P.start.w, P.end.w, e), h = lerp(P.start.h, P.end.h, e);
         gl.bindFramebuffer(gl.FRAMEBUFFER, P.fb); gl.viewport(0, 0, P.fw, P.fh);
         gl.uniform1f(AU.uTime, tsec); gl.uniform1f(AU.uAspect, w / h); gl.uniform3fv(AU.uA, P.a); gl.uniform3fv(AU.uB, P.b); gl.uniform3fv(AU.uC, P.c);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -996,7 +997,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       gl.uniform2f(U.uRes, vw, vh); gl.uniform1f(U.uTime, (now - t0) / 1000); gl.uniform1f(U.uDpr, dpr);
       for (const P of people) {
         if (!(P.y - sy < vh && P.y + P.h - sy > 0)) { if (P.oo !== 0) { P.oo = 0; P.over.style.opacity = 0; P.over.classList.remove('on'); } continue; }
-        const g = clamp((sy - P.y) / (vh * .8)), ec = clamp(P.sp, 0, 1.04), e = Math.min(1.04, Math.max(0, P.sp) / .72), em = clamp(e);   // la forme se transforme plus vite (sur 72 % du trajet), le reste suit le défilement
+        const g = clamp((sy - P.y) / (vh * .8)), ec = clamp(P.sp, 0, 1.04), e = Math.min(1.04, Math.max(0, P.sp - .12) / .6), em = clamp(e);   // la forme se transforme plus vite (sur 72 % du trajet), le reste suit le défilement
         // le décor collant : en haut tant qu'on est dans la section, puis il remonte avec la page
         const stTop = sy < P.y ? P.y - sy : Math.min(0, P.y + P.h - vh - sy);
         // à la fin, la carte d'Arthur part vers la gauche pendant que la page des projets arrive
@@ -1009,8 +1010,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         if (em > .97 && stTop === 0) cover = true;
         if (r.y < 60 && r.y + r.h > 20) dark = true;
         // les deux grands mots : ils arrivent pendant que la carte grandit, puis laissent la place aux infos
-        const bo = (.18 + .82 * sstep(.35, .85, ec)) * sstep(.04, .2, ec) * (1 - sstep(.86, .99, g));
-        if (Math.abs(bo - P.bo) > .002) { P.bo = bo; P.big.style.opacity = (bo * .95).toFixed(3); const sh = ((1 - sstep(.2, .8, ec)) * 50).toFixed(1); P.bs[0].style.transform = `translateX(${sh}px)`; P.bs[1].style.transform = `translateX(${-sh}px)`;
+        const bo = (.5 + .5 * sstep(.45, .85, ec)) * sstep(0, .1, ec) * (1 - sstep(.86, .99, g));
+        if (Math.abs(bo - P.bo) > .002) { P.bo = bo; P.big.style.opacity = (bo * .95).toFixed(3); const sh = ((1 - sstep(.2, .8, ec)) * 50).toFixed(1); P.bs[0].style.transform = `translateX(${sh}px)`; P.bs[1].style.transform = `translateX(${-sh}px)`; P.big.style.transform = `translateY(${((1 - sstep(.12, .8, ec)) * vh * .26).toFixed(1)}px)`;
           P.pill.style.transform = `scale(${sstep(.7, .95, ec).toFixed(3)})`; }
         const oo = clamp((g - .8) / .17), io = clamp(1 - g * 5);   // le nom en noir s'efface dès que la carte part
         if (Math.abs(oo - P.oo) > .002) { P.oo = oo; P.over.style.opacity = oo.toFixed(3); P.over.classList.toggle('on', oo > .5); }
@@ -1276,9 +1277,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     // A = la carte d'Arthur ouverte, B = « Projets » avec la capsule ouverte.
     const zone = () => { const fr = window.__finSlide && window.__finSlide();
       if (!fr) return null; const arth = [...document.querySelectorAll('.pp')].pop(), A = Math.round(docBox(arth).y + innerHeight * .86); return [A, Math.round(fr[1] - 4)]; };
-    function goTo(to, dir) { stops = [to]; const y = scrollY; if (Math.abs(to - y) < 3) return; if (window.__lenis) window.__lenis.stop(); go(dir); }
-    const wrapDone = () => { if (!moving && window.__lenis) { window.__lenis.start(); } };
-    setInterval(wrapDone, 120);
+    function goTo(to, dir) { stops = [to]; const y = scrollY; if (Math.abs(to - y) < 3) return; if (window.__lenis) window.__lenis.scrollTo(y, { immediate: true, force: true }); go(dir); }
     // molette et pavé tactile
     addEventListener('wheel', e => {
       if (menuOpen() || e.ctrlKey) return;
