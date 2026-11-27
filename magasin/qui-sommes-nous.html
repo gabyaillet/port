@@ -93,7 +93,7 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .pp-big span { display: inline-block; will-change: transform; }
 .pp-pill { display: grid; place-items: center; width: 1.05em; height: .62em; border-radius: 99px; background: #fff; transform: scale(0); will-change: transform; }
 .pp-pill b { width: .22em; height: .22em; border-radius: 50%; border: .045em solid #141414; }   /* le cercle d'Obtura */
-.no-gl .pp-big { display: none; }
+.pp-big { display: none !important; }   /* plus de grands mots blancs ni de pastille sur les cartes */
 .pp-over { position: absolute; color: #fff; padding: clamp(1.2rem, 3vw, 2.6rem); display: grid; grid-template-rows: auto 1fr auto; opacity: 0; pointer-events: none; border-radius: 24px; }
 .pp-over.on { pointer-events: auto; }
 .pp-top { display: flex; justify-content: space-between; align-items: center; font: 400 .62rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.85); }
@@ -1273,36 +1273,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       requestAnimationFrame(step);
     }
     const menuOpen = () => document.getElementById('nav').dataset.open === 'true';
-    // Défilement continu partout. Seul le passage de la carte d'Arthur aux projets se fait tout seul, d'un geste :
-    // A = la carte d'Arthur ouverte, B = « Projets » avec la capsule ouverte.
-    const zone = () => { const fr = window.__finSlide && window.__finSlide();
-      if (!fr) return null; const arth = [...document.querySelectorAll('.pp')].pop(), A = Math.round(docBox(arth).y + innerHeight * .86); return [A, Math.round(fr[1] - 4)]; };
-    function goTo(to, dir) { stops = [to]; const y = scrollY; if (Math.abs(to - y) < 3) return; if (window.__lenis) window.__lenis.scrollTo(y, { immediate: true, force: true }); go(dir); }
-    // molette et pavé tactile
-    addEventListener('wheel', e => {
-      if (menuOpen() || e.ctrlKey) return;
-      const Z = zone(); if (!Z) return; const [A, B] = Z, y = scrollY, d = Math.sign(e.deltaY), now = performance.now();
-      if (moving) { e.preventDefault(); e.stopImmediatePropagation(); if (d !== curDir && now - runStart > 200) goTo(d > 0 ? B : A, d); return; }
-      if (now < coolUntil) { if ((d > 0 && y >= A - 4 && y < B) || (d < 0 && y > A && y <= B + 4)) { e.preventDefault(); e.stopImmediatePropagation(); } return; }
-      const tgt = (window.__lenis ? window.__lenis.targetScroll : y) + e.deltaY;
-      if (d > 0 && y < B - 8 && tgt > A + 2) {
-        e.preventDefault(); e.stopImmediatePropagation();
-        if (y >= A - 12) goTo(B, 1);                                   // sur la carte d'Arthur : un geste suffit jusqu'à « Projets »
-        else if (window.__lenis) window.__lenis.scrollTo(A);            // on arrive d'en haut : on s'arrête d'abord sur la carte d'Arthur
-        else goTo(A, 1);
-      } else if (d < 0 && y > A + 8 && y <= B + 8 && tgt < B - 2) { e.preventDefault(); e.stopImmediatePropagation(); goTo(A, -1); }
-    }, { passive: false, capture: true });
-    // doigt : défilement normal, sauf dans le passage Arthur → Projets
-    let ty = null, lastY = scrollY;
-    addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive: true });
-    addEventListener('touchmove', e => { if (menuOpen() || ty == null) return; const Z = zone(); if (!Z) return; const [A, B] = Z, y = scrollY, d = Math.sign(ty - e.touches[0].clientY);
-      if (moving || (d > 0 && y >= A - 12 && y < B - 8) || (d < 0 && y > A + 8 && y <= B + 8)) e.preventDefault(); }, { passive: false });
-    addEventListener('touchend', e => { if (ty == null || menuOpen()) return; const dy = ty - e.changedTouches[0].clientY; ty = null; if (Math.abs(dy) <= 24 || moving) return;
-      const Z = zone(); if (!Z) return; const [A, B] = Z, y = scrollY, d = Math.sign(dy);
-      if (d > 0 && y >= A - 12 && y < B - 8) goTo(B, 1); else if (d < 0 && y > A + 8 && y <= B + 8) goTo(A, -1); }, { passive: true });
-    // si on entre dans le passage autrement (élan du doigt, clavier, barre de défilement), il se termine tout seul
-    addEventListener('scroll', () => { const y = scrollY, d = Math.sign(y - lastY); lastY = y; if (moving || !d || performance.now() < coolUntil) return;
-      const Z = zone(); if (!Z) return; const [A, B] = Z; if (y > A + 12 && y < B - 12) goTo(d > 0 ? B : A, d); }, { passive: true });
+    // le défilement est continu partout : c'est lui qui fait avancer les animations (rien ne se fait tout seul)
     window.__pages = { stops: () => stops, go };
   })();
 
