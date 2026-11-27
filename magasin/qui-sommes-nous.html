@@ -980,12 +980,12 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     computeStops(); addEventListener('resize', () => setTimeout(computeStops, 200)); addEventListener('load', computeStops);
     if (document.fonts) document.fonts.ready.then(computeStops);
     let curTo = 0;
-    function go(dir, ref) {
+    function go(dir, ref, fast) {   // fast : on enchaîne (geste pendant un mouvement) → pas de ralentissement sur les cartes
       const y = scrollY, yr = ref == null ? y : ref; let to = null;   // ref : on enchaîne à partir de la page visée
       if (dir > 0) to = stops.find(v => v > yr + 8); else for (let i = stops.length - 1; i >= 0; i--) if (stops[i] < yr - 8) { to = stops[i]; break; }
       if (to == null) return;
       curTo = to; moving = true; const id = ++runId; curDir = dir; runStart = performance.now();
-      const done = () => { moving = false; coolUntil = performance.now() + (dir > 0 ? 450 : 120); };   // petite pause : l'élan du pavé tactile ne relance pas tout de suite
+      const done = () => { moving = false; coolUntil = performance.now() + (dir > 0 && !fast ? 450 : 120); };   // petite pause : l'élan du pavé tactile ne relance pas tout de suite
       // le trajet est découpé : les zones où une carte se déploie sont parcourues lentement (comme la vidéo),
       // le reste plus vite, et la vitesse se raccorde en douceur d'un morceau à l'autre
       const vh = innerHeight, lo = Math.min(y, to), hi = Math.max(y, to), knots = [y];
@@ -994,8 +994,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       knots.push(to);
       const inZone = (a, c) => zones.some(([z0, z1]) => Math.min(a, c) >= z0 - 2 && Math.max(a, c) <= z1 + 2);
       const segs = []; for (let i = 0; i < knots.length - 1; i++) { const d = Math.abs(knots[i + 1] - knots[i]) / vh;
-        segs.push({ a: knots[i], b: knots[i + 1], T: dir > 0 ? (inZone(knots[i], knots[i + 1]) ? Math.max(1.2, 2.8 * d / .8) : Math.max(.5, .45 + d * .5)) : Math.max(.3, .25 + d * .28) }); }   // en remontant, tout va plus vite
-      if (segs.length === 1) segs[0].T = Math.min(3.4, Math.max(dir > 0 ? 1.1 : .8, segs[0].T + (dir > 0 ? .4 : .2)));
+        segs.push({ a: knots[i], b: knots[i + 1], T: dir > 0 && !fast ? (inZone(knots[i], knots[i + 1]) ? Math.max(1.2, 2.8 * d / .8) : Math.max(.5, .45 + d * .5)) : Math.max(.3, .25 + d * .28) }); }   // en remontant, tout va plus vite
+      if (segs.length === 1) segs[0].T = Math.min(3.4, Math.max(dir > 0 && !fast ? 1.1 : .8, segs[0].T + (dir > 0 && !fast ? .4 : .2)));
       const v = []; for (let i = 0; i <= segs.length; i++) { if (i === 0 || i === segs.length) { v.push(0); continue; }
         const s1 = (segs[i - 1].b - segs[i - 1].a) / segs[i - 1].T, s2 = (segs[i].b - segs[i].a) / segs[i].T; v.push(Math.sign(s1) * Math.min(Math.abs(s1), Math.abs(s2))); }
       const herm = (sg, v0, v1, u) => { const T = sg.T, u2 = u * u, u3 = u2 * u; return (2 * u3 - 3 * u2 + 1) * sg.a + (u3 - 2 * u2 + u) * T * v0 + (-2 * u3 + 3 * u2) * sg.b + (u3 - u2) * T * v1; };
@@ -1020,8 +1020,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const d = Math.sign(e.deltaY);
       // changer de sens en route est toujours possible (pour remonter sans attendre)
       if (moving && d !== curDir && performance.now() - runStart > 200) { go(d); return; }
-      // en remontant, un nouveau geste enchaîne tout de suite sur la page d'avant, sans attendre la fin
-      if (moving && d < 0 && d === curDir && performance.now() - runStart > 250) { go(d, curTo); return; }
+      // un nouveau geste dans le même sens enchaîne tout de suite sur la page suivante, en accéléré
+      if (moving && d === curDir && performance.now() - runStart > 250) { go(d, curTo, true); return; }   // dans les deux sens
       if (busy()) return;
       go(d);
     }, { passive: false, capture: true });
@@ -1029,12 +1029,12 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     let ty = null;
     addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive: true });
     addEventListener('touchmove', e => { if (!menuOpen()) e.preventDefault(); }, { passive: false });
-    addEventListener('touchend', e => { if (ty == null || menuOpen()) return; const dy = ty - e.changedTouches[0].clientY; ty = null; if (Math.abs(dy) <= 24) return; const d = Math.sign(dy); if ((moving && d !== curDir) || !busy()) go(d); }, { passive: true });
+    addEventListener('touchend', e => { if (ty == null || menuOpen()) return; const dy = ty - e.changedTouches[0].clientY; ty = null; if (Math.abs(dy) <= 24) return; const d = Math.sign(dy); if (moving && d === curDir && performance.now() - runStart > 250) go(d, curTo, true); else if ((moving && d !== curDir) || !busy()) go(d); }, { passive: true });
     // clavier
     addEventListener('keydown', e => {
       if (menuOpen() || e.target.closest('input, textarea')) return;
       const k = e.key, dir = (k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) ? 1 : (k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey)) ? -1 : 0;
-      if (!dir) return; e.preventDefault(); if ((moving && dir !== curDir) || !busy()) go(dir);
+      if (!dir) return; e.preventDefault(); if (moving && dir === curDir && performance.now() - runStart > 250) go(dir, curTo, true); else if ((moving && dir !== curDir) || !busy()) go(dir);
     });
     window.__pages = { stops: () => stops, go };
   })();
