@@ -32,7 +32,7 @@ img { display: block; max-width: 100%; }
 .ribbon path { fill: none; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
 
 /* Le titre et sa chute */
-.fall { position: relative; height: 200svh; }
+.fall { position: relative; height: 165svh; }
 .stage { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; }
 /* « bienvenue » en italique à empattements (Instrument Serif), grand et fin */
 h1 { position: relative; margin: 0; font: italic 400 clamp(4rem, 12vw, 10rem)/.9 "Instrument Serif", Georgia, serif; letter-spacing: -.015em; display: flex; padding: 0 .08em; }
@@ -123,6 +123,55 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
   background: radial-gradient(60% 70% at 25% 25%, var(--a), transparent), radial-gradient(60% 70% at 80% 60%, var(--b), transparent), radial-gradient(50% 50% at 40% 90%, var(--c), transparent), #0e0e12; }
 .no-gl .pp-ini { display: block; }
 
+/* ---------- La fin (comme le village du site de la voiture) ----------
+   Un mur de couleur monte du bas ; au centre, le cercle du logo ; de petits sites flottent en profondeur autour,
+   puis sont aspirés dedans pendant que le cercle se resserre en un point. Là, le fond devient blanc d'un coup
+   et deux particules de couleur en sortent, avec leur reflet, jusqu'au contact. */
+.finale { position: relative; z-index: 4; height: 440svh; }
+.fin-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.fin-wall { position: absolute; inset: 0; background: linear-gradient(160deg, #2f45ff 0%, #5b3cff 55%, #7a3cff 100%); transform: translateY(101%); will-change: transform; }
+.fin-wall.white { background: #fff; }
+.fin-cards { position: absolute; inset: 0; perspective: 900px; perspective-origin: 50% 46%; transform-style: preserve-3d; pointer-events: none; }
+.fcard { position: absolute; left: 50%; top: 46%; width: clamp(86px, 11vw, 160px); aspect-ratio: 16 / 10; margin: 0; opacity: 0; will-change: transform, opacity; }
+.mini { width: 100%; height: 100%; border-radius: 7px; overflow: hidden; container-type: size; display: grid; grid-template-rows: auto 1fr;
+  box-shadow: 0 30px 50px -24px rgba(10,10,40,.55), 0 0 0 1px rgba(255,255,255,.14); }
+.mini .mb { display: flex; gap: 1.2cqw; padding: 2.2cqw 3cqw; border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent); }
+.mini .mb i { width: 2cqw; height: 2cqw; border-radius: 50%; background: currentColor; opacity: .3; }
+.mini .mbody { padding: 6cqw 7cqw 5cqw; display: grid; grid-template-columns: 1.25fr .75fr; grid-template-rows: 1fr auto; gap: 4cqw 5cqw; align-items: end; }
+.mini .ln { display: block; height: 4.6cqw; border-radius: 3cqw; background: currentColor; margin-bottom: 2.6cqw; }
+.mini .ln.s { height: 2.2cqw; opacity: .35; width: 84%; margin-bottom: 1.8cqw; }
+.mini .ln.c { width: 34%; height: 3cqw; margin: 2cqw 0 0; }
+.mini .ph { height: 100%; border-radius: 3cqw; }
+.mini .row { grid-column: 1 / -1; display: flex; gap: 3cqw; } .mini .row i { flex: 1; height: 9cqw; border-radius: 2cqw; }
+.fin-logo { position: absolute; left: 50%; top: 46%; width: min(52vw, 40vh, 360px); aspect-ratio: 1; transform: translate(-50%, -50%); will-change: transform; pointer-events: none; }
+.fin-logo svg { width: 100%; height: 100%; overflow: visible; }
+.fin-logo circle { fill: none; stroke: #fff; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.fin-name { position: absolute; left: 50%; top: calc(46% + min(26vw, 20vh, 180px) + 1.6rem); transform: translateX(-50%); color: #fff; text-align: center; white-space: nowrap; opacity: 0; will-change: opacity, transform; }
+.fin-name span { display: block; font: 400 .64rem var(--mono); letter-spacing: .2em; text-transform: uppercase; opacity: .8; }
+.fin-name b { display: block; margin-top: .5rem; font: italic 400 clamp(2.2rem, 6vw, 4.2rem)/1 "Instrument Serif", Georgia, serif; }
+.fin-strings { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.fin-strings path, .c-thread path { fill: none; stroke-width: 1.2; stroke-linecap: round; }
+.fin-strings circle, .c-thread circle { opacity: 0; }
+.pt-a { fill: #2f45ff; filter: drop-shadow(0 0 6px #2f45ff) drop-shadow(0 0 14px rgba(47,69,255,.6)); }
+.pt-b { fill: #ff4f8b; filter: drop-shadow(0 0 6px #ff4f8b) drop-shadow(0 0 14px rgba(255,79,139,.6)); }
+.ln-a { stroke: rgba(47,69,255,.55); } .ln-b { stroke: rgba(255,79,139,.55); }
+.topbar.light2 { --ink: #f4f4f2; --wall: #0d0d0d; }
+
+/* Le contact, sur fond blanc : les deux particules y arrivent */
+.contact { position: relative; z-index: 4; background: #fff; padding: 34svh 0 0; }
+.c-thread { position: absolute; left: 0; top: 0; width: 100%; overflow: visible; pointer-events: none; }
+.c-in { position: relative; padding-bottom: 14svh; }
+.c-title { margin: 0 0 1.6rem; font: 500 clamp(3rem, 9vw, 8rem)/.9 var(--f); letter-spacing: -.055em; }
+.c-title .serif { font-size: 1.06em; }
+.c-lead { margin: 0 0 clamp(2.5rem, 6vw, 4.5rem); max-width: 32rem; font-size: 1.05rem; line-height: 1.55; color: #3a3a38; }
+.c-list { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; }
+.c-list div { padding-top: 1rem; border-top: 1px solid rgba(20,20,20,.15); }
+.c-list dt { font: 400 .64rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: .6rem; }
+.c-list dd { margin: 0; font-size: 1.05rem; line-height: 1.45; }
+.c-list dd.todo { color: #8a8a87; font-style: italic; }
+.contact .foot { position: relative; }
+@media (max-width: 760px) { .c-list { grid-template-columns: 1fr 1fr; } }
+
 /* Quand le trait passe sous un texte posé sur le mur, il s'interrompt autour des lettres : le texte reste lisible */
 .team > .wrap > .label { -webkit-text-stroke: 4px #d8d8d6; paint-order: stroke fill; }
 .head > p { -webkit-text-stroke: 3px #d8d8d6; paint-order: stroke fill; }
@@ -198,6 +247,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 </header>
 <ul class="nav" id="nav" data-open="false">
   <li><a href="#equipe">Qui sommes-nous</a></li>
+  <li><a href="#contact">Contact</a></li>
   <li><a href="./">Revoir l'intro</a></li>
   <li class="nav-foot"><button class="pill nav-close" type="button">Fermer ✕</button></li>
 </ul>
@@ -251,7 +301,31 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   </div>
 </section>
 <div class="curtain" id="curtain" aria-hidden="true"></div>
-<footer class="foot"><div class="wrap"><span>Obtura Studio · Nantes</span><a href="./">Revoir l'intro</a></div></footer>
+<section class="finale" id="fin" aria-label="Obtura Studio">
+  <div class="fin-stage">
+    <div class="fin-wall" id="fin-wall"></div>
+    <div class="fin-cards" id="fin-cards" aria-hidden="true"></div>
+    <div class="fin-logo" id="fin-logo" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" pathLength="302"/></svg></div>
+    <p class="fin-name" id="fin-name"><span>Obtura Studio</span><b>Web design · Nantes</b></p>
+    <svg class="fin-strings" id="fin-strings" aria-hidden="true"><path class="ln-a"/><path class="ln-b"/><circle class="pt-a" r="5"/><circle class="pt-b" r="5"/></svg>
+  </div>
+</section>
+
+<section class="contact" id="contact" aria-labelledby="c-title">
+  <svg class="c-thread" id="c-thread" aria-hidden="true"><path class="ln-a"/><path class="ln-b"/><circle class="pt-a" r="5"/><circle class="pt-b" r="5"/></svg>
+  <div class="wrap c-in" id="c-in">
+    <p class="label">Contact</p>
+    <h2 class="c-title" id="c-title">Parlons de <span class="serif grad">votre projet.</span></h2>
+    <p class="c-lead">Un site à créer ou à entretenir pour votre entreprise ? On s'en occupe à deux, du design au développement.</p>
+    <dl class="c-list">
+      <div><dt>E-mail</dt><dd class="todo">À compléter</dd></div>
+      <div><dt>Instagram et TikTok</dt><dd>Obtura Web</dd></div>
+      <div><dt>Où</dt><dd>Nantes</dd></div>
+      <div><dt>Qui</dt><dd>Gabriel Aillet et Arthur Goubill</dd></div>
+    </dl>
+  </div>
+  <footer class="foot"><div class="wrap"><span>Obtura Studio · Nantes</span><a href="./">Revoir l'intro</a></div></footer>
+</section>
 
 <script>
 (() => {
@@ -325,7 +399,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   // Safari ne sait pas flouter dans un canvas : le flou est alors fait par le navigateur sur la toile entière
   if (!('filter' in g)) cv.style.filter = 'blur(14px)';
   function loop(now) {
-    if (window.__wallHidden) { requestAnimationFrame(loop); return; }   // caché derrière un panneau : rien à dessiner
+    if (window.__wallHidden || window.__finCover) { requestAnimationFrame(loop); return; }   // caché derrière un panneau : rien à dessiner
     if (descend !== lastDesc) {
       lastDesc = descend; const shift = (descend - d0) * PAR;
       if (Math.abs(shift) > innerHeight * MARG * .8) { draw(now / 1000); lastDraw = now; }
@@ -375,7 +449,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const box = id => docBox(typeof id === 'string' ? document.getElementById(id) : id);
     const fb = docBox(fall), endFall = fb.y + fb.h - vh * .35;
     const people = [...document.querySelectorAll('.pp')], first = box(people[0]), last = box(people[people.length - 1]);
-    const man = box('team-head'), foot = docBox(document.querySelector('.foot'));
+    const man = box('team-head'), foot = box('fin');
     // 1er morceau : de l'arrivée jusqu'au-dessus du premier panneau, où il s'arrête
     const A = seg();
     // il entre par la gauche dès l'arrivée, passe sous le mot sans le barrer
@@ -386,14 +460,14 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     A.M(wide ? vw * .86 : vw * .93, man.y + man.h * .35, false);
     const startW = wide ? vw * .3 : vw * .62, startX = wide ? vw * .05 : 20;
     A.M(startX + startW * (wide ? .55 : .5), first.y + vh * (wide ? .38 : .5) - 44, false);
-    // 2e morceau : il reprend sous le dernier panneau et s'arrête au-dessus du bas de page
+    // 2e morceau : il reprend sous le dernier panneau et s'arrête juste avant le mur de couleur
     const B = seg();
     B.M(wide ? vw * .3 : vw * .25, last.y + last.h + 24, false);
     B.M(vw * (wide ? .72 : .8), (last.y + last.h + foot.y) / 2, false);
-    B.M(vw * .5, foot.y - 26, false);
+    B.M(vw * .5, foot.y - 30, false);
     // les textes que le trait ne doit pas barrer (agrandis de l'épaisseur du trait)
     const pad = sw / 2 + 10, obst = [];
-    document.querySelectorAll('.hero-x, #title, #team-head .label, #manifesto, .foot span, .foot a').forEach(el => {
+    document.querySelectorAll('.hero-x, #title, #team-head .label, #manifesto').forEach(el => {
       const b = docBox(el); if (b.w && b.h) obst.push({ x0: b.x - pad, x1: b.x + b.w + pad, y0: b.y - pad, y1: b.y + b.h + pad }); });
     const smooth = (smp, passes, win) => { for (let pass = 0; pass < passes; pass++) {
       const nx = new Array(smp.length); nx[0] = smp[0]; nx[smp.length - 1] = smp[smp.length - 1];
@@ -583,23 +657,29 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const VS = `
       attribute vec2 aUv;
       uniform vec4 uRect; uniform vec2 uRes; uniform float uBend; uniform float uVel; uniform float uApp;
-      uniform vec4 uWarp; uniform float uTwist;   // déformation tirée au hasard : force (et sens), biais, ondulation, phase ; torsion
+      uniform vec4 uWarp; uniform float uTwist;
+      uniform float uRotY; uniform float uRotX; uniform float uCurve;   // la feuille en 3D : inclinaisons et courbure
       varying vec2 vUv; varying float vZ;
       void main() {
         vUv = aUv;
         vec2 p = uRect.xy + aUv * uRect.zw;
         float sx = sin(3.14159 * aUv.x);
-        // la feuille qui se courbe en grandissant (présentations)
-        float wave = sx + uWarp.z * sin(6.28318 * aUv.x + uWarp.w) * sx;
-        p.y += uBend * uRect.w * .22 * uWarp.x * wave * (1. - aUv.y * .55);
-        p.x += uBend * uRect.z * (.06 + uWarp.y) * (aUv.y - .5) * cos(3.14159 * aUv.x);
-        p.y += uBend * uRect.w * uTwist * (aUv.x - .5) * (aUv.y - .3);
+        // la feuille en 3D (présentations, comme la vidéo de lusion.co) : elle se cintre autour d'un axe vertical,
+        // s'incline vers nous, puis la perspective fait courber ses bords haut et bas
+        vec2 ctr = uRect.xy + uRect.zw * .5;
+        vec3 q = vec3(p - ctr, 0.);
+        if (abs(uCurve) > .001) { float Rr = uRect.z * .5 / uCurve, th = q.x / Rr; q.x = sin(th) * Rr; q.z = (1. - cos(th)) * Rr; }
+        float cY = cos(uRotY), sY = sin(uRotY); q = vec3(q.x * cY + q.z * sY, q.y, -q.x * sY + q.z * cY);
+        float cX = cos(uRotX), sX = sin(uRotX); q = vec3(q.x, q.y * cX - q.z * sX, q.y * sX + q.z * cX);
+        float foc = uRes.y * 1.5;
+        p = ctr + q.xy * foc / (foc - q.z);
+        float zf = q.z / max(uRect.z, 1.);
         // la vitesse du défilement : le milieu de l'image traîne derrière les bords
         p.y -= uVel * 1.4 * sx;
         // l'apparition : le bas de l'image est encore recourbé
         float u = 1. - uApp;
         p.y += u * uRect.w * .14 * sx * aUv.y;
-        float z = (uBend * .9 * abs(uWarp.x) + min(abs(uVel) * .006, .5) + u * .6) * sx;
+        float z = (min(abs(uVel) * .006, .5) + u * .6) * sx + zf;
         vZ = z;
         gl_Position = vec4(p.x / uRes.x * 2. - 1., 1. - p.y / uRes.y * 2., 0., 1. - z * .06);
       }`;
@@ -714,7 +794,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     catch (e) { root.classList.add('no-gl'); return; }
     gl.useProgram(prog);
     root.classList.add('gl');
-    const U = {}; ['uRip', 'uLiq', 'uSeed', 'uWarp', 'uTwist', 'uRect', 'uRes', 'uBend', 'uVel', 'uApp', 'uTex', 'uMode', 'uSize', 'uRad', 'uTime', 'uA', 'uB', 'uC', 'uTint', 'uMouse', 'uHover', 'uDpr'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+    const U = {}; ['uRotY', 'uRotX', 'uCurve', 'uRip', 'uLiq', 'uSeed', 'uWarp', 'uTwist', 'uRect', 'uRes', 'uBend', 'uVel', 'uApp', 'uTex', 'uMode', 'uSize', 'uRad', 'uTime', 'uA', 'uB', 'uC', 'uTint', 'uMouse', 'uHover', 'uDpr'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
     // maillage 32 × 32 : assez fin pour des courbes lisses
     const N = 32, uvs = [], idx = [];
     for (let y = 0; y <= N; y++) for (let x = 0; x <= N; x++) uvs.push(x / N, y / N);
@@ -785,7 +865,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     function plane(r, o) {
       gl.uniform4f(U.uRect, r.x, r.y, r.w, r.h); gl.uniform2f(U.uSize, r.w, r.h); gl.uniform1f(U.uRad, o.rad);
       const W = o.warp || NOWARP; gl.uniform4f(U.uWarp, W[0], W[1], W[2], W[3]); gl.uniform1f(U.uTwist, W[4]);
-      gl.uniform1f(U.uBend, o.bend || 0); gl.uniform1f(U.uLiq, o.liq || 0); gl.uniform1f(U.uSeed, o.seed || 0); gl.uniform1f(U.uRip, o.rip || 0); gl.uniform1f(U.uVel, o.vel || 0); gl.uniform1f(U.uApp, o.app == null ? 1 : o.app);
+      gl.uniform1f(U.uBend, o.bend || 0); gl.uniform1f(U.uLiq, o.liq || 0); gl.uniform1f(U.uSeed, o.seed || 0); gl.uniform1f(U.uRip, o.rip || 0); gl.uniform1f(U.uRotY, o.ry || 0); gl.uniform1f(U.uRotX, o.rx || 0); gl.uniform1f(U.uCurve, o.curve || 0); gl.uniform1f(U.uVel, o.vel || 0); gl.uniform1f(U.uApp, o.app == null ? 1 : o.app);
       gl.uniform1f(U.uMode, o.mode); gl.uniform1f(U.uTint, o.tint || 0); gl.uniform1f(U.uHover, o.hover || 0); gl.uniform2f(U.uMouse, o.mx || 0, o.my || 0);
       if (o.pal) { gl.uniform3fv(U.uA, o.pal[0]); gl.uniform3fv(U.uB, o.pal[1]); gl.uniform3fv(U.uC, o.pal[2]); }
       gl.bindTexture(gl.TEXTURE_2D, o.tex || blank);
@@ -840,7 +920,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const stTop = sy < P.y ? P.y - sy : Math.min(0, P.y + P.h - vh - sy);
         const S = P.start, E = P.end;
         const r = { x: lerp(S.x, E.x, e), y: lerp(S.y, E.y, e) + stTop, w: lerp(S.w, E.w, e), h: lerp(S.h, E.h, e) };
-        plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(14, 24, ec), bend: 0, liq: clamp(Math.sin(Math.PI * ec) * .55 + Math.abs(P.sv) * .18), rip: Math.sin(Math.PI * ec), seed: P.seed, tint: 1 - sstep(.25, .9, ec), pal: [P.a, P.b, P.c] });
+        const bnd = Math.sin(Math.PI * ec) * (vw < 760 ? .7 : 1), side = P.right ? -1 : 1;   // la feuille se cintre et s'incline pendant qu'elle grandit
+        plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(14, 24, ec), bend: 0, liq: 0, rip: 0, ry: side * .42 * bnd + P.sv * .04 * side, rx: -.16 * bnd, curve: .6 * bnd, seed: P.seed, tint: 1 - sstep(.25, .9, ec), pal: [P.a, P.b, P.c] });
         if (ec > .97 && stTop === 0) cover = true;
         if (r.y < 60 && r.y + r.h > 20) dark = true;
         const oo = clamp((g - .78) / .17), io = clamp(1 - g * 2.6);
@@ -856,6 +937,102 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       }
       window.__wallHidden = cover;
       if (dark !== lightTop) { lightTop = dark; topbarEl.classList.toggle('light', dark); }
+    }
+    requestAnimationFrame(frame);
+  })();
+
+  /* ---------- La fin : mur de couleur, logo, petits sites aspirés, puis fond blanc et deux particules ---------- */
+  (function finale() {
+    const fin = document.getElementById('fin'), wallEl = document.getElementById('fin-wall'), cardsEl = document.getElementById('fin-cards');
+    const logo = document.getElementById('fin-logo'), ring = logo.querySelector('circle'), name = document.getElementById('fin-name');
+    const strings = document.getElementById('fin-strings'), sP = [...strings.querySelectorAll('path')], sD = [...strings.querySelectorAll('circle')];
+    const contact = document.getElementById('contact'), cIn = document.getElementById('c-in'), cSvg = document.getElementById('c-thread');
+    const cP = [...cSvg.querySelectorAll('path')], cD = [...cSvg.querySelectorAll('circle')], topbarEl = document.getElementById('topbar');
+    // de petites maquettes de sites (des formes, pas de faux contenu), aux couleurs variées
+    const TH = [['#f4f2ee', '#141414', '#2f45ff', '#ffb066'], ['#0f0f13', '#ededeb', '#7a3cff', '#22c1ff'], ['#ece6da', '#2a2420', '#b8553c', '#e2b33c'],
+      ['#1a1240', '#e9e4ff', '#8d8bff', '#ff4f8b'], ['#203126', '#e7efe2', '#a7c79a', '#f0c9a0'], ['#bfe0e6', '#0f2e36', '#1d6b78', '#ff8a3d'],
+      ['#e2b33c', '#1d1a14', '#7a2e24', '#f6e9dd'], ['#f7f5f0', '#1a1a1a', '#d0442f', '#2f45ff']];
+    const ph = (t, a) => `background: linear-gradient(${130 + a * 40}deg, ${t[2]}, ${t[3]})`;
+    const mini = t => `<div class="mini" style="background:${t[0]};color:${t[1]}"><div class="mb"><i></i><i></i><i></i></div>
+      <div class="mbody"><div><span class="ln"></span><span class="ln" style="width:72%"></span><span class="ln s"></span><span class="ln s" style="width:60%"></span><span class="ln c" style="background:${t[2]}"></span></div>
+      <div class="ph" style="${ph(t, 0)}"></div><div class="row"><i style="${ph(t, 1)}"></i><i style="${ph(t, 2)}"></i><i style="${ph(t, 3)}"></i></div></div></div>`;
+    let sd = 777; const R = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+    const MOB = innerWidth < 760, N = MOB ? 10 : 16, cards = [];
+    const spawn = (c, t, first) => { let x, y; do { x = (R() - .5) * 2; y = (R() - .5) * 2; } while (Math.hypot(x, y * 1.1) < .45);
+      c.x = x; c.y = y; c.ry = -x * 22 + (R() - .5) * 10; c.rx = y * 10 + (R() - .5) * 8; c.rz = (R() - .5) * 6;
+      c.z0 = -700 - R() * 300; c.z1 = 40 + R() * 140; c.life = 9 + R() * 7; c.born = first ? t - R() * c.life : t; };
+    for (let i = 0; i < N; i++) { const el = document.createElement('figure'); el.className = 'fcard'; el.innerHTML = mini(TH[i % TH.length]); cardsEl.appendChild(el);
+      const c = { el, delay: R() }; spawn(c, performance.now() / 1000, true); cards.push(c); }
+    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const C = v => Math.max(0, Math.min(1, v));
+    // les deux trajets des particules : de l'écran jusqu'au contact, tirés au hasard à chaque visite
+    const seed = Math.random() * 1000;
+    let cLen = [0, 0], cTo = [], cH = 1, cTop = 0, curY = 0, lastLight = false, lastWhite = null;
+    function curve(from, to, W, k) {
+      const dy = to.y - from.y, sw = Math.sin(seed + k * 2.1) * Math.min(W * .32, 380);
+      return `M ${from.x} ${from.y} C ${from.x + sw * .6} ${from.y + dy * .3}, ${to.x - sw} ${to.y - dy * .45}, ${to.x} ${to.y}`;
+    }
+    function layoutC() {
+      const W = innerWidth, top = contact.offsetTop; cTop = top; cH = contact.offsetHeight;
+      cSvg.setAttribute('viewBox', `0 0 ${W} ${cH}`); cSvg.style.height = cH + 'px';
+      const t = cIn.offsetTop, title = document.getElementById('c-title');
+      // elles arrivent de part et d'autre du titre « Parlons de votre projet »
+      cTo = [{ x: Math.max(24, cIn.offsetLeft + 10), y: t + title.offsetTop - 26 }, { x: Math.min(W - 24, cIn.offsetLeft + title.offsetWidth * .72), y: t + title.offsetTop - 26 }];
+      const ex = [W * .44, W * .56];
+      cP.forEach((pa, k) => { pa.setAttribute('d', curve({ x: ex[k], y: 0 }, cTo[k], W, k)); cLen[k] = pa.getTotalLength(); pa.style.strokeDasharray = `${cLen[k]} ${cLen[k]}`; });
+    }
+    layoutC(); addEventListener('resize', layoutC); if (document.fonts) document.fonts.ready.then(layoutC);
+    function frame(now) {
+      requestAnimationFrame(frame);
+      const t = now / 1000, W = innerWidth, H = innerHeight, r = fin.getBoundingClientRect();
+      const onStage = r.top < H && r.bottom > 0;
+      const p = C(-r.top / Math.max(1, r.height - H));
+      // 0 → .16 : le mur monte ; .1 → .26 : le cercle se dessine ; .3 → .7 : les sites sont aspirés, le cercle devient un point
+      const up = ease(C(p / .16)), white = p >= .72;
+      window.__finCover = onStage && up >= .999;
+      const light = onStage && up > .9 && !white;
+      if (light !== lastLight) { lastLight = light; topbarEl.classList.toggle('light2', light); }
+      if (white !== lastWhite) { lastWhite = white; wallEl.classList.toggle('white', white); }
+      if (!onStage) { contactFrame(); return; }
+      wallEl.style.transform = `translateY(${((1 - up) * 101).toFixed(2)}%)`;
+      const draw = C((p - .1) / .16), shr = ease(C((p - .3) / .4));
+      const w0 = logo.offsetWidth * .96 || 1, sc = 1 + (10 / w0 - 1) * shr;
+      ring.style.strokeDasharray = '302 302'; ring.style.strokeDashoffset = (302 * (1 - draw)).toFixed(1);
+      const dotF = C((shr - .85) / .15);
+      ring.style.fill = `rgba(255,255,255,${dotF})`;
+      logo.style.transform = `translate(-50%, -50%) scale(${sc.toFixed(4)})`;
+      logo.style.visibility = white ? 'hidden' : 'visible'; logo.style.opacity = C((p - .09) / .05).toFixed(3);   // le cercle n'apparaît qu'une fois le mur monté
+      name.style.opacity = (C((p - .16) / .08) * (1 - C((p - .3) / .08))).toFixed(3);
+      name.style.transform = `translate(-50%, ${((1 - C((p - .16) / .08)) * 16).toFixed(1)}px)`;
+      cards.forEach(c => {
+        let age = (t - c.born) / c.life; if (age >= 1 && p < .3) { spawn(c, t, false); age = 0; } age = Math.min(age, 1);
+        const life = reduce ? 1 : Math.sin(Math.PI * age), q = ease(C((p - .3 - c.delay * .08) / .36));
+        const z = (c.z0 + (c.z1 - c.z0) * age) * (1 - q) - 500 * q, spread = 1 + Math.max(0, -z) / 900 * .85;
+        const x = c.x * W * .44 * spread * (1 - q), y = c.y * H * .38 * spread * (1 - q);
+        c.el.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateY(${(c.ry * (1 - q)).toFixed(2)}deg) rotateX(${(c.rx * (1 - q)).toFixed(2)}deg) rotate(${(c.rz * (1 - q)).toFixed(2)}deg) scale(${(1 - q * .6).toFixed(3)})`;
+        c.el.style.opacity = (C((p - .12) / .1) * Math.max(life, q < 1 ? q * .9 : 0) * (1 - C((q - .8) / .2))).toFixed(3);
+      });
+      // les deux particules sortent du point et descendent jusqu'en bas de l'écran (le contact prend le relais)
+      const th = C((p - .72) / .28), ox = W / 2, oy = H * .46, ex = [W * .44, W * .56];
+      strings.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      sP.forEach((pa, k) => {
+        const sgn = k ? 1 : -1, ey = H + 2;
+        pa.setAttribute('d', `M ${ox} ${oy} C ${ox + sgn * W * .22} ${oy + (ey - oy) * .1}, ${ex[k] + sgn * W * .18} ${ey - (ey - oy) * .45}, ${ex[k]} ${ey}`);
+        const len = pa.getTotalLength(); pa.style.strokeDasharray = `${len} ${len}`; pa.style.strokeDashoffset = (len * (1 - th)).toFixed(1);
+        const pt = pa.getPointAtLength(len * th); sD[k].setAttribute('cx', pt.x.toFixed(1)); sD[k].setAttribute('cy', pt.y.toFixed(1)); sD[k].style.opacity = white && th < .999 ? 1 : 0;
+      });
+      contactFrame();
+    }
+    function contactFrame() {
+      // dans le contact, le bout des deux trajets suit le défilement (lissé), comme les points de la page « Tous mes projets »
+      const target = reduce ? 1e9 : scrollY + innerHeight * .62 - cTop;
+      curY += (target - curY) * .14;
+      cP.forEach((pa, k) => {
+        const tt = C(curY / Math.max(1, cTo[k] ? cTo[k].y : 1));
+        pa.style.strokeDashoffset = (cLen[k] * (1 - tt)).toFixed(1);
+        const pt = pa.getPointAtLength(cLen[k] * tt); cD[k].setAttribute('cx', pt.x.toFixed(1)); cD[k].setAttribute('cy', pt.y.toFixed(1));
+        cD[k].style.opacity = tt > .002 ? 1 : 0;
+      });
     }
     requestAnimationFrame(frame);
   })();
