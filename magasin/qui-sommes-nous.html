@@ -463,9 +463,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     rib.style.height = '0px';   // sinon la toile du trait garde son ancienne hauteur et rallonge la page
     const vw = innerWidth, vh = innerHeight, docH = document.documentElement.scrollHeight;
     rib.setAttribute('viewBox', `0 0 ${vw} ${docH}`); rib.style.height = docH + 'px';
-    const wide = vw > 760, sw = Math.max(10, Math.min(20, vw * .013));
+    const wide = vw > 760, sw = Math.max(15, Math.min(28, vw * .019));   // plus épais
     // peu de boucles : deux au plus, seulement pendant la chute
-    let loops = 0; const L = p => (loops < 2 && R() < p) ? (loops++, true) : false;
+    let loops = 0; const L = p => (loops < 1 && R() < p) ? (loops++, true) : false;   // une boucle au plus
     // une suite de points de passage, toujours plus bas les uns que les autres
     const seg = () => { const m = []; m.M = (x, y, loop) => { const prev = m[m.length - 1]; m.push({ x, y: prev ? Math.max(y, prev.y + 40) : y, loop }); }; return m; };
     const box = id => docBox(typeof id === 'string' ? document.getElementById(id) : id);
@@ -477,7 +477,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     // il entre par la gauche dès l'arrivée, passe sous le mot sans le barrer
     A.M(-60, vh * .1, false); A.M(vw * (.08 + R() * .06), vh * .5, false);
     let y = vh * .5, side = 1;
-    while (y < endFall - vh * .5) { y += vh * (.38 + R() * .18); side = -side; A.M(vw * (.5 + side * (.12 + R() * .2)), y, L(.3)); }
+    while (y < endFall - vh * .6) { y += vh * (.62 + R() * .2); side = -side; A.M(vw * (.5 + side * (.1 + R() * .14)), y, L(.35)); }   // moins de virages, plus amples
     // il longe le texte « Qui sommes-nous » par la droite (sans le barrer), puis vient se poser au-dessus du panneau
     A.M(wide ? vw * .86 : vw * .93, man.y + man.h * .35, false);
     const startW = wide ? vw * .3 : vw * .62, startX = wide ? vw * .05 : 20;
@@ -519,7 +519,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const f = (t - L0[j]) / ((L0[j + 1] - L0[j]) || 1); smp.push({ x: raw[j].x + (raw[j + 1].x - raw[j].x) * f, y: raw[j].y + (raw[j + 1].y - raw[j].y) * f }); }
       // lissage large (≈ 90 px) : les virages deviennent de grandes courbes, plus aucun angle ;
       // puis on l'écarte des textes, en relissant à chaque fois pour ne pas recréer de coin
-      smooth(smp, 3, 22);
+      smooth(smp, 4, 30);
       for (let it = 0; it < 6; it++) { push(smp); smooth(smp, 1, 14); }
       smooth(smp, 2, 10);
       return { smp, idx: majIdx.map(k => Math.round(L0[ptToSmp[k]] / tot * m)), majors };
@@ -1062,7 +1062,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         if (u <= 0 || u >= 1) { if (c.vis) { c.vis = false; c.el.style.opacity = 0; } return; }
         c.vis = true;
         const a = ease(C(u / .32)), o = C((u - .6) / .4), o2 = o * o;
-        const k = .2 + .8 * a + 1.1 * o2;
+        const k = .6 + .4 * a + 1.1 * o2;   // elles restent autour du logo, sans passer dessus
         const x = c.ax * rx * k, y = c.ay * ry * k, z = -900 * (1 - a) + 650 * o2;
         c.el.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateY(${(c.ry * (1 - a) - c.ry * .6 * o).toFixed(2)}deg) rotate(${(c.rz * (1 - a) + c.rz * .8 * o).toFixed(2)}deg)`;
         c.el.style.opacity = (a * (1 - o)).toFixed(3);
@@ -1145,6 +1145,59 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         b.addEventListener('pointerleave', () => b.style.translate = '');
       });
     }
+  })();
+
+  /* ---------- Défilement par pages ----------
+     Dès qu'on commence à défiler (molette, pavé tactile, doigt, flèches), la page part toute seule jusqu'à la
+     « page » suivante (ou précédente) et va au bout, même si on lâche : comme la carte de lusion.co.
+     Pages : le début, le texte « Qui sommes-nous », la carte de Gabriel ouverte, celle d'Arthur, le logo sur le mur,
+     les deux particules, le contact, le bas de page. */
+  (function pages() {
+    if (reduce) return;
+    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    let stops = [], moving = false, coolUntil = 0;
+    function computeStops() {
+      const vh = innerHeight, b = id => docBox(document.getElementById(id)), pts = [0];
+      pts.push(Math.max(0, b('team-head').y - vh * .16));
+      document.querySelectorAll('.pp').forEach(el => pts.push(docBox(el).y + vh * .86));
+      const f = b('fin'); pts.push(f.y + (f.h - vh) * .07); pts.push(f.y + f.h - vh + vh * .12);
+      pts.push(b('c-in').y - vh * .2);
+      pts.push(document.documentElement.scrollHeight - vh);
+      stops = [...new Set(pts.map(Math.round))].sort((a, c) => a - c);
+    }
+    computeStops(); addEventListener('resize', () => setTimeout(computeStops, 200)); addEventListener('load', computeStops);
+    if (document.fonts) document.fonts.ready.then(computeStops);
+    function go(dir) {
+      const y = scrollY; let to = null;
+      if (dir > 0) to = stops.find(v => v > y + 8); else for (let i = stops.length - 1; i >= 0; i--) if (stops[i] < y - 8) { to = stops[i]; break; }
+      if (to == null) return;
+      const dist = Math.abs(to - y) / innerHeight, dur = Math.min(3.4, Math.max(1.1, .9 + dist * .55));
+      moving = true;
+      const done = () => { moving = false; coolUntil = performance.now() + 450; };   // petite pause : l'élan du pavé tactile ne relance pas tout de suite
+      if (window.__lenis) window.__lenis.scrollTo(to, { duration: dur, easing: ease, lock: true, force: true, onComplete: done });
+      else { const y0 = y, t0 = performance.now(); const step = now => { const k = Math.min(1, (now - t0) / (dur * 1000)); scrollTo(0, y0 + (to - y0) * ease(k)); if (k < 1) requestAnimationFrame(step); else done(); }; requestAnimationFrame(step); }
+    }
+    const menuOpen = () => document.getElementById('nav').dataset.open === 'true';
+    const busy = () => moving || performance.now() < coolUntil;
+    // molette et pavé tactile : on prend la main avant le défilement adouci
+    addEventListener('wheel', e => {
+      if (menuOpen() || e.ctrlKey) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      if (busy() || Math.abs(e.deltaY) < 3) return;
+      go(Math.sign(e.deltaY));
+    }, { passive: false, capture: true });
+    // doigt : un glissement suffit, la page finit toute seule
+    let ty = null;
+    addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive: true });
+    addEventListener('touchmove', e => { if (!menuOpen()) e.preventDefault(); }, { passive: false });
+    addEventListener('touchend', e => { if (ty == null || menuOpen()) return; const dy = ty - e.changedTouches[0].clientY; ty = null; if (Math.abs(dy) > 24 && !busy()) go(Math.sign(dy)); }, { passive: true });
+    // clavier
+    addEventListener('keydown', e => {
+      if (menuOpen() || e.target.closest('input, textarea')) return;
+      const k = e.key, dir = (k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) ? 1 : (k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey)) ? -1 : 0;
+      if (!dir) return; e.preventDefault(); if (!busy()) go(dir);
+    });
+    window.__pages = { stops: () => stops, go };
   })();
 
   const rises = document.querySelectorAll('.rise');
