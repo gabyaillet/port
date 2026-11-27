@@ -142,28 +142,38 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .wall-text .label { color: rgba(255,255,255,.85); }
 .wall-text h2 { margin: 0; font: italic 400 clamp(4rem, 13vw, 13rem)/.86 "Instrument Serif", Georgia, serif; letter-spacing: -.02em; }
 .wall-text p:last-child { margin: 1.4rem 0 0; max-width: 26rem; font-size: 1.05rem; line-height: 1.5; color: rgba(255,255,255,.88); }
-.works { background: #efefed; color: #141414; }
-.wk-col { position: absolute; top: 0; width: min(32vw, 30rem); display: grid; gap: 16svh; will-change: transform; }
-.wk-col.l { left: max(20px, 4vw); } .wk-col.r { right: max(20px, 4vw); }
-.wk { display: block; color: inherit; text-decoration: none; transition: opacity .5s; }
-.wk.dim { opacity: .18; }
-.wk .im { background: #fff; padding: 4px; box-shadow: 0 1px 0 rgba(0,0,0,.04); }
-.wk img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10.5; object-fit: cover; transition: transform 1s cubic-bezier(.16,1,.3,1); }
-.wk:hover img { transform: scale(1.03); }
-.wk .im { overflow: hidden; }
-.wk .cap { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: .9rem; }
-.wk h3 { margin: 0; font: 400 clamp(1.2rem, 1.7vw, 1.6rem) "Instrument Serif", Georgia, serif; letter-spacing: -.005em; }
-.wk .mt { font: 400 .8rem var(--f); color: #6d6d6a; white-space: nowrap; }
-.wk-cats { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 0; list-style: none; display: grid; gap: .15rem; }
-.wk-cats button { all: unset; cursor: pointer; font: 500 clamp(1.7rem, 2.6vw, 2.7rem)/1.18 var(--f); letter-spacing: -.035em; color: #c9c9c6; transition: color .5s; white-space: nowrap; }
-.wk-cats button sup { font: 400 .34em "Instrument Serif", Georgia, serif; letter-spacing: 0; margin-left: .3em; vertical-align: .9em; }
+.works { background: #f0f0ee; color: #141414; }
+.works::before, .works::after { content: ""; position: absolute; left: 0; right: 0; height: 13svh; z-index: 3; pointer-events: none; }   /* les projets s'effacent en douceur en haut et en bas */
+.works::before { top: 0; background: linear-gradient(#f0f0ee 35%, rgba(240,240,238,0)); }
+.works::after { bottom: 0; background: linear-gradient(rgba(240,240,238,0), #f0f0ee 80%); }
+/* comme la photo : deux larges colonnes décalées, images en paysage dans un fin cadre blanc, catégories à gauche du centre */
+.wk-col { position: absolute; top: 0; width: 33vw; display: grid; gap: 15svh; will-change: transform; }
+.wk-col.l { left: 4vw; } .wk-col.r { right: 3vw; }
+.wk { display: block; color: inherit; text-decoration: none; transition: opacity .6s; }
+.wk.dim { opacity: .16; }
+.wk .im { position: relative; background: #fff; padding: 3px; overflow: hidden; box-shadow: 0 30px 60px -40px rgba(20,20,20,.25); }
+.wk .fr { position: relative; overflow: hidden; aspect-ratio: 1.44; background: #fff; }
+.wk img { position: absolute; left: 0; top: -8%; width: 100%; height: 116%; object-fit: cover; will-change: transform; }   /* l'image glisse un peu dans son cadre */
+.wk .cap { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 1rem; }
+.wk h3 { margin: 0; font: 400 clamp(1.25rem, 1.75vw, 1.7rem) "Instrument Serif", Georgia, serif; letter-spacing: -.005em; }
+.wk .mt { font: 400 .8rem var(--f); color: #6d6d6a; white-space: nowrap; display: flex; gap: .7rem; }
+.wk .fr::after { content: ""; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background .6s; }
+.wk:hover .fr::after { background: rgba(255,255,255,.08); }
+/* les projets à venir : des cartes blanches, avec seulement le petit cercle d'Obtura et un numéro */
+.wk.blank .fr { background: linear-gradient(160deg, #ffffff 0%, #f7f7f5 100%); display: grid; place-items: center; }
+.wk.blank .fr i { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid #d7d7d4; }
+.wk.blank .fr b { position: absolute; left: 14px; top: 12px; font: 400 .62rem var(--mono); letter-spacing: .18em; color: #b9b9b6; }
+.wk.blank h3 { color: #9a9a97; }
+.wk-cats { position: absolute; left: 41.5vw; top: 50%; transform: translateY(-50%); margin: 0; padding: 0; list-style: none; display: grid; gap: .05rem; }
+.wk-cats button { all: unset; cursor: pointer; font: 400 clamp(1.6rem, 2.35vw, 2.5rem)/1.22 var(--f); letter-spacing: -.035em; color: #cfcfcc; transition: color .6s; white-space: nowrap; }
+.wk-cats button sup { font: 400 .36em "Instrument Serif", Georgia, serif; letter-spacing: .02em; margin-left: .35em; vertical-align: .95em; }
 .wk-cats button.on, .wk-cats button:hover { color: #141414; }
 .wk-cats button:focus-visible { outline: 1px solid #141414; outline-offset: 4px; }
 @media (max-width: 760px) {
-  .wk-col { width: 44vw; gap: 10svh; } .wk-col.l { left: 12px; } .wk-col.r { right: 12px; }
-  .wk-cats { top: calc(env(safe-area-inset-top, 0px) + 4.4rem); transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: .2rem .8rem; width: 92vw; z-index: 2; background: #efefed; padding: .4rem 0 .6rem; }
+  .wk-col { width: 45vw; gap: 9svh; } .wk-col.l { left: 3vw; } .wk-col.r { right: 3vw; }
+  .wk-cats { left: 50%; top: calc(env(safe-area-inset-top, 0px) + 4.2rem); transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .8rem; width: 94vw; z-index: 2; background: #f0f0ee; padding: .4rem 0 .7rem; }
   .wk-cats button { font-size: 1.05rem; }
-  .wk .cap { flex-direction: column; gap: .2rem; } .wk h3 { font-size: 1.05rem; }
+  .wk .cap { flex-direction: column; gap: .2rem; margin-top: .6rem; } .wk h3 { font-size: 1.05rem; } .wk .mt { font-size: .7rem; }
 }
 .fin-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
 .fin-wall { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
@@ -316,20 +326,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         <div class="wall-text" id="wall-text"><p class="label">Obtura Studio · 2026</p><h2>Nos projets</h2><p>Ce qu'on a déjà fait, en attendant les sites de nos premiers clients.</p></div>
       </div></div>
       <div class="fin-panel works" id="works">
-        <div class="wk-col l" id="wk-l">
-          <a class="wk" data-cat="3d" href="./"><div class="im"><img src="./img/boutique-obtura.jpg" alt="La façade de la boutique Obtura en 3D, avec son enseigne" width="1200" height="750" loading="lazy" decoding="async"></div><div class="cap"><h3>La boutique Obtura</h3><span class="mt">Intro 3D · 2026</span></div></a>
-          <a class="wk" data-cat="web" href="https://gabyaillet.github.io/port/projets.html"><div class="im"><img src="./img/boutique-vins.jpg" alt="Maquette du site Le Cellier : trois bouteilles stylisées et le nom en grand" width="1200" height="750" loading="lazy" decoding="async"></div><div class="cap"><h3>Boutique de vins</h3><span class="mt">Site web · Projet d'IUT</span></div></a>
-        </div>
-        <ul class="wk-cats" id="wk-cats">
-          <li><button type="button" data-f="all">Tous<sup>(4)</sup></button></li>
-          <li><button type="button" data-f="3d">3D<sup>(2)</sup></button></li>
-          <li><button type="button" data-f="web">Site web<sup>(1)</sup></button></li>
-          <li><button type="button" data-f="code">Programmation<sup>(1)</sup></button></li>
-        </ul>
-        <div class="wk-col r" id="wk-r">
-          <a class="wk" data-cat="3d" href="https://gabyaillet.github.io/port/vitrine/"><div class="im"><img src="./img/ville-2cv.jpg" alt="La place d'une petite ville en 3D, avec une 2CV devant les lettres BIENVENUE" width="1200" height="750" loading="lazy" decoding="async"></div><div class="cap"><h3>La ville en 2CV</h3><span class="mt">3D · Gabriel</span></div></a>
-          <a class="wk" data-cat="code" href="https://gabyaillet.github.io/port/projets.html"><div class="im"><img src="./img/particules.jpg" alt="Un nuage de particules blanches sur fond noir" width="1200" height="750" loading="lazy" decoding="async"></div><div class="cap"><h3>Générateur de particules</h3><span class="mt">Programmation · Projet d'IUT</span></div></a>
-        </div>
+        <div class="wk-col l" id="wk-l"></div>
+        <ul class="wk-cats" id="wk-cats"></ul>
+        <div class="wk-col r" id="wk-r"></div>
       </div>
     </div>
   </div>
@@ -995,8 +994,28 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   (function finale() {
     const fin = document.getElementById('fin'), wallEl = document.getElementById('fin-wall'), topbarEl = document.getElementById('topbar');
     const track = document.getElementById('fin-track'), wtext = document.getElementById('wall-text');
-    const colL = document.getElementById('wk-l'), colR = document.getElementById('wk-r'), cats = [...document.querySelectorAll('#wk-cats button')];
-    const works = [...document.querySelectorAll('.wk')];
+    const colL = document.getElementById('wk-l'), colR = document.getElementById('wk-r'), cats = [];
+    // nos projets, et des cartes blanches pour ceux à venir
+    const WK = [
+      { n: 'La boutique Obtura', t: 'Intro 3D', y: '2026', c: '3d', img: './img/boutique-obtura.jpg', href: './', alt: "La façade de la boutique Obtura en 3D, avec son enseigne" },
+      null,
+      { n: 'Boutique de vins', t: 'Site web', y: "Projet d'IUT", c: 'web', img: './img/boutique-vins.jpg', href: 'https://gabyaillet.github.io/port/projets.html', alt: 'Maquette du site Le Cellier : trois bouteilles stylisées et le nom en grand' },
+      null, null,
+      null,
+      { n: 'La ville en 2CV', t: '3D', y: 'Gabriel', c: '3d', img: './img/ville-2cv.jpg', href: 'https://gabyaillet.github.io/port/vitrine/', alt: "La place d'une petite ville en 3D, avec une 2CV devant les lettres BIENVENUE" },
+      null,
+      { n: 'Générateur de particules', t: 'Programmation', y: "Projet d'IUT", c: 'code', img: './img/particules.jpg', href: 'https://gabyaillet.github.io/port/projets.html', alt: 'Un nuage de particules blanches sur fond noir' },
+      null];
+    let blankN = 0;
+    const card = P => {
+      if (!P) { blankN++; return `<div class="wk blank" data-cat="soon"><div class="im"><div class="fr"><b>${String(blankN).padStart(2, '0')}</b><i></i></div></div><div class="cap"><h3>À venir</h3><span class="mt"><span>Projet</span><span>Bientôt</span></span></div></div>`; }
+      return `<a class="wk" data-cat="${P.c}" href="${P.href}"><div class="im"><div class="fr"><img src="${P.img}" alt="${P.alt}" loading="lazy" decoding="async"></div></div><div class="cap"><h3>${P.n}</h3><span class="mt"><span>${P.t}</span><span>${P.y}</span></span></div></a>`;
+    };
+    colL.innerHTML = WK.slice(0, 5).map(card).join(''); colR.innerHTML = WK.slice(5).map(card).join('');
+    const CATS = [['all', 'Tous'], ['3d', '3D'], ['web', 'Site web'], ['code', 'Programmation'], ['soon', 'À venir']];
+    document.getElementById('wk-cats').innerHTML = CATS.map(([f, l]) => `<li><button type="button" data-f="${f}">${l}<sup>(${f === 'all' ? WK.length : WK.filter(P => (P ? P.c : 'soon') === f).length})</sup></button></li>`).join('');
+    cats.splice(0, cats.length, ...document.querySelectorAll('#wk-cats button'));
+    const works = [...document.querySelectorAll('.wk')], imgs = works.map(w => w.querySelector('img'));
     const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, C = v => Math.max(0, Math.min(1, v));
     let lastLight = false, lastR = -1, G = null, filter = null, lastCat = '';
     // les longueurs : glissement vers la gauche (90 % d'écran), puis le défilement des colonnes
@@ -1029,6 +1048,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       // les colonnes : celle de gauche monte, celle de droite descend (comme la photo)
       const tL = G.top0 + H * .15 - cp * (G.travel + H * .15), tR = G.top0 - G.travel + cp * G.travel;
       colL.style.transform = `translate3d(0, ${tL.toFixed(1)}px, 0)`; colR.style.transform = `translate3d(0, ${tR.toFixed(1)}px, 0)`;
+      // dans chaque cadre, l'image glisse un peu (parallaxe), dans le sens inverse de sa colonne
+      if (sp > .02) works.forEach((w, k) => { const im = imgs[k]; if (!im) return; const b = w.getBoundingClientRect();
+        if (b.bottom < -50 || b.top > H + 50) return; const d = (b.top + b.height / 2 - H / 2) / H; im.style.transform = `translate3d(0, ${(d * -7).toFixed(2)}%, 0)`; });
       // au centre, la catégorie du projet le plus proche du milieu de l'écran s'allume (ou celle choisie)
       let cat = filter || 'all';
       if (!filter && sp > .9) { let best = 1e9;
