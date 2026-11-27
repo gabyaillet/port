@@ -129,7 +129,7 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
    et deux particules de couleur en sortent, avec leur reflet, jusqu'au contact. */
 .finale { position: relative; z-index: 4; height: 440svh; }
 .fin-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
-.fin-wall { position: absolute; inset: 0; background: linear-gradient(160deg, #2f45ff 0%, #5b3cff 55%, #7a3cff 100%); transform: translateY(101%); will-change: transform; }
+.fin-wall { position: absolute; inset: 0; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); transform: translateY(101%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; will-change: transform; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
 .fin-wall.white { background: #fff; }
 .fin-cards { position: absolute; inset: 0; perspective: 900px; perspective-origin: 50% 46%; transform-style: preserve-3d; pointer-events: none; }
 .fcard { position: absolute; left: 50%; top: 46%; width: clamp(86px, 11vw, 160px); aspect-ratio: 16 / 10; margin: 0; opacity: 0; will-change: transform, opacity; }
@@ -460,11 +460,12 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     A.M(wide ? vw * .86 : vw * .93, man.y + man.h * .35, false);
     const startW = wide ? vw * .3 : vw * .62, startX = wide ? vw * .05 : 20;
     A.M(startX + startW * (wide ? .55 : .5), first.y + vh * (wide ? .38 : .5) - 44, false);
-    // 2e morceau : il reprend sous le dernier panneau et s'arrête juste avant le mur de couleur
+    // 2e morceau : il reprend sous le dernier panneau, file vers le bas et sort de l'écran
     const B = seg();
     B.M(wide ? vw * .3 : vw * .25, last.y + last.h + 24, false);
-    B.M(vw * (wide ? .72 : .8), (last.y + last.h + foot.y) / 2, false);
-    B.M(vw * .5, foot.y - 30, false);
+    B.M(vw * (wide ? .68 : .78), (last.y + last.h + foot.y) / 2, false);
+    B.M(vw * .46, foot.y + vh * .55, false);
+    B.M(vw * .52, foot.y + vh * 1.15, false);   // il traverse le bas de l'écran ; le mur de couleur monte ensuite par-dessus
     // les textes que le trait ne doit pas barrer (agrandis de l'épaisseur du trait)
     const pad = sw / 2 + 10, obst = [];
     document.querySelectorAll('.hero-x, #title, #team-head .label, #manifesto').forEach(el => {
@@ -514,6 +515,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const a = o + P.idx[m], b = o + P.idx[m + 1], ya = P.majors[m].y, yb = P.majors[m + 1].y, sa = S[a], sb = S[b] || sa + 1;
         for (let i = a; i <= b; i++) K[i] = ya + (yb - ya) * (S[i] - sa) / Math.max(1, sb - sa);
       }
+      // 2e morceau : on ne le suit plus, il file vers le bas bien plus vite que le défilement et sort de l'écran
+      if (pi === 1) { const k0 = K[o]; for (let i = o; i < o + P.smp.length; i++) K[i] = k0 + (K[i] - k0) * .35; }
       o += P.smp.length;
     });
     total = S[n - 1];
@@ -995,6 +998,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       if (white !== lastWhite) { lastWhite = white; wallEl.classList.toggle('white', white); }
       if (!onStage) { contactFrame(); return; }
       wallEl.style.transform = `translateY(${((1 - up) * 101).toFixed(2)}%)`;
+      const rr = 1 - up; wallEl.style.borderRadius = `${(50 * rr).toFixed(1)}% ${(50 * rr).toFixed(1)}% 0 0 / ${(14 * rr).toFixed(1)}% ${(14 * rr).toFixed(1)}% 0 0`;
       const draw = C((p - .1) / .16), shr = ease(C((p - .3) / .4));
       const w0 = logo.offsetWidth * .96 || 1, sc = 1 + (10 / w0 - 1) * shr;
       ring.style.strokeDasharray = '302 302'; ring.style.strokeDashoffset = (302 * (1 - draw)).toFixed(1);
