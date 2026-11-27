@@ -1083,20 +1083,24 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const trL = Math.max(H * .5, hL - H - 2 * edge), trR = Math.max(H * .5, hR - H - 2 * edge), travel = Math.max(trL, trR);
       // glissement, ouverture de la capsule, capsule en plein écran, défilement des projets, mur
       G = { H, slide: H * .9, open: H * .75, exp: H * .9, travel, top0, hL, hR, edge, trL, trR, rise: H * .9 };
-      buildMz(); G.M = mz.offsetWidth; G.slide = H * .9 * (innerWidth + G.M) / innerWidth;
+      buildMz(); G.M = mz.offsetWidth;
+      // le trajet vers la gauche : la carte d'Arthur, un bon espace, la mosaïque, un petit espace, puis le mot « Projets »
+      const W = innerWidth; G.padL = W * (narrow ? .25 : .32); G.gapR = W * (narrow ? .08 : .07);
+      pjCap.style.width = '2px'; G.wordW = pjW.offsetWidth;
+      G.track = W + G.padL + G.M + G.gapR - (W - G.wordW) / 2; G.slide = H * .9 * G.track / W;
       G.w0 = G.slide + G.open + G.exp;
       G.fs = parseFloat(getComputedStyle(pjW).fontSize);
       fin.style.height = (H + G.w0 + travel + G.rise) + 'px';
     }
-    finLayout(); addEventListener('resize', finLayout); addEventListener('load', finLayout);
+    finLayout(); addEventListener('resize', finLayout); addEventListener('load', finLayout); if (document.fonts) document.fonts.ready.then(finLayout);
     window.__finStops = () => { if (!G) return []; let y = 0, e = fin; while (e) { y += e.offsetTop; e = e.offsetParent; }
-      return [y + G.slide * .5, y + G.slide + G.open, y + G.w0, y + G.w0 + G.travel * .5, y + G.w0 + G.travel, y + G.w0 + G.travel + G.rise]; };
+      return [y + G.slide + G.open, y + G.w0, y + G.w0 + G.travel * .5, y + G.w0 + G.travel, y + G.w0 + G.travel + G.rise]; };
     cats.forEach(b => b.addEventListener('click', () => { filter = b.dataset.f === 'all' ? null : b.dataset.f;
       works.forEach(w => w.classList.toggle('dim', !!filter && w.dataset.cat !== filter)); lastCat = ''; }));
     (function frame() {
       requestAnimationFrame(frame);
       const H = innerHeight, r = fin.getBoundingClientRect(), on = r.top < H && r.bottom > 0;
-      const rel = Math.max(0, -r.top), sp = G ? ease(C(rel / G.slide)) : 0, W = innerWidth, X = G && r.top <= 0 ? sp * (W + G.M) : 0;
+      const rel = Math.max(0, -r.top), sp = G ? ease(C(rel / G.slide)) : 0, W = innerWidth, X = G && r.top <= 0 ? sp * G.track : 0;
       window.__finCover = false;
       window.__slideX = on && r.top <= 0 ? -X : 0;   // la carte d'Arthur (WebGL) part vers la gauche, puis la mosaïque passe, puis le mot « Projets »
       if (arthur) arthur.style.transform = window.__slideX ? `translate3d(${window.__slideX.toFixed(1)}px, 0, 0)` : '';
@@ -1105,11 +1109,11 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       // le mot « Projets » arrive de la droite pendant que la carte d'Arthur part à gauche ; un trait se dessine entre « Pro » et « jets »
       const lp = ease(C((rel - G.slide * .8) / (G.slide * .2)));
       const op = ease(C((rel - G.slide) / G.open)), ep = C((rel - G.slide - G.open) / G.exp), ee = ease(ep);
-      pjEl.style.transform = `translate3d(${Math.max(0, W + G.M - X).toFixed(1)}px, 0, 0)`;
+      pjEl.style.transform = `translate3d(${Math.max(0, G.track - X).toFixed(1)}px, 0, 0)`;
       // la mosaïque : elle traverse l'écran, ses colonnes montent et descendent une sur deux
-      const mx = W - X;
+      const mx = W + G.padL - X - op * ((W - G.wordW) / 2 - G.gapR + G.M * .05 + 20);   // pendant que la capsule s'ouvre, « Pro » pousse la mosaïque hors de l'écran
       if (mx < W && mx > -G.M) { mz.style.visibility = ''; mz.style.transform = `translate3d(${mx.toFixed(1)}px, 0, 0)`;
-        const q = X / (W + G.M);
+        const q = X / G.track;
         mzCols.forEach((c, i) => { const d = i % 2 ? 1 : -1, off = -H * .6 - (+c.dataset.shift || 0) + d * (q - .5) * H * .9; c.style.transform = `translate3d(0, ${off.toFixed(1)}px, 0)`; }); }
       else mz.style.visibility = 'hidden';
       const mzDark = mx < 60 && mx + G.M > 60;   // la mosaïque noire est sous l'en-tête : il passe en clair
