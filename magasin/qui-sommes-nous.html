@@ -32,7 +32,7 @@ img { display: block; max-width: 100%; }
 .ribbon path { fill: none; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
 
 /* Le titre et sa chute */
-.fall { position: relative; height: 100svh; }
+.fall { position: relative; height: 165svh; }
 .stage { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; }
 /* « bienvenue » en italique à empattements (Instrument Serif), grand et fin */
 h1 { position: relative; margin: 0; font: italic 400 clamp(4rem, 12vw, 10rem)/.9 "Instrument Serif", Georgia, serif; letter-spacing: -.015em; display: flex; padding: 0 .08em; }
@@ -62,7 +62,7 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 
 /* Qui sommes-nous : un manifeste qui se révèle mot à mot, puis nos deux cartes de membre, à côté de nos noms en grand */
 .team, .work, .foot { position: relative; z-index: 3; }
-.team { padding: 2svh 0 6svh; }
+.team { padding: 2svh 0 6svh; margin-top: -38svh; }   /* le texte arrive juste après la disparition des lettres */
 .head { display: grid; grid-template-columns: 1fr minmax(0, 24rem); gap: 1.5rem 3rem; align-items: end; margin-bottom: clamp(2.5rem, 6vw, 4.5rem); }
 h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacing: -.045em; }
 .head p { margin: 0; font-size: 1.02rem; line-height: 1.55; color: #3a3a38; }
