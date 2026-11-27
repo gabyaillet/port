@@ -89,6 +89,8 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .pp-big { position: absolute; display: flex; justify-content: space-between; align-items: center; padding: 0 clamp(1rem, 3vw, 2.6rem); pointer-events: none; opacity: 0; z-index: 1;
   font: 400 clamp(2.6rem, 9.5vw, 9.5rem)/1 var(--f); letter-spacing: -.04em; text-transform: uppercase; color: #fff; will-change: opacity; }   /* comme « PLAY / REEL » sur la vidéo */
 .pp-big span { display: inline-block; will-change: transform; }
+.pp-pill { display: grid; place-items: center; width: 1.05em; height: .62em; border-radius: 99px; background: #fff; transform: scale(0); will-change: transform; }
+.pp-pill b { width: .22em; height: .22em; border-radius: 50%; border: .045em solid #141414; }   /* le cercle d'Obtura */
 .no-gl .pp-big { display: none; }
 .pp-over { position: absolute; color: #fff; padding: clamp(1.2rem, 3vw, 2.6rem); display: grid; grid-template-rows: auto 1fr auto; opacity: 0; pointer-events: none; border-radius: 24px; }
 .pp-over.on { pointer-events: auto; }
@@ -246,7 +248,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     <div class="pp" data-a="#2f45ff" data-b="#7a3cff" data-c="#22c1ff" style="--a:#2f45ff; --b:#7a3cff; --c:#22c1ff">
       <div class="pp-stage">
         <div class="pp-intro" aria-hidden="true"><p class="p-kicker">01 · Cofondateur</p><p class="p-name">Gabriel <span class="serif">Aillet</span></p></div>
-        <div class="pp-big" aria-hidden="true"><span>Gabriel</span><span>Aillet</span></div>
+        <div class="pp-big" aria-hidden="true"><span>Gabriel</span><i class="pp-pill"><b></b></i><span>Aillet</span></div>
         <article class="pp-over">
           <div class="pp-top"><span><i></i>Obtura Studio · N° 01</span><span>Nantes</span></div>
           <div class="pp-ini" aria-hidden="true">G.A</div>
@@ -260,7 +262,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     <div class="pp right" data-a="#ff4f8b" data-b="#ff8a3d" data-c="#7a3cff" style="--a:#ff4f8b; --b:#ff8a3d; --c:#7a3cff">
       <div class="pp-stage">
         <div class="pp-intro" aria-hidden="true"><p class="p-kicker">02 · Cofondateur</p><p class="p-name">Arthur <span class="serif">Goubill</span></p></div>
-        <div class="pp-big" aria-hidden="true"><span>Arthur</span><span>Goubill</span></div>
+        <div class="pp-big" aria-hidden="true"><span>Arthur</span><i class="pp-pill"><b></b></i><span>Goubill</span></div>
         <article class="pp-over">
           <div class="pp-top"><span><i></i>Obtura Studio · N° 02</span><span>Nantes</span></div>
           <div class="pp-ini" aria-hidden="true">A.G</div>
@@ -622,13 +624,19 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         float sx = sin(3.14159 * aUv.x);
         // la feuille en 3D (présentations, comme la vidéo de lusion.co) : elle se cintre autour d'un axe vertical,
         // s'incline vers nous, puis la perspective fait courber ses bords haut et bas
-        // comme la vidéo de lusion.co : la carte s'étire du petit format au grand ; le coin du haut côté écran part
-        // en premier, le coin du bas à l'opposé suit en retard, ce qui courbe ses bords pendant le mouvement
+        // comme la vidéo de lusion.co : en grandissant, la carte tourne en 3D (son côté loin recule en perspective)
+        // et penche un peu, avec une très légère courbure ; elle se remet à plat en arrivant
         if (uMorph > .5) {
-          float dl = ((uDirX > 0. ? 1. - aUv.x : aUv.x) * .7 + aUv.y * .3) * .3;
-          float lt = clamp((uProg - dl) / (1. - .3), 0., 1.);
-          lt = lt < .5 ? 4. * lt * lt * lt : 1. - pow(-2. * lt + 2., 3.) / 2.;
-          p = mix(uStart.xy + aUv * uStart.zw, uEnd.xy + aUv * uEnd.zw, lt) + vec2(0., uOffY);
+          float e = uProg, bump = sin(3.14159 * e);
+          vec2 cc = mix(uStart.xy + uStart.zw * .5, uEnd.xy + uEnd.zw * .5, e) + vec2(0., uOffY), sz = mix(uStart.zw, uEnd.zw, e);
+          vec3 q3 = vec3((aUv - .5) * sz, 0.);
+          float cv = .2 * bump;
+          if (cv > .001) { float Rr = sz.x * .5 / cv, th = q3.x / Rr; q3.x = sin(th) * Rr; q3.z = -(1. - cos(th)) * Rr; }
+          float az = -uDirX * .1 * bump, ay = uDirX * .42 * bump;
+          q3.xy = vec2(q3.x * cos(az) - q3.y * sin(az), q3.x * sin(az) + q3.y * cos(az));
+          q3 = vec3(q3.x * cos(ay) + q3.z * sin(ay), q3.y, -q3.x * sin(ay) + q3.z * cos(ay));
+          float fo = uRes.y * 1.25;
+          p = cc + q3.xy * fo / (fo - q3.z);
         }
         vec2 ctr = uRect.xy + uRect.zw * .5;
         vec3 q = vec3(p - ctr, 0.);
@@ -724,7 +732,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         }
         // la teinte violette (bichromie) du début
         float lum = dot(col, vec3(.299, .587, .114));
-        col = mix(col, mix(vec3(.16, .17, .95), vec3(.86, .85, 1.), lum), uTint);
+        col = mix(col, mix(vec3(.36, .31, .9), vec3(.9, .89, .99), smoothstep(0., .8, lum)), uTint);
         col *= 1. - vZ * .12;
         gl_FragColor = vec4(col * a, a);
       }`;
@@ -778,7 +786,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const blank = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, blank); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([200, 200, 198, 255]));
 
     // les présentations
-    const people = [...document.querySelectorAll('.pp')].map(el => ({ el, over: el.querySelector('.pp-over'), big: el.querySelector('.pp-big'), bs: [...el.querySelectorAll('.pp-big span')], bo: -1, intro: el.querySelector('.pp-intro'),
+    const people = [...document.querySelectorAll('.pp')].map(el => ({ el, over: el.querySelector('.pp-over'), big: el.querySelector('.pp-big'), bs: [...el.querySelectorAll('.pp-big span')], pill: el.querySelector('.pp-pill'), bo: -1, intro: el.querySelector('.pp-intro'),
       a: hex(el.dataset.a), b: hex(el.dataset.b), c: hex(el.dataset.c), y: 0, h: 1, end: null, oo: -1, io: -1, right: el.classList.contains('right'),
       warp: [1, 0, 0, 0, 0], seed: Math.random() * 6.283, sp: -1, sv: 0, tg: 0 }));
     // les projets
@@ -890,8 +898,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         if (ec > .97 && stTop === 0) cover = true;
         if (r.y < 60 && r.y + r.h > 20) dark = true;
         // les deux grands mots : ils arrivent pendant que la carte grandit, puis laissent la place aux infos
-        const bo = sstep(.2, .6, ec) * (1 - sstep(.82, .98, g));
-        if (Math.abs(bo - P.bo) > .002) { P.bo = bo; P.big.style.opacity = (bo * .92).toFixed(3); const sh = ((1 - sstep(.2, .7, ec)) * 60).toFixed(1); P.bs[0].style.transform = `translateX(${sh}px)`; P.bs[1].style.transform = `translateX(${-sh}px)`; }
+        const bo = (.18 + .82 * sstep(.35, .85, ec)) * sstep(.04, .2, ec) * (1 - sstep(.86, .99, g));
+        if (Math.abs(bo - P.bo) > .002) { P.bo = bo; P.big.style.opacity = (bo * .95).toFixed(3); const sh = ((1 - sstep(.2, .8, ec)) * 50).toFixed(1); P.bs[0].style.transform = `translateX(${sh}px)`; P.bs[1].style.transform = `translateX(${-sh}px)`;
+          P.pill.style.transform = `scale(${sstep(.7, .95, ec).toFixed(3)})`; }
         const oo = clamp((g - .8) / .17), io = clamp(1 - g * 2.6);
         if (Math.abs(oo - P.oo) > .002) { P.oo = oo; P.over.style.opacity = oo.toFixed(3); P.over.classList.toggle('on', oo > .5); }
         if (Math.abs(io - P.io) > .002) { P.io = io; P.intro.style.opacity = io.toFixed(3); P.intro.style.transform = `translateY(${(-(1 - io) * 40).toFixed(1)}px)`; }
@@ -954,7 +963,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   (function pages() {
     if (reduce) return;
     const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    let stops = [], moving = false, coolUntil = 0;
+    let stops = [], moving = false, coolUntil = 0, runId = 0, curDir = 0, runStart = 0;
     function computeStops() {
       const vh = innerHeight, b = id => docBox(document.getElementById(id)), pts = [0];
       pts.push(Math.max(0, b('team-head').y - vh * .16));
@@ -968,8 +977,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const y = scrollY; let to = null;
       if (dir > 0) to = stops.find(v => v > y + 8); else for (let i = stops.length - 1; i >= 0; i--) if (stops[i] < y - 8) { to = stops[i]; break; }
       if (to == null) return;
-      moving = true;
-      const done = () => { moving = false; coolUntil = performance.now() + 450; };   // petite pause : l'élan du pavé tactile ne relance pas tout de suite
+      moving = true; const id = ++runId; curDir = dir; runStart = performance.now();
+      const done = () => { moving = false; coolUntil = performance.now() + (dir > 0 ? 450 : 250); };   // petite pause : l'élan du pavé tactile ne relance pas tout de suite
       // le trajet est découpé : les zones où une carte se déploie sont parcourues lentement (comme la vidéo),
       // le reste plus vite, et la vitesse se raccorde en douceur d'un morceau à l'autre
       const vh = innerHeight, lo = Math.min(y, to), hi = Math.max(y, to), knots = [y];
@@ -978,13 +987,14 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       knots.push(to);
       const inZone = (a, c) => zones.some(([z0, z1]) => Math.min(a, c) >= z0 - 2 && Math.max(a, c) <= z1 + 2);
       const segs = []; for (let i = 0; i < knots.length - 1; i++) { const d = Math.abs(knots[i + 1] - knots[i]) / vh;
-        segs.push({ a: knots[i], b: knots[i + 1], T: inZone(knots[i], knots[i + 1]) ? Math.max(1.2, 2.8 * d / .8) : Math.max(.5, .45 + d * .5) }); }
-      if (segs.length === 1) segs[0].T = Math.min(3.4, Math.max(1.1, segs[0].T + .4));
+        segs.push({ a: knots[i], b: knots[i + 1], T: dir > 0 ? (inZone(knots[i], knots[i + 1]) ? Math.max(1.2, 2.8 * d / .8) : Math.max(.5, .45 + d * .5)) : (inZone(knots[i], knots[i + 1]) ? Math.max(.6, 1.1 * d / .8) : Math.max(.35, .3 + d * .3)) }); }   // en remontant, tout va plus vite
+      if (segs.length === 1) segs[0].T = Math.min(3.4, Math.max(dir > 0 ? 1.1 : .8, segs[0].T + (dir > 0 ? .4 : .2)));
       const v = []; for (let i = 0; i <= segs.length; i++) { if (i === 0 || i === segs.length) { v.push(0); continue; }
         const s1 = (segs[i - 1].b - segs[i - 1].a) / segs[i - 1].T, s2 = (segs[i].b - segs[i].a) / segs[i].T; v.push(Math.sign(s1) * Math.min(Math.abs(s1), Math.abs(s2))); }
       const herm = (sg, v0, v1, u) => { const T = sg.T, u2 = u * u, u3 = u2 * u; return (2 * u3 - 3 * u2 + 1) * sg.a + (u3 - 2 * u2 + u) * T * v0 + (-2 * u3 + 3 * u2) * sg.b + (u3 - u2) * T * v1; };
       const total = segs.reduce((a, sg) => a + sg.T, 0), t0 = performance.now();
       const step = now => {
+        if (id !== runId) return;   // on a changé de sens en route : ce trajet s'arrête là
         let t = (now - t0) / 1000, i = 0; if (t >= total) t = total;
         while (i < segs.length - 1 && t > segs[i].T) { t -= segs[i].T; i++; }
         const yy = herm(segs[i], v[i], v[i + 1], Math.min(1, t / segs[i].T));
@@ -999,19 +1009,23 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     addEventListener('wheel', e => {
       if (menuOpen() || e.ctrlKey) return;
       e.preventDefault(); e.stopImmediatePropagation();
-      if (busy() || Math.abs(e.deltaY) < 3) return;
-      go(Math.sign(e.deltaY));
+      if (Math.abs(e.deltaY) < 3) return;
+      const d = Math.sign(e.deltaY);
+      // changer de sens en route est toujours possible (pour remonter sans attendre)
+      if (moving && d !== curDir && performance.now() - runStart > 200) { go(d); return; }
+      if (busy()) return;
+      go(d);
     }, { passive: false, capture: true });
     // doigt : un glissement suffit, la page finit toute seule
     let ty = null;
     addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive: true });
     addEventListener('touchmove', e => { if (!menuOpen()) e.preventDefault(); }, { passive: false });
-    addEventListener('touchend', e => { if (ty == null || menuOpen()) return; const dy = ty - e.changedTouches[0].clientY; ty = null; if (Math.abs(dy) > 24 && !busy()) go(Math.sign(dy)); }, { passive: true });
+    addEventListener('touchend', e => { if (ty == null || menuOpen()) return; const dy = ty - e.changedTouches[0].clientY; ty = null; if (Math.abs(dy) <= 24) return; const d = Math.sign(dy); if ((moving && d !== curDir) || !busy()) go(d); }, { passive: true });
     // clavier
     addEventListener('keydown', e => {
       if (menuOpen() || e.target.closest('input, textarea')) return;
       const k = e.key, dir = (k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) ? 1 : (k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey)) ? -1 : 0;
-      if (!dir) return; e.preventDefault(); if (!busy()) go(dir);
+      if (!dir) return; e.preventDefault(); if ((moving && dir !== curDir) || !busy()) go(dir);
     });
     window.__pages = { stops: () => stops, go };
   })();
