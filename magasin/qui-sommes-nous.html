@@ -62,10 +62,7 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 
 /* Qui sommes-nous : un manifeste qui se révèle mot à mot, puis nos deux cartes de membre, à côté de nos noms en grand */
 .team, .work, .foot { position: relative; z-index: 3; }
-.team { padding: 2svh 0 6svh; margin-top: -30svh; }
-.man-pin { position: relative; }   /* le texte reste en place le temps que le trait fasse son chemin autour (hauteur réglée en JS) */
-#team-head { position: sticky; top: 18svh; }
-.no-gl #team-head, .reduce #team-head { position: relative; top: auto; }   /* le texte arrive juste après la disparition des lettres */
+.team { padding: 2svh 0 6svh; margin-top: -30svh; }   /* le texte arrive juste après la disparition des lettres */
 .head { display: grid; grid-template-columns: 1fr minmax(0, 24rem); gap: 1.5rem 3rem; align-items: end; margin-bottom: clamp(2.5rem, 6vw, 4.5rem); }
 h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacing: -.045em; }
 .head p { margin: 0; font-size: 1.02rem; line-height: 1.55; color: #3a3a38; }
@@ -310,11 +307,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 </section>
 
 <section class="team" id="equipe" aria-label="Qui sommes-nous">
-  <div class="man-pin" id="man-pin">
   <div class="wrap" id="team-head">
     <p class="label">Qui sommes-nous</p>
     <p class="manifesto" id="manifesto">Deux étudiants à Nantes, <span class="grad serif">un seul studio.</span> On crée et on entretient des sites web pour les entreprises, et on fait tout à deux : le design, le développement et le lien avec vous.</p>
-  </div>
   </div>
   <div class="people" id="profiles">
     <div class="pp" data-a="#2f45ff" data-b="#7a3cff" data-c="#22c1ff" style="--a:#2f45ff; --b:#7a3cff; --c:#22c1ff">
@@ -501,33 +496,20 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const box = id => docBox(typeof id === 'string' ? document.getElementById(id) : id);
     const fb = docBox(fall), endFall = fb.y + fb.h - vh * .35;
     const people = [...document.querySelectorAll('.pp')], first = box(people[0]), last = box(people[people.length - 1]);
-    const man = box('team-head'), foot = box('fin'), pinB = box('man-pin'), hd = document.getElementById('team-head'), th = hd.offsetHeight, PIN = pinB.h - th, P0 = pinB.y - vh * .18, P1 = P0 + PIN;
-    const tx0 = hd.querySelector('.manifesto').getBoundingClientRect().left, tx1 = tx0 + hd.querySelector('.manifesto').offsetWidth, ty0 = vh * .18;
+    const man = box('team-head'), foot = box('fin');
     // 1er morceau : de l'arrivée jusqu'au-dessus du premier panneau, où il s'arrête
     const A = seg();
     // il entre par la gauche dès l'arrivée, passe sous le mot sans le barrer
     A.M(-60, vh * .1, false); A.M(vw * (.08 + R() * .06), vh * .5, false);
     let y = vh * .5, side = 1;
-    while (y < Math.min(endFall, P0 + vh * .1) - vh * .7) { y += vh * (.75 + R() * .2);   /* les vagues s'arrêtent au-dessus du texte */ side = -side; A.M(vw * (.5 + side * (.12 + R() * .12)), y, L(.35)); }   // de grandes vagues, jamais de demi-tour
+    while (y < Math.min(endFall, man.y - vh * .45) - vh * .6) { y += vh * (.75 + R() * .2);   /* les vagues s'arrêtent au-dessus du texte */ side = -side; A.M(vw * (.5 + side * (.12 + R() * .12)), y, L(.35)); }   // de grandes vagues, jamais de demi-tour
     // il longe le texte « Qui sommes-nous » par la droite (sans le barrer), puis descend en biais se poser au-dessus du panneau
-    // pendant que le texte reste en place : le trait passe derrière, redescend, remonte un peu, fait un petit tour,
-    // puis redescend. Il avance avec le défilement : on reste plus longtemps sur le texte pour le lire.
-    { const W = tx1 - tx0, sc = [];
-      sc.push([wide ? vw * .84 : vw * .9, vh * .06]);
-      sc.push([tx0 + W * .78, ty0 + th * .45]);
-      sc.push([tx0 + W * .35, ty0 + th * .95]);
-      sc.push([tx0 + W * .12, ty0 + th * .7]);
-      const r = Math.min(vw, vh) * .075, cx = tx0 + W * .3, cy = ty0 + th * .15;   // il remonte et fait un petit tour
-      for (let j = 0; j <= 10; j++) { const a = Math.PI * .9 - j * Math.PI * 2 / 10; sc.push([cx + r * Math.cos(a) + j * 4, cy + r * Math.sin(a)]); }
-      sc.push([tx0 + W * .7, ty0 + th + vh * .1]);
-      sc.push([wide ? vw * .88 : vw * .92, Math.min(vh * .92, ty0 + th + vh * .3)]);
-      const d = [0]; for (let j = 1; j < sc.length; j++) d.push(d[j - 1] + Math.hypot(sc[j][0] - sc[j - 1][0], sc[j][1] - sc[j - 1][1]));
-      sc.forEach((q, j) => { const t = P0 + PIN * d[j] / d[d.length - 1], prev = A[A.length - 1];
-        A.push({ x: q[0], y: q[1] + t, loop: false, k: Math.max(t + vh * TIP, prev ? prev.k + 1 : -1e9) }); }); }
+    A.M(wide ? vw * .8 : vw * .85, man.y - vh * .3, false);   // il passe à droite bien au-dessus du texte
+    A.M(wide ? vw * .93 : vw * .95, man.y + man.h * .2, false); A.M(wide ? vw * .9 : vw * .92, man.y + man.h + vh * .05, false);
     // comme la vidéo : il passe au-dessus de la petite carte de Gabriel, descend sur son côté, passe dessous et sort à droite ;
     // la carte se déploie ensuite par-dessus, et on ne le voit plus. Il va plus vite que le défilement pour avoir fini avant.
     const startW = wide ? vw * .38 : vw * .62, startX = 0, cTop = first.y + vh * .5, cBot = cTop + startW * .58;
-    const k0 = P1 + vh * TIP + 10, kEnd = Math.max(k0 + vh * .3, first.y + vh * .2);
+    const k0 = man.y + man.h + vh * .05, kEnd = first.y + vh * .2;
     A.M(startX + startW * 1.1, cTop - vh * .14, false, k0 + (kEnd - k0) * .3);
     A.M(startX + startW * .7, (cTop + cBot) / 2, false, k0 + (kEnd - k0) * .55);   // il passe derrière la carte
     A.M(startX + startW * .45, cBot + vh * .06, false, k0 + (kEnd - k0) * .75);
@@ -637,11 +619,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     return { el: s, d: Math.random() * .32, g: .85 + Math.random() * .3, rot: (Math.random() < .5 ? -1 : 1) * (40 + Math.random() * 90), drift: (Math.random() - .5) * 2, ph: Math.random() * 6 };
   });
   let fallTop = 0, fallH = 1;
-  let manY = 0, manH = 1, pinY = 0, pinLen = 0;
-  const pinEl = document.getElementById('man-pin'), headEl = document.getElementById('team-head');
-  function layout() { fallTop = fall.offsetTop; fallH = fall.offsetHeight;
-    pinLen = reduce ? 0 : Math.round(innerHeight * .9); pinEl.style.height = (headEl.offsetHeight + pinLen) + 'px'; pinY = docBox(pinEl).y;
-    const mb = docBox(document.getElementById('manifesto')); manY = mb.y; manH = mb.h; buildRibbon(); if (window.__glLayout) window.__glLayout(); }
+  let manY = 0, manH = 1;
+  function layout() { fallTop = fall.offsetTop; fallH = fall.offsetHeight; const mb = docBox(document.getElementById('manifesto')); manY = mb.y; manH = mb.h; buildRibbon(); if (window.__glLayout) window.__glLayout(); }
 
   // le défilement est lissé : la valeur affichée rattrape la vraie en douceur (plus fluide qu'à la molette brute)
   let yGoal = 0, yNow = -1, smoothing = false, lastF = 0;
@@ -702,8 +681,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   man.querySelectorAll('.grad .w').forEach(w => { w.classList.add('grad'); });
   let lastRev = -1;
   function revealWords() {
-    const vh = innerHeight, top = manY - scrollY, P0 = pinY - vh * .18;           // position mémorisée : pas de calcul de mise en page à chaque image
-    const p = reduce ? 1 : clamp((scrollY - (P0 - vh * .55)) / (vh * .55 + pinLen * .7));   // les mots se révèlent pendant que le texte reste en place   // fini quand le texte arrive en haut de l'écran (sa page)
+    const vh = innerHeight, top = manY - scrollY;           // position mémorisée : pas de calcul de mise en page à chaque image
+    const p = reduce ? 1 : clamp((vh * .85 - top) / (vh * .55));   // fini quand le texte arrive en haut de l'écran (sa page)
     const n = Math.round(p * words.length * 1.1 * 100) / 100; if (n === lastRev) return; lastRev = n;
     words.forEach((w, i) => { w.style.opacity = (.14 + .86 * clamp(n - i)).toFixed(2); });
   }
