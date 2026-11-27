@@ -62,7 +62,7 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 
 /* Qui sommes-nous : un manifeste qui se révèle mot à mot, puis nos deux cartes de membre, à côté de nos noms en grand */
 .team, .work, .foot { position: relative; z-index: 3; }
-.team { padding: 2svh 0 6svh; margin-top: -38svh; }   /* le texte arrive juste après la disparition des lettres */
+.team { padding: 2svh 0 6svh; margin-top: -30svh; }   /* le texte arrive juste après la disparition des lettres */
 .head { display: grid; grid-template-columns: 1fr minmax(0, 24rem); gap: 1.5rem 3rem; align-items: end; margin-bottom: clamp(2.5rem, 6vw, 4.5rem); }
 h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacing: -.045em; }
 .head p { margin: 0; font-size: 1.02rem; line-height: 1.55; color: #3a3a38; }
@@ -502,8 +502,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     // il entre par la gauche dès l'arrivée, passe sous le mot sans le barrer
     A.M(-60, vh * .1, false); A.M(vw * (.08 + R() * .06), vh * .5, false);
     let y = vh * .5, side = 1;
-    while (y < Math.min(endFall, man.y - vh * .2) - vh * .6) { y += vh * (.75 + R() * .2);   /* les vagues s'arrêtent au-dessus du texte */ side = -side; A.M(vw * (.5 + side * (.12 + R() * .12)), y, L(.35)); }   // de grandes vagues, jamais de demi-tour
+    while (y < Math.min(endFall, man.y - vh * .45) - vh * .6) { y += vh * (.75 + R() * .2);   /* les vagues s'arrêtent au-dessus du texte */ side = -side; A.M(vw * (.5 + side * (.12 + R() * .12)), y, L(.35)); }   // de grandes vagues, jamais de demi-tour
     // il longe le texte « Qui sommes-nous » par la droite (sans le barrer), puis descend en biais se poser au-dessus du panneau
+    A.M(wide ? vw * .8 : vw * .85, man.y - vh * .3, false);   // il passe à droite bien au-dessus du texte
     A.M(wide ? vw * .93 : vw * .95, man.y + man.h * .2, false); A.M(wide ? vw * .9 : vw * .92, man.y + man.h + vh * .05, false);
     // comme la vidéo : il passe au-dessus de la petite carte de Gabriel, descend sur son côté, passe dessous et sort à droite ;
     // la carte se déploie ensuite par-dessus, et on ne le voit plus. Il va plus vite que le défilement pour avoir fini avant.
@@ -1013,8 +1014,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const bo = (.5 + .5 * sstep(.45, .85, ec)) * sstep(0, .1, ec) * (1 - sstep(.86, .99, g));
         if (Math.abs(bo - P.bo) > .002) { P.bo = bo; P.big.style.opacity = (bo * .95).toFixed(3); const sh = ((1 - sstep(.2, .8, ec)) * 50).toFixed(1); P.bs[0].style.transform = `translateX(${sh}px)`; P.bs[1].style.transform = `translateX(${-sh}px)`; P.big.style.transform = `translateY(${((1 - sstep(.12, .8, ec)) * vh * .26).toFixed(1)}px)`;
           P.pill.style.transform = `scale(${sstep(.7, .95, ec).toFixed(3)})`; }
-        const oo = clamp((g - .8) / .17), io = clamp(1 - g * 5);   // le nom en noir s'efface dès que la carte part
-        if (Math.abs(oo - P.oo) > .002) { P.oo = oo; P.over.style.opacity = oo.toFixed(3); P.over.classList.toggle('on', oo > .5); }
+        const oo = sstep(.26, .64, (sy - P.y) / vh), io = clamp(1 - g * 5);   // les infos arrivent doucement vers la fin de la transformation   // le nom en noir s'efface dès que la carte part
+        if (Math.abs(oo - P.oo) > .002) { P.oo = oo; P.over.style.opacity = oo.toFixed(3); P.over.style.transform = `translateY(${((1 - oo) * 16).toFixed(1)}px)`; P.over.classList.toggle('on', oo > .5); }
         if (Math.abs(io - P.io) > .002) { P.io = io; P.intro.style.opacity = io.toFixed(3); P.intro.style.transform = `translateY(${(-(1 - io) * 40).toFixed(1)}px)`; }
       }
       for (const P of projects) {
