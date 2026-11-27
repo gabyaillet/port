@@ -423,6 +423,16 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     A.M(startX + startW * .7, (cTop + cBot) / 2, false, k0 + (kEnd - k0) * .55);   // il passe derrière la carte
     A.M(startX + startW * .45, cBot + vh * .06, false, k0 + (kEnd - k0) * .75);
     A.M(vw + 90, cBot + vh * .02, false, kEnd);   // puis il sort à droite
+    // 2e morceau, la même chose en miroir pour Arthur (sa carte part du bord droit) : le trait entre par la gauche,
+    // passe au-dessus de sa petite carte, derrière elle, ressort dessous et repart à gauche avant qu'elle se déploie
+    const B = seg(), sec = box(people[people.length - 1]);
+    const bW = startW, bX = vw - bW, bTop = sec.y + vh * .5, bBot = bTop + bW * .58;
+    const kb0 = sec.y + vh * .02, kbEnd = sec.y + vh * .2;
+    B.M(-90, bTop - vh * .3, false, kb0);
+    B.M(bX - bW * .1, bTop - vh * .14, false, kb0 + (kbEnd - kb0) * .3);
+    B.M(bX + bW * .3, (bTop + bBot) / 2, false, kb0 + (kbEnd - kb0) * .55);   // derrière la carte
+    B.M(bX + bW * .55, bBot + vh * .06, false, kb0 + (kbEnd - kb0) * .75);
+    B.M(-90, bBot + vh * .02, false, kbEnd);   // puis il sort à gauche
     // les textes que le trait ne doit pas barrer (agrandis de l'épaisseur du trait)
     const pad = sw / 2 + 10, obst = [];
     document.querySelectorAll('.hero-x, #title, #team-head .label, #manifesto').forEach(el => {
@@ -459,7 +469,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       // (plus d'écartement forcé autour des textes : c'est lui qui créait des demi-tours ; le tracé passe déjà à côté)
       return { smp, idx: majIdx.map(k => Math.round(L0[ptToSmp[k]] / tot * m)), majors };
     }
-    const parts = [build(A)];
+    const parts = [build(A), build(B)];
     let n = 0; parts.forEach(P => n += P.smp.length);
     X = new Float32Array(n); Y = new Float32Array(n); S = new Float32Array(n); K = new Float32Array(n);
     const starts = []; let o = 0;
@@ -472,7 +482,6 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         for (let i = a; i <= b; i++) K[i] = ya + (yb - ya) * (S[i] - sa) / Math.max(1, sb - sa);
       }
       // 2e morceau : on ne le suit plus, il file vers le bas bien plus vite que le défilement et sort de l'écran
-      if (pi === 1) { const k0 = K[o]; for (let i = o; i < o + P.smp.length; i++) K[i] = k0 + (K[i] - k0) * .35; }
       o += P.smp.length;
     });
     total = S[n - 1];
