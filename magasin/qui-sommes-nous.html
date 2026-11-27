@@ -30,6 +30,7 @@ img { display: block; max-width: 100%; }
 /* Le trait : posé sur la page (il défile avec elle), devant les lettres, derrière les cartes */
 .ribbon { position: absolute; left: 0; top: 0; width: 100%; z-index: 2; pointer-events: none; overflow: visible; display: block; }
 .ribbon path { fill: none; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
+.ribbon path.hl { stroke: rgba(255,255,255,.34); }
 
 /* Le titre et sa chute */
 .fall { position: relative; height: 165svh; }
@@ -498,7 +499,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         gr.setAttribute('x1', X[i0].toFixed(1)); gr.setAttribute('y1', Y[i0].toFixed(1)); gr.setAttribute('x2', (X[i1] + (X[i1] === X[i0] && Y[i1] === Y[i0] ? 1 : 0)).toFixed(1)); gr.setAttribute('y2', Y[i1].toFixed(1));
         gr.innerHTML = `<stop offset="0" stop-color="${colorAt(S[i0])}"/><stop offset="1" stop-color="${colorAt(S[i1])}"/>`; defs.appendChild(gr);
         const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.style.strokeWidth = sw; p.setAttribute('stroke', `url(#rg${ci})`); rib.appendChild(p);
-        chunks.push({ el: p, s0: S[i0], s1: S[i1], len: S[i1] - S[i0], st: '' });
+        // un reflet clair sur le dessus : le trait ressemble à un tube, comme sur la vidéo
+        const h = document.createElementNS(NS, 'path'); h.setAttribute('d', d); h.setAttribute('class', 'hl'); h.style.strokeWidth = (sw * .28).toFixed(1); h.setAttribute('transform', `translate(0 ${(-sw * .17).toFixed(1)})`); rib.appendChild(h);
+        chunks.push({ el: p, hl: h, s0: S[i0], s1: S[i1], len: S[i1] - S[i0], st: '' });
       }
     });
     lastL = -1;
@@ -512,9 +515,10 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       L = S[lo] + (S[hi] - S[lo]) * (key - K[lo]) / Math.max(1e-3, K[hi] - K[lo]); }
     if (Math.abs(L - lastL) < .3) return; lastL = L;
     for (const c of chunks) {
-      if (L >= c.s1) { if (c.st !== 'full') { c.st = 'full'; c.el.style.visibility = 'visible'; c.el.style.strokeDasharray = 'none'; } }
-      else if (L <= c.s0 + .5) { if (c.st !== 'off') { c.st = 'off'; c.el.style.visibility = 'hidden'; } }
-      else { c.st = 'part'; c.el.style.visibility = 'visible'; c.el.style.strokeDasharray = `${c.len.toFixed(1)} ${(c.len + 40).toFixed(1)}`; c.el.style.strokeDashoffset = (c.len - (L - c.s0)).toFixed(1); }
+      if (L >= c.s1) { if (c.st !== 'full') { c.st = 'full'; for (const e of [c.el, c.hl]) { e.style.visibility = 'visible'; e.style.strokeDasharray = 'none'; } } }
+      else if (L <= c.s0 + .5) { if (c.st !== 'off') { c.st = 'off'; c.el.style.visibility = c.hl.style.visibility = 'hidden'; } }
+      else { c.st = 'part'; const da = `${c.len.toFixed(1)} ${(c.len + 40).toFixed(1)}`, dof = (c.len - (L - c.s0)).toFixed(1);
+        for (const e of [c.el, c.hl]) { e.style.visibility = 'visible'; e.style.strokeDasharray = da; e.style.strokeDashoffset = dof; } }
     }
   }
 
@@ -983,7 +987,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   (function pages() {
     if (reduce) return;
     const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    let stops = [], moving = false, coolUntil = 0, runId = 0, curDir = 0, runStart = 0;
+    let stops = [], moving = false, coolUntil = 0, runId = 0, curDir = 0, runStart = 0, lastWheel = 0, lastAd = 0;
     function computeStops() {
       const vh = innerHeight, b = id => docBox(document.getElementById(id)), pts = [0];
       pts.push(Math.max(0, b('team-head').y - vh * .16));
@@ -999,7 +1003,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       if (dir > 0) to = stops.find(v => v > yr + 8); else for (let i = stops.length - 1; i >= 0; i--) if (stops[i] < yr - 8) { to = stops[i]; break; }
       if (to == null) return;
       curTo = to; moving = true; const id = ++runId; curDir = dir; runStart = performance.now();
-      const done = () => { moving = false; coolUntil = performance.now() + (dir > 0 && !fast ? 450 : 120); };   // petite pause : l'élan du pavé tactile ne relance pas tout de suite
+      const done = () => { moving = false; coolUntil = performance.now() + (!fast ? 380 : 120); };   // petite pause : l'élan du pavé tactile ne relance pas tout de suite
       // le trajet est découpé : les zones où une carte se déploie sont parcourues lentement (comme la vidéo),
       // le reste plus vite, et la vitesse se raccorde en douceur d'un morceau à l'autre
       const vh = innerHeight, lo = Math.min(y, to), hi = Math.max(y, to), knots = [y];
@@ -1008,8 +1012,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       knots.push(to);
       const inZone = (a, c) => zones.some(([z0, z1]) => Math.min(a, c) >= z0 - 2 && Math.max(a, c) <= z1 + 2);
       const segs = []; for (let i = 0; i < knots.length - 1; i++) { const d = Math.abs(knots[i + 1] - knots[i]) / vh;
-        segs.push({ a: knots[i], b: knots[i + 1], T: dir > 0 && !fast ? (inZone(knots[i], knots[i + 1]) ? Math.max(1.2, 2.8 * d / .8) : Math.max(.5, .45 + d * .5)) : Math.max(.3, .25 + d * .28) }); }   // en remontant, tout va plus vite
-      if (segs.length === 1) segs[0].T = Math.min(3.4, Math.max(dir > 0 && !fast ? 1.1 : .8, segs[0].T + (dir > 0 && !fast ? .4 : .2)));
+        segs.push({ a: knots[i], b: knots[i + 1], T: !fast ? (inZone(knots[i], knots[i + 1]) ? Math.max(1.2, 2.8 * d / .8) : Math.max(.5, .45 + d * .5)) * (dir > 0 ? 1 : .8) : Math.max(.3, .25 + d * .28) }); }   // en remontant : pareil, 20 % plus vite ; en enchaînant : vite
+      if (segs.length === 1) segs[0].T = Math.min(3.4, Math.max(!fast ? 1 : .8, segs[0].T + (!fast ? .3 : .2)));
       const v = []; for (let i = 0; i <= segs.length; i++) { if (i === 0 || i === segs.length) { v.push(0); continue; }
         const s1 = (segs[i - 1].b - segs[i - 1].a) / segs[i - 1].T, s2 = (segs[i].b - segs[i].a) / segs[i].T; v.push(Math.sign(s1) * Math.min(Math.abs(s1), Math.abs(s2))); }
       const herm = (sg, v0, v1, u) => { const T = sg.T, u2 = u * u, u3 = u2 * u; return (2 * u3 - 3 * u2 + 1) * sg.a + (u3 - 2 * u2 + u) * T * v0 + (-2 * u3 + 3 * u2) * sg.b + (u3 - u2) * T * v1; };
@@ -1030,13 +1034,18 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     addEventListener('wheel', e => {
       if (menuOpen() || e.ctrlKey) return;
       e.preventDefault(); e.stopImmediatePropagation();
-      if (Math.abs(e.deltaY) < 3) return;
+      const now = performance.now(), ad = Math.abs(e.deltaY), gap = now - lastWheel, prevAd = lastAd;
+      lastWheel = now; lastAd = ad;
+      if (ad < 3) return;
       const d = Math.sign(e.deltaY);
-      // changer de sens en route est toujours possible (pour remonter sans attendre)
-      if (moving && d !== curDir && performance.now() - runStart > 200) { go(d); return; }
+      // un vrai nouveau geste ? (pas l'élan du pavé tactile, qui continue tout seul en diminuant)
+      const notch = ad % 100 === 0 || ad % 120 === 0;   // un cran de molette
+      const fresh = gap > 240 || (ad > prevAd * 1.25 + 4 && ad >= 16) || (notch && gap > 40);
+      // changer de sens en route est toujours possible
+      if (moving && d !== curDir && now - runStart > 200) { go(d); return; }
       // un nouveau geste dans le même sens enchaîne tout de suite sur la page suivante, en accéléré
-      if (moving && d === curDir && performance.now() - runStart > 250) { go(d, curTo, true); return; }   // dans les deux sens
-      if (busy()) return;
+      if (moving && d === curDir && fresh && now - runStart > 250) { go(d, curTo, true); return; }
+      if (busy() || (!fresh && now - coolUntil < 700)) return;   // l'élan qui traîne après un mouvement ne relance rien
       go(d);
     }, { passive: false, capture: true });
     // doigt : un glissement suffit, la page finit toute seule
