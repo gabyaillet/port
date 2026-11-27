@@ -13,7 +13,7 @@ html.lenis, html.lenis body { height: auto; } .lenis.lenis-smooth { scroll-behav
 /* Un mur d'enduit gris où passent des ombres de feuillage ; au défilement, les lettres de « bienvenue » tombent une à une en s'effaçant
    et la caméra les suit. Un trait épais au bout rond se dessine avec le défilement, fait des boucles au hasard, suit la chute
    puis mène à nos deux profils, avant un mur en dégradé qui monte. Couleurs vives et transitions en rideau, dans l'esprit de lusion.co et unseen.co. */
-:root { --wall: #d2d2d0; --ink: #141414; --muted: #5d5d5a; --card: #e6e6e4;
+:root { --wall: #e8e7e4; --ink: #141414; --muted: #5d5d5a; --card: #e6e6e4;
   --c1: #2f45ff; --c2: #7a3cff; --c3: #ff4f8b; --c4: #ff8a3d; --c5: #22c1ff;   /* les couleurs vives : bleu électrique, violet, rose, orange, cyan */
   --f: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; color-scheme: light; }
 * { box-sizing: border-box; }
@@ -67,7 +67,7 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacing: -.045em; }
 .head p { margin: 0; font-size: 1.02rem; line-height: 1.55; color: #3a3a38; }
 .grad { background: linear-gradient(90deg, var(--c1), var(--c2) 45%, var(--c3) 75%, var(--c4)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.manifesto { margin: 0 0 clamp(3.5rem, 9vw, 7rem); max-width: 17em; font: 500 clamp(1.9rem, 4.4vw, 4rem)/1.06 var(--f); letter-spacing: -.035em; -webkit-text-stroke: 4px #d8d8d6; paint-order: stroke fill; }
+.manifesto { margin: 0 0 clamp(3.5rem, 9vw, 7rem); max-width: 17em; font: 500 clamp(1.9rem, 4.4vw, 4rem)/1.06 var(--f); letter-spacing: -.035em; -webkit-text-stroke: 4px #e8e7e4; paint-order: stroke fill; }
 .manifesto .w { opacity: .14; }
 .grad, .grad .w, .head h2 .grad { -webkit-text-stroke: 0; }   /* pas de contour sur les mots en dégradé */
 .paused, .paused * { animation-play-state: paused !important; }
@@ -86,7 +86,7 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .p-kicker::after { content: ""; flex: 0 1 4rem; height: 1px; background: currentColor; opacity: .5; }
 .p-name { margin: 1rem 0 0; font: 500 clamp(3rem, 7vw, 7.2rem)/.86 var(--f); letter-spacing: -.055em; }
 .p-name .serif { display: block; font-size: 1.08em; letter-spacing: -.02em; padding-left: .5em; }
-.pp-intro .p-name, .pp-intro .p-kicker { -webkit-text-stroke: 4px #d8d8d6; paint-order: stroke fill; }
+.pp-intro .p-name, .pp-intro .p-kicker { -webkit-text-stroke: 4px #e8e7e4; paint-order: stroke fill; }
 .pp-intro .p-name .serif { -webkit-text-stroke-width: 4px; }
 .pp-big { position: absolute; display: flex; justify-content: space-between; align-items: center; padding: 0 clamp(1rem, 3vw, 2.6rem); pointer-events: none; opacity: 0; z-index: 1;
   font: 400 clamp(2.6rem, 9.5vw, 9.5rem)/1 var(--f); letter-spacing: -.04em; text-transform: uppercase; color: #fff; will-change: opacity; }   /* comme « PLAY / REEL » sur la vidéo */
@@ -169,7 +169,7 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .gx-mode button.on { color: #141414; text-decoration: underline; text-underline-offset: 3px; }
 .gx-stack { position: absolute; inset: 0; }
 .gx-it { position: absolute; left: 0; top: 0; display: block; will-change: transform, width, height; }
-.gx-it .fr { position: absolute; inset: 0; overflow: hidden; background: #cfcfcd; }
+.gx-it .fr { position: absolute; inset: 0; overflow: hidden; background: #dcdbd8; }
 .gx-it img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .gx-it i { position: absolute; bottom: 0; font: 500 .58rem var(--mono); font-style: normal; letter-spacing: .04em; color: #141414; white-space: nowrap; }
 .gx-it:nth-child(odd) i { right: calc(100% + 14px); } .gx-it:nth-child(even) i { left: calc(100% + 14px); }
@@ -189,7 +189,7 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .fin-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
 .fin-wall { position: absolute; inset: 0; overflow: hidden; z-index: 4; transform: translateY(101%); will-change: transform; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
 .topbar.light2 { --ink: #f4f4f2; --wall: #0d0d0d; }
-.topbar.light.dark2 { --ink: #141414; --wall: #d2d2d0; }   /* sur la page blanche des projets, l'en-tête redevient sombre */
+.topbar.light.dark2 { --ink: #141414; --wall: #e8e7e4; }   /* sur la page blanche des projets, l'en-tête redevient sombre */
 /* nos contacts, sur le mur en dégradé */
 .wall-contact { position: absolute; left: max(20px, 6vw); right: max(20px, 6vw); bottom: calc(env(safe-area-inset-bottom, 0px) + 11svh); color: #fff; }
 .wall-contact .label { color: rgba(255,255,255,.85); }
@@ -213,8 +213,8 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 @media (hover: none), (pointer: coarse) { .cursor { display: none; } }
 
 /* Quand le trait passe sous un texte posé sur le mur, il s'interrompt autour des lettres : le texte reste lisible */
-.team > .wrap > .label { -webkit-text-stroke: 4px #d8d8d6; paint-order: stroke fill; }
-.head > p { -webkit-text-stroke: 3px #d8d8d6; paint-order: stroke fill; }
+.team > .wrap > .label { -webkit-text-stroke: 4px #e8e7e4; paint-order: stroke fill; }
+.head > p { -webkit-text-stroke: 3px #e8e7e4; paint-order: stroke fill; }
 .foot { padding: 3rem 0 calc(env(safe-area-inset-bottom, 0px) + 2.5rem); }
 .foot .wrap { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font: 400 .66rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
 .foot a { color: var(--ink); }
@@ -240,7 +240,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 /* En-tête : la marque à gauche, le menu à droite (même menu plein écran que le portfolio de Gabriel) ;
    sombre sur le mur, clair quand un panneau ou une image sombre passe dessous */
 .topbar.light { --ink: #f4f4f2; --wall: #0d0d0d; }
-.no-gl .topbar { background: rgba(210,210,208,.86); }   /* version simple : un bandeau clair, toujours lisible */
+.no-gl .topbar { background: rgba(232,231,228,.86); }   /* version simple : un bandeau clair, toujours lisible */
 .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; justify-content: flex-end; gap: 1rem; transition: color .3s;
   min-height: 4rem; padding: env(safe-area-inset-top, 0px) max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px)); }
 .brand { position: absolute; left: max(20px, env(safe-area-inset-left, 0px)); top: calc(50% + env(safe-area-inset-top, 0px) / 2); transform: translateY(-50%);
@@ -422,7 +422,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const dx = (Math.sin(t * s.f + s.ph) + Math.sin(t * s.f * 1.7 + s.ph * 2) * .5 + wind * .6) * s.amp, dy = Math.cos(t * s.f * .8 + s.ph) * s.amp;
       g1.beginPath(); g1.ellipse((s.x + dx) * W, (wy(s.y) + dy) * H + OFF, s.rx * m, s.ry * m, s.a + wind * .05, 0, 7); g1.fill();
     }
-    g2.fillStyle = '#cecdcc'; g2.strokeStyle = '#cecdcc'; g2.lineCap = 'round';
+    g2.fillStyle = '#dedcd8'; g2.strokeStyle = '#dedcd8'; g2.lineCap = 'round';
     for (const b of branches) {
       const sway = wind * .012;
       const sh = wy((b.y0 + b.y1) / 2) - (b.y0 + b.y1) / 2, y0 = b.y0 + sh, y1 = b.y1 + sh;
@@ -432,7 +432,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const dx = (Math.sin(t * l.f + l.ph) + wind) * l.amp, dy = Math.cos(t * l.f * 1.3 + l.ph) * l.amp;
       g2.beginPath(); g2.ellipse((l.x + dx) * W, (wy(l.y) + dy) * H + OFF, l.r * m, l.r * m * .45, l.a, 0, 7); g2.fill();
     }
-    g.filter = 'none'; g.globalAlpha = 1; g.fillStyle = '#d7d7d5'; g.fillRect(0, 0, W, HH);
+    g.filter = 'none'; g.globalAlpha = 1; g.fillStyle = '#e8e7e4'; g.fillRect(0, 0, W, HH);
     g.filter = `blur(${Math.round(m * .03)}px)`; g.drawImage(lay1, 0, 0);
     g.filter = `blur(${Math.round(m * .014)}px)`; g.globalAlpha = .45; g.drawImage(lay2, 0, 0);
     g.filter = 'none'; g.globalAlpha = 1;
