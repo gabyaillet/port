@@ -23,18 +23,18 @@ if (reduce) leave();
 /* ---------- Rendu ---------- */
 let renderer;
 try {
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: !LITE, powerPreference: 'high-performance' });
 } catch (e) {
   document.body.insertAdjacentHTML('beforeend', '<div class="err"><p>Votre navigateur n’affiche pas la 3D.<br><a href="' + TARGET + '">Entrer sur le site →</a></p></div>');
   throw e;
 }
-renderer.setPixelRatio(Math.min(devicePixelRatio, LITE ? 1.5 : 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, LITE ? 1.35 : 2));
 renderer.setSize(innerWidth, innerHeight, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.12;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = LITE ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
 renderer.shadowMap.autoUpdate = false; // la boutique ne bouge pas : l'ombre est calculée une fois (et quand les portes glissent)
 renderer.shadowMap.needsUpdate = true;
 
@@ -383,7 +383,7 @@ scene.add(new THREE.HemisphereLight('#fff7ec', '#8a6d52', 0.85));
   const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(env, 0.04).texture; scene.environmentIntensity = 0.55; pm.dispose(); }
 const sun = new THREE.DirectionalLight('#fff2dd', 1.6);
 sun.position.set(3, 9, 1); sun.target.position.set(-0.5, 0, -6.5); scene.add(sun, sun.target);
-sun.castShadow = true; sun.shadow.mapSize.set(LITE ? 2048 : 4096, LITE ? 2048 : 4096); sun.shadow.radius = 3;   // ombre calculée une fois : plus fine sans coûter à chaque image
+sun.castShadow = true; sun.shadow.mapSize.set(LITE ? 1024 : 4096, LITE ? 1024 : 4096); sun.shadow.radius = 3;   // ombre calculée une fois : plus fine sans coûter à chaque image
 Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 22 }); sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.02;
 // le plafond et les murs ne doivent pas faire d'ombre au soleil intérieur
 const warm1 = new THREE.PointLight('#ffcf94', 6, 7, 1.6); warm1.position.set(3.6, 2.3, -3.3); scene.add(warm1);
@@ -491,7 +491,7 @@ addEventListener('resize', fit); fit();
 
 /* ---------- Animation ---------- */
 const pos = new THREE.Vector3(), tgt = new THREE.Vector3();
-let t0 = null, phase = 'path', last = 0;
+let t0 = null, phase = 'path', last = 0, tAcc = 0, tPrev = null;
 let lastDoor = -1;
 function frameAt(t) {
   const k = Math.min(t / T, 1), u = easeCruise(k);
@@ -502,7 +502,7 @@ function frameAt(t) {
   camera.lookAt(tgt);
   // les portes s'écartent quand on approche
   const o = THREE.MathUtils.smoothstep(7, 3.2, pos.z);
-  if (o !== lastDoor) { lastDoor = o; for (const d of doors) d.g.position.x = d.s * (0.54 + o * 1.05); renderer.shadowMap.needsUpdate = true; }
+  if (o !== lastDoor) { lastDoor = o; for (const d of doors) d.g.position.x = d.s * (0.54 + o * 1.05); if (o === 0 || o === 1) renderer.shadowMap.needsUpdate = true; }   // ombre recalculée seulement portes fermées puis ouvertes
   return k;
 }
 // Résolution adaptative : si l'appareil peine (moins de ~45 i/s), on baisse un peu la définition
@@ -520,7 +520,8 @@ function tick(now) {
   if (leaving) return;
   if (paused) { requestAnimationFrame(tick); return; }
   if (t0 === null) t0 = now;
-  const t = (now - t0) / 1000;
+  const dt = tPrev === null ? 0 : Math.min(0.1, (now - tPrev) / 1000); tPrev = now; tAcc += dt;
+  const t = tAcc;
   if (phase === 'path') {
     const k = frameAt(t);
     if (k >= 1) { phase = 'screen'; enterScreen(); }
@@ -588,6 +589,9 @@ async function clickTab() {
 /* ---------- Démarrage ---------- */
 {
   drawScreen();
+  scene.traverse(o => { if (!o.userData.moving) { o.updateMatrix(); o.matrixAutoUpdate = false; } });
+  for (const d of doors) { d.g.matrixAutoUpdate = true; d.g.userData.moving = true; }
+  renderer.compile(scene, camera);
   frameAt(0); renderer.render(scene, camera);
   requestAnimationFrame(() => { veil.classList.add('off'); skipBtn.classList.add('show'); requestAnimationFrame(tick); });
 }
