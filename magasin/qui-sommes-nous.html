@@ -62,7 +62,7 @@ h1 .l { display: inline-block; will-change: transform, opacity; transform-origin
 
 /* Qui sommes-nous : un manifeste qui se révèle mot à mot, puis nos deux cartes de membre, à côté de nos noms en grand */
 .team, .work, .foot { position: relative; z-index: 3; }
-.team { padding: 2svh 0 26svh; }
+.team { padding: 2svh 0 6svh; }
 .head { display: grid; grid-template-columns: 1fr minmax(0, 24rem); gap: 1.5rem 3rem; align-items: end; margin-bottom: clamp(2.5rem, 6vw, 4.5rem); }
 h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacing: -.045em; }
 .head p { margin: 0; font-size: 1.02rem; line-height: 1.55; color: #3a3a38; }
@@ -127,28 +127,25 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
    Un mur de couleur monte du bas ; au centre, le cercle du logo ; de petits sites flottent en profondeur autour,
    puis sont aspirés dedans pendant que le cercle se resserre en un point. Là, le fond devient blanc d'un coup
    et deux particules de couleur en sortent, avec leur reflet, jusqu'au contact. */
-.finale { position: relative; z-index: 4; height: 440svh; }
+.finale { position: relative; z-index: 4; height: 360svh; }
 .fin-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
-.fin-wall { position: absolute; inset: 0; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); transform: translateY(101%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; will-change: transform; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
+.fin-wall { position: absolute; inset: 0; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
 .fin-wall.white { background: #fff; }
 .fin-cards { position: absolute; inset: 0; perspective: 900px; perspective-origin: 50% 46%; transform-style: preserve-3d; pointer-events: none; }
-.fcard { position: absolute; left: 50%; top: 46%; width: clamp(86px, 11vw, 160px); aspect-ratio: 16 / 10; margin: 0; opacity: 0; will-change: transform, opacity; }
-.mini { width: 100%; height: 100%; border-radius: 7px; overflow: hidden; container-type: size; display: grid; grid-template-rows: auto 1fr;
-  box-shadow: 0 30px 50px -24px rgba(10,10,40,.55), 0 0 0 1px rgba(255,255,255,.14); }
-.mini .mb { display: flex; gap: 1.2cqw; padding: 2.2cqw 3cqw; border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent); }
-.mini .mb i { width: 2cqw; height: 2cqw; border-radius: 50%; background: currentColor; opacity: .3; }
-.mini .mbody { padding: 6cqw 7cqw 5cqw; display: grid; grid-template-columns: 1.25fr .75fr; grid-template-rows: 1fr auto; gap: 4cqw 5cqw; align-items: end; }
-.mini .ln { display: block; height: 4.6cqw; border-radius: 3cqw; background: currentColor; margin-bottom: 2.6cqw; }
-.mini .ln.s { height: 2.2cqw; opacity: .35; width: 84%; margin-bottom: 1.8cqw; }
-.mini .ln.c { width: 34%; height: 3cqw; margin: 2cqw 0 0; }
-.mini .ph { height: 100%; border-radius: 3cqw; }
-.mini .row { grid-column: 1 / -1; display: flex; gap: 3cqw; } .mini .row i { flex: 1; height: 9cqw; border-radius: 2cqw; }
-.fin-logo { position: absolute; left: 50%; top: 46%; width: min(52vw, 40vh, 360px); aspect-ratio: 1; transform: translate(-50%, -50%); will-change: transform; pointer-events: none; }
-.fin-logo svg { width: 100%; height: 100%; overflow: visible; }
-.fin-logo circle { fill: none; stroke: #fff; stroke-width: 2; vector-effect: non-scaling-stroke; }
-.fin-name { position: absolute; left: 50%; top: calc(46% + min(26vw, 20vh, 180px) + 1.6rem); transform: translateX(-50%); color: #fff; text-align: center; white-space: nowrap; opacity: 0; will-change: opacity, transform; }
-.fin-name span { display: block; font: 400 .64rem var(--mono); letter-spacing: .2em; text-transform: uppercase; opacity: .8; }
-.fin-name b { display: block; margin-top: .5rem; font: italic 400 clamp(2.2rem, 6vw, 4.2rem)/1 "Instrument Serif", Georgia, serif; }
+.fcard { position: absolute; left: 50%; top: 46%; width: clamp(104px, 12vw, 168px); height: calc(clamp(104px, 12vw, 168px) * 1.25); margin: 0; opacity: 0; will-change: transform, opacity; container-type: inline-size; }
+/* les cartes : blanches, nettes, ce qu'on fait écrit en grand en italique */
+.fc { width: 100%; height: 100%; border-radius: 16px; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; padding: 9cqw 9cqw 8cqw;
+  background: #f7f7f5; color: #141414; box-shadow: 0 40px 60px -30px rgba(20,10,60,.6), 0 0 0 1px rgba(255,255,255,.5); }
+.fc .tp { display: flex; justify-content: space-between; align-items: center; font: 400 6.4cqw var(--mono); letter-spacing: .14em; text-transform: uppercase; color: #6d6d6a; }
+.fc .tp i { width: 7cqw; height: 7cqw; border-radius: 50%; border: 1.4px solid currentColor; }
+.fc b { align-self: center; font: italic 400 19cqw/.95 "Instrument Serif", Georgia, serif; letter-spacing: -.01em; }
+.fc .bt { height: 3cqw; border-radius: 3cqw; }
+/* le logo d'Obtura, en petit : le cercle et le mot */
+.fin-logo { position: absolute; left: 50%; top: 46%; display: flex; align-items: center; gap: 14px; transform: translate(-50%, -50%); will-change: transform, opacity; pointer-events: none; color: #fff; }
+.fin-logo svg { width: 34px; height: 34px; overflow: visible; flex: none; }
+.fin-logo circle { fill: none; stroke: #fff; stroke-width: 2.4; vector-effect: non-scaling-stroke; }
+.fin-logo .wm { font: 600 1.45rem var(--f); letter-spacing: .3em; margin-right: -.3em; will-change: opacity; }
+.fin-name { position: absolute; left: 50%; top: calc(46% + 2.6rem); transform: translateX(-50%); color: rgba(255,255,255,.82); text-align: center; white-space: nowrap; opacity: 0; font: 400 .62rem var(--mono); letter-spacing: .22em; text-transform: uppercase; will-change: opacity, transform; }
 .fin-strings { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .fin-strings path, .c-thread path { fill: none; stroke-width: 1.2; stroke-linecap: round; }
 .c-thread circle { opacity: 0; }
@@ -172,6 +169,29 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .c-list dd.todo { color: #8a8a87; font-style: italic; }
 .contact .foot { position: relative; }
 @media (max-width: 760px) { .c-list { grid-template-columns: 1fr 1fr; } }
+
+/* ---------- Repris du portfolio de Gabriel, un peu changés ----------
+   le curseur (ici en dégradé), les boutons aimantés, les titres qui montent mot par mot,
+   les apparitions en cascade et le bandeau qui défile plus vite quand on défile */
+.cursor { position: fixed; left: 0; top: 0; z-index: 300; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; pointer-events: none;
+  background: linear-gradient(135deg, var(--c1), var(--c3)); box-shadow: 0 0 0 1.5px rgba(255,255,255,.9); display: grid; place-items: center;
+  transition: width .35s cubic-bezier(.2,.8,.2,1), height .35s cubic-bezier(.2,.8,.2,1), margin .35s cubic-bezier(.2,.8,.2,1); }
+.cursor span { font: 500 .6rem var(--mono); letter-spacing: .12em; text-transform: uppercase; color: #fff; opacity: 0; transition: opacity .2s; }
+.cursor.big { width: 76px; height: 76px; margin: -38px 0 0 -38px; } .cursor.big span { opacity: 1; }
+.cursor.mid { width: 34px; height: 34px; margin: -17px 0 0 -17px; }
+@media (hover: none), (pointer: coarse) { .cursor { display: none; } }
+.rv-w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .12em; margin-bottom: -.12em; }
+.rv-w > span { display: inline-block; transition: transform 1.1s cubic-bezier(.16,1,.3,1); }
+.pre .rv-w > span { transform: translateY(115%) rotate(5deg); }
+.pre.in .rv-w > span { transform: none; }
+.fu { transition: opacity 1s cubic-bezier(.16,1,.3,1), transform 1.1s cubic-bezier(.16,1,.3,1); }
+.fu.pre { opacity: 0; transform: translateY(40px); } .fu.pre.in { opacity: 1; transform: none; }
+.marquee { overflow: hidden; padding-block: clamp(1.4rem, 3vw, 2.4rem); border-top: 1px solid rgba(20,20,20,.1); }
+.marquee .track { display: flex; width: max-content; will-change: transform; }
+.marquee span { font: 500 clamp(3rem, 9vw, 8rem)/1 var(--f); letter-spacing: -.05em; text-transform: uppercase; white-space: nowrap; padding-right: .45em; display: inline-flex; align-items: center; gap: .45em; }
+.marquee span::after { content: ""; width: .2em; height: .2em; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c3)); }
+.marquee span.o { color: transparent; -webkit-text-stroke: 1.5px #141414; }
+@media (prefers-reduced-motion: reduce) { .pre .rv-w > span, .fu.pre { transform: none; opacity: 1; } }
 
 /* Quand le trait passe sous un texte posé sur le mur, il s'interrompt autour des lettres : le texte reste lisible */
 .team > .wrap > .label { -webkit-text-stroke: 4px #d8d8d6; paint-order: stroke fill; }
@@ -306,8 +326,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   <div class="fin-stage">
     <div class="fin-wall" id="fin-wall"></div>
     <div class="fin-cards" id="fin-cards" aria-hidden="true"></div>
-    <div class="fin-logo" id="fin-logo" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" pathLength="302"/></svg></div>
-    <p class="fin-name" id="fin-name"><span>Obtura Studio</span><b>Web design · Nantes</b></p>
+    <div class="fin-logo" id="fin-logo" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" pathLength="302"/></svg><span class="wm" id="fin-wm">OBTURA</span></div>
+    <p class="fin-name" id="fin-name">Studio · Web design · Nantes</p>
   </div>
 </section>
 
@@ -324,6 +344,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       <div><dt>Qui</dt><dd>Gabriel Aillet et Arthur Goubill</dd></div>
     </dl>
   </div>
+  <div class="marquee" aria-hidden="true"><div class="track" id="marquee-track"><span>Obtura Studio</span><span class="o">Web design</span><span>Création</span><span class="o">Maintenance</span><span>Nantes</span><span class="o">Obtura Studio</span></div></div>
   <footer class="foot"><div class="wrap"><span>Obtura Studio · Nantes</span><a href="./">Revoir l'intro</a></div></footer>
 </section>
 
@@ -464,9 +485,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     // 2e morceau : il reprend sous le dernier panneau, file vers le bas et sort de l'écran
     const B = seg();
     B.M(wide ? vw * .3 : vw * .25, last.y + last.h + 24, false);
-    B.M(vw * (wide ? .68 : .78), (last.y + last.h + foot.y) / 2, false);
-    B.M(vw * .46, foot.y + vh * .55, false);
-    B.M(vw * .52, foot.y + vh * 1.15, false);   // il traverse le bas de l'écran ; le mur de couleur monte ensuite par-dessus
+    B.M(vw * (wide ? .64 : .74), foot.y + vh * .05, false);
+    B.M(vw * .48, foot.y + vh * .5, false);   // il file vers le bas et passe sous le mur de couleur qui arrive
     // les textes que le trait ne doit pas barrer (agrandis de l'épaisseur du trait)
     const pad = sw / 2 + 10, obst = [];
     document.querySelectorAll('.hero-x, #title, #team-head .label, #manifesto').forEach(el => {
@@ -948,28 +968,24 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   /* ---------- La fin : mur de couleur, logo, petits sites aspirés, puis fond blanc et deux particules ---------- */
   (function finale() {
     const fin = document.getElementById('fin'), wallEl = document.getElementById('fin-wall'), cardsEl = document.getElementById('fin-cards');
-    const logo = document.getElementById('fin-logo'), ring = logo.querySelector('circle'), name = document.getElementById('fin-name');
+    const logo = document.getElementById('fin-logo'), ring = logo.querySelector('circle'), name = document.getElementById('fin-name'), wm = document.getElementById('fin-wm');
     const finStage = fin.querySelector('.fin-stage');
     // quand toutes les cartes sont rentrées, le point tremble de plus en plus, puis éclate en deux particules
     let burstAt = null;
     const outExpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
     const contact = document.getElementById('contact'), cIn = document.getElementById('c-in'), cSvg = document.getElementById('c-thread');
     const cP = [...cSvg.querySelectorAll('path')], cD = [...cSvg.querySelectorAll('.pt-a, .pt-b')], cO = cSvg.querySelector('.pt-o'), cOr = cSvg.querySelector('.pt-o-ring'), topbarEl = document.getElementById('topbar');
-    // de petites maquettes de sites (des formes, pas de faux contenu), aux couleurs variées
-    const TH = [['#f4f2ee', '#141414', '#2f45ff', '#ffb066'], ['#0f0f13', '#ededeb', '#7a3cff', '#22c1ff'], ['#ece6da', '#2a2420', '#b8553c', '#e2b33c'],
-      ['#1a1240', '#e9e4ff', '#8d8bff', '#ff4f8b'], ['#203126', '#e7efe2', '#a7c79a', '#f0c9a0'], ['#bfe0e6', '#0f2e36', '#1d6b78', '#ff8a3d'],
-      ['#e2b33c', '#1d1a14', '#7a2e24', '#f6e9dd'], ['#f7f5f0', '#1a1a1a', '#d0442f', '#2f45ff']];
-    const ph = (t, a) => `background: linear-gradient(${130 + a * 40}deg, ${t[2]}, ${t[3]})`;
-    const mini = t => `<div class="mini" style="background:${t[0]};color:${t[1]}"><div class="mb"><i></i><i></i><i></i></div>
-      <div class="mbody"><div><span class="ln"></span><span class="ln" style="width:72%"></span><span class="ln s"></span><span class="ln s" style="width:60%"></span><span class="ln c" style="background:${t[2]}"></span></div>
-      <div class="ph" style="${ph(t, 0)}"></div><div class="row"><i style="${ph(t, 1)}"></i><i style="${ph(t, 2)}"></i><i style="${ph(t, 3)}"></i></div></div></div>`;
-    let sd = 777; const R = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
-    const MOB = innerWidth < 760, N = MOB ? 10 : 16, cards = [];
-    const spawn = (c, t, first) => { let x, y; do { x = (R() - .5) * 2; y = (R() - .5) * 2; } while (Math.hypot(x, y * 1.1) < .45);
-      c.x = x; c.y = y; c.ry = -x * 22 + (R() - .5) * 10; c.rx = y * 10 + (R() - .5) * 8; c.rz = (R() - .5) * 6;
-      c.z0 = -700 - R() * 300; c.z1 = 40 + R() * 140; c.life = 9 + R() * 7; c.born = first ? t - R() * c.life : t; };
-    for (let i = 0; i < N; i++) { const el = document.createElement('figure'); el.className = 'fcard'; el.innerHTML = mini(TH[i % TH.length]); cardsEl.appendChild(el);
-      const c = { el, delay: R() }; spawn(c, performance.now() / 1000, true); cards.push(c); }
+    // les cartes : ce qu'on fait (repris de notre accord), une à une ; chacune arrive du fond, se montre un instant
+    // puis file vers nous et disparaît
+    const WORDS = ['Création', 'Design', 'Développement', 'Maintenance', 'Sites web', 'Nantes'];
+    const DOTS = ['#2f45ff', '#7a3cff', '#ff4f8b', '#ff8a3d', '#22c1ff', '#2f45ff'];
+    const cards = WORDS.map((w, i) => {
+      const el = document.createElement('figure'); el.className = 'fcard';
+      el.innerHTML = `<div class="fc"><div class="tp"><span>Obtura</span><span>0${i + 1}</span></div><b style="font-size:${Math.min(19, 170 / w.length).toFixed(1)}cqw">${w}</b><span class="bt" style="background:linear-gradient(90deg, ${DOTS[i]}, ${DOTS[(i + 2) % 6]})"></span></div>`;
+      cardsEl.appendChild(el);
+      const a = -2.2 + i * 1.15 + (i % 2 ? .25 : -.2);                 // autour du logo, jamais dessus
+      return { el, ax: Math.cos(a), ay: Math.sin(a), rz: (i % 2 ? 1 : -1) * (4 + i), ry: (i % 2 ? -1 : 1) * 18, st: .05 + i * .075 };
+    });
     const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     const C = v => Math.max(0, Math.min(1, v));
     // les deux trajets des particules : de l'écran jusqu'au contact, tirés au hasard à chaque visite
@@ -1011,37 +1027,45 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const t = now / 1000, W = innerWidth, H = innerHeight, r = fin.getBoundingClientRect();
       const onStage = r.top < H && r.bottom > 0;
       const p = C(-r.top / Math.max(1, r.height - H));
-      // 0 → .16 : le mur monte ; .1 → .26 : le cercle se dessine ; .3 → .8 : les sites sont aspirés, le cercle devient un point ;
-      // .84 → .985 : le point tremble de plus en plus ; puis le fond devient blanc et les deux particules partent
-      const up = ease(C(p / .16)), white = p >= .985;
-      window.__finCover = onStage && up >= .999;
-      const light = onStage && up > .9 && !white;
+      // le mur arrive avec la page, sans attente : son bord du haut, arrondi, s'aplatit en montant.
+      // Puis : .0 → .08 le logo d'Obtura apparaît ; .05 → .6 les cartes passent une à une ;
+      // .58 → .8 le mot s'efface et le cercle se resserre en point ; .8 → .985 le point tremble ; puis blanc et particules
+      const up = C((H - r.top) / H), white = p >= .985;
+      window.__finCover = onStage && r.top <= 0;
+      const light = onStage && r.top < 50 && !white;
       if (light !== lastLight) { lastLight = light; topbarEl.classList.toggle('light2', light); }
       if (white !== lastWhite) { lastWhite = white; wallEl.classList.toggle('white', white); }
       if (white && burstAt == null && !reduce) burstAt = now; if (p < .97 && r.top < H) burstAt = null;
       bt = burstAt == null ? null : (now - burstAt) / 1000;
       if (!onStage) { contactFrame(); return; }
-      wallEl.style.transform = `translateY(${((1 - up) * 101).toFixed(2)}%)`;
-      const rr = 1 - up; wallEl.style.borderRadius = `${(50 * rr).toFixed(1)}% ${(50 * rr).toFixed(1)}% 0 0 / ${(14 * rr).toFixed(1)}% ${(14 * rr).toFixed(1)}% 0 0`;
-      const draw = C((p - .1) / .16), shr = ease(C((p - .3) / .52));
-      const w0 = logo.offsetWidth * .96 || 1, sc = 1 + (10 / w0 - 1) * shr;
+      wallEl.style.transform = 'none';
+      const rr = 1 - ease(up); wallEl.style.borderRadius = `${(50 * rr).toFixed(1)}% ${(50 * rr).toFixed(1)}% 0 0 / ${(14 * rr).toFixed(1)}% ${(14 * rr).toFixed(1)}% 0 0`;
+      const draw = C(p / .08), wmOp = C(p / .06) * (1 - C((p - .58) / .06)), shr = ease(C((p - .6) / .2));
       ring.style.strokeDasharray = '302 302'; ring.style.strokeDashoffset = (302 * (1 - draw)).toFixed(1);
-      ring.style.fill = `rgba(255,255,255,${C((shr - .85) / .15)})`;
+      ring.style.fill = `rgba(255,255,255,${C((shr - .7) / .3)})`;
+      wm.style.opacity = wmOp.toFixed(3);
+      // quand le mot s'efface, le cercle glisse au centre de l'écran
+      const shiftX = (wm.offsetWidth + 14) / 2 * C((p - .58) / .1);
       // le point tremble de plus en plus vite et brille
-      const pre = reduce ? 0 : C((p - .84) / .14), amp = pre * pre * 7;
+      const pre = reduce ? 0 : C((p - .8) / .18), amp = pre * pre * 7;
       const jx = Math.sin(t * 71) * amp + Math.sin(t * 43) * amp * .5, jy = Math.cos(t * 67) * amp + Math.cos(t * 37) * amp * .5;
-      logo.style.transform = `translate(-50%, -50%) translate(${jx.toFixed(1)}px, ${jy.toFixed(1)}px) scale(${(sc * (1 + pre * .5 + Math.sin(t * 30) * pre * .12)).toFixed(4)})`;
+      const sc = (1 - .72 * shr) * (1 + pre * .4 + Math.sin(t * 30) * pre * .1);
+      logo.style.transform = `translate(-50%, -50%) translate(${(shiftX + jx).toFixed(1)}px, ${jy.toFixed(1)}px) scale(${sc.toFixed(4)})`;
       logo.style.filter = pre > 0 ? `drop-shadow(0 0 ${(4 + pre * 14).toFixed(1)}px rgba(255,255,255,${(.5 + pre * .5).toFixed(2)}))` : 'none';
-      logo.style.visibility = white ? 'hidden' : 'visible'; logo.style.opacity = C((p - .09) / .05).toFixed(3);
-      name.style.opacity = (C((p - .16) / .08) * (1 - C((p - .3) / .08))).toFixed(3);
-      name.style.transform = `translate(-50%, ${((1 - C((p - .16) / .08)) * 16).toFixed(1)}px)`;
+      logo.style.visibility = white ? 'hidden' : 'visible'; logo.style.opacity = C((p + .02) / .05).toFixed(3);
+      name.style.opacity = (C((p - .03) / .05) * (1 - C((p - .55) / .05))).toFixed(3);
+      name.style.transform = `translate(-50%, ${((1 - C((p - .03) / .05)) * 12).toFixed(1)}px)`;
+      // les cartes : elles arrivent du fond, se montrent un instant, puis filent vers nous et disparaissent
+      const rx = W * (W < 760 ? .26 : .3), ry = H * (W < 760 ? .27 : .26);
       cards.forEach(c => {
-        let age = (t - c.born) / c.life; if (age >= 1 && p < .3) { spawn(c, t, false); age = 0; } age = Math.min(age, 1);
-        const life = reduce ? 1 : Math.sin(Math.PI * age), q = ease(C((p - .3 - c.delay * .08) / .44));
-        const z = (c.z0 + (c.z1 - c.z0) * age) * (1 - q) - 500 * q, spread = 1 + Math.max(0, -z) / 900 * .85;
-        const x = c.x * W * .44 * spread * (1 - q), y = c.y * H * .38 * spread * (1 - q);
-        c.el.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateY(${(c.ry * (1 - q)).toFixed(2)}deg) rotateX(${(c.rx * (1 - q)).toFixed(2)}deg) rotate(${(c.rz * (1 - q)).toFixed(2)}deg) scale(${(1 - q * .6).toFixed(3)})`;
-        c.el.style.opacity = (C((p - .12) / .1) * Math.max(life, q < 1 ? q * .9 : 0) * (1 - C((q - .8) / .2))).toFixed(3);
+        const u = C((p - c.st) / .17);
+        if (u <= 0 || u >= 1) { if (c.vis) { c.vis = false; c.el.style.opacity = 0; } return; }
+        c.vis = true;
+        const a = ease(C(u / .32)), o = C((u - .6) / .4), o2 = o * o;
+        const k = .2 + .8 * a + 1.1 * o2;
+        const x = c.ax * rx * k, y = c.ay * ry * k, z = -900 * (1 - a) + 650 * o2;
+        c.el.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateY(${(c.ry * (1 - a) - c.ry * .6 * o).toFixed(2)}deg) rotate(${(c.rz * (1 - a) + c.rz * .8 * o).toFixed(2)}deg)`;
+        c.el.style.opacity = (a * (1 - o)).toFixed(3);
       });
       // l'écran tremble un instant quand le point éclate
       const shk = bt != null && bt < .5 ? Math.pow(1 - bt / .5, 2) * 9 : 0;
@@ -1068,6 +1092,59 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       });
     }
     requestAnimationFrame(frame);
+  })();
+
+  /* ---------- Repris du portfolio de Gabriel, un peu changés ---------- */
+  (function fromPortfolio() {
+    const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    // titres qui montent mot par mot (les mots en dégradé gardent leur couleur)
+    document.querySelectorAll('#c-title').forEach(h => {
+      const walk = node => [...node.childNodes].forEach(n => {
+        if (n.nodeType === 3) { const f = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(w => { if (!w) return; if (/^\s+$/.test(w)) { f.appendChild(document.createTextNode(w)); return; }
+            const o = document.createElement('span'); o.className = 'rv-w'; const i = document.createElement('span'); i.textContent = w;
+            if (n.parentElement.closest('.grad')) i.className = 'grad'; o.appendChild(i); f.appendChild(o); });
+          n.replaceWith(f); }
+        else if (n.nodeType === 1 && !n.classList.contains('rv-w')) walk(n);
+      });
+      walk(h); h.querySelectorAll('.rv-w > span').forEach((sp, i) => sp.style.transitionDelay = (i * .07) + 's'); h.dataset.rv = 'words';
+    });
+    // apparitions en cascade
+    document.querySelectorAll('#contact .label, .c-lead, .c-list > div').forEach(el => el.classList.add('fu'));
+    document.querySelectorAll('.fu').forEach(el => { const sib = [...el.parentElement.children].filter(c => c.classList.contains('fu')); el.style.transitionDelay = (sib.indexOf(el) * .08) + 's'; });
+    const rev = [...document.querySelectorAll('[data-rv], .fu')];
+    if (!reduce && 'IntersectionObserver' in window) {
+      rev.forEach(el => el.classList.add('pre'));
+      const rio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rio.unobserve(e.target); } }), { rootMargin: '0px 0px -12% 0px' });
+      rev.forEach(el => rio.observe(el));
+    }
+    // bandeau qui défile, plus vite et penché quand on défile vite
+    const track = document.getElementById('marquee-track'); track.innerHTML += track.innerHTML;
+    let mx = 0, lastY = scrollY, v = 0, half = track.scrollWidth / 2, near = false;
+    addEventListener('resize', () => half = track.scrollWidth / 2);
+    if ('IntersectionObserver' in window) new IntersectionObserver(es => near = es[0].isIntersecting, { rootMargin: '200px' }).observe(track); else near = true;
+    (function tick() {
+      const y = scrollY; v += ((y - lastY) - v) * .1; lastY = y;
+      if (!reduce && near) { mx -= .6 + Math.abs(v) * .35; if (-mx > half) mx += half;
+        track.style.transform = `translate3d(${mx.toFixed(1)}px,0,0) skewX(${Math.max(-8, Math.min(8, -v * .25)).toFixed(2)}deg)`; }
+      requestAnimationFrame(tick);
+    })();
+    // curseur en dégradé et boutons aimantés (ordinateur seulement)
+    if (fine && !reduce) {
+      const cur = document.createElement('div'); cur.className = 'cursor'; cur.innerHTML = '<span></span>'; document.body.appendChild(cur);
+      const lab = cur.firstChild;
+      let cx = innerWidth / 2, cy = innerHeight / 2, tx = cx, ty = cy;
+      addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; });
+      (function mv() { const dx = tx - cx, dy = ty - cy; if (Math.abs(dx) + Math.abs(dy) > .1) { cx += dx * .35; cy += dy * .35; cur.style.transform = `translate3d(${cx}px, ${cy}px, 0)`; } requestAnimationFrame(mv); })();
+      document.addEventListener('pointerover', e => {
+        const a = e.target.closest('a, button'); cur.classList.toggle('mid', !!a && !a.classList.contains('more'));
+        cur.classList.toggle('big', !!a && a.classList.contains('more')); lab.textContent = a && a.classList.contains('more') ? 'Voir' : '';
+      });
+      document.querySelectorAll('.pill, .more, .brand').forEach(b => {
+        b.addEventListener('pointermove', e => { const r = b.getBoundingClientRect(); b.style.translate = `${((e.clientX - r.left - r.width / 2) * .3).toFixed(1)}px ${((e.clientY - r.top - r.height / 2) * .4).toFixed(1)}px`; });
+        b.addEventListener('pointerleave', () => b.style.translate = '');
+      });
+    }
   })();
 
   const rises = document.querySelectorAll('.rise');
