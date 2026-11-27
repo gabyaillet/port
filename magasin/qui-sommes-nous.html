@@ -133,16 +133,12 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .no-gl .pp-ini { display: block; }
 
 /* ---------- La fin : après nos cartes, le mur en dégradé monte et couvre l'écran ---------- */
-.finale { position: relative; z-index: 4; height: 400svh; }   /* hauteur recalculée selon les projets */
+.finale { position: relative; z-index: 4; height: 400svh; margin-top: calc(-100svh - 90svh); pointer-events: none; }   /* hauteur recalculée ; elle commence pendant que la carte d'Arthur est encore là */
+.pp.last { height: calc(205svh + 90svh); }   /* la carte d'Arthur reste en place le temps de glisser vers la gauche */
+.fin-stage > * { pointer-events: auto; }
 /* Le mur en dégradé monte avec un texte ; puis tout glisse vers la gauche et une page blanche arrive :
    nos projets en deux colonnes sur les côtés (celle de gauche monte, celle de droite descend) et, au centre, les catégories */
-.fin-track { position: absolute; left: 0; top: 0; height: 100%; width: 200vw; display: flex; will-change: transform; }
-.fin-panel { position: relative; flex: none; width: 100vw; height: 100%; overflow: hidden; }
-.wall-text { position: absolute; left: max(20px, 6vw); right: max(20px, 6vw); bottom: calc(env(safe-area-inset-bottom, 0px) + 12svh); color: #fff; will-change: opacity, transform; }
-.wall-text .label { color: rgba(255,255,255,.85); }
-.wall-text h2 { margin: 0; font: italic 400 clamp(4rem, 13vw, 13rem)/.86 "Instrument Serif", Georgia, serif; letter-spacing: -.02em; }
-.wall-text p:last-child { margin: 1.4rem 0 0; max-width: 26rem; font-size: 1.05rem; line-height: 1.5; color: rgba(255,255,255,.88); }
-.works { background: #f0f0ee; color: #141414; }
+.works { position: absolute; inset: 0; overflow: hidden; background: #f0f0ee; color: #141414; transform: translateX(100%); will-change: transform; }
 /* comme la photo : deux larges colonnes décalées, images en paysage dans un fin cadre blanc, catégories à gauche du centre */
 .wk-col { position: absolute; top: 0; width: 33vw; display: grid; gap: 15svh; will-change: transform; }
 .wk-col.l { left: 4vw; } .wk-col.r { right: 3vw; }
@@ -173,8 +169,20 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
   .wk .cap { flex-direction: column; gap: .2rem; margin-top: .6rem; } .wk h3 { font-size: 1.05rem; } .wk .mt { font-size: .7rem; }
 }
 .fin-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
-.fin-wall { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
+.fin-wall { position: absolute; inset: 0; overflow: hidden; z-index: 4; transform: translateY(101%); will-change: transform; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
 .topbar.light2 { --ink: #f4f4f2; --wall: #0d0d0d; }
+.topbar.light.dark2 { --ink: #141414; --wall: #d2d2d0; }   /* sur la page blanche des projets, l'en-tête redevient sombre */
+/* nos contacts, sur le mur en dégradé */
+.wall-contact { position: absolute; left: max(20px, 6vw); right: max(20px, 6vw); bottom: calc(env(safe-area-inset-bottom, 0px) + 11svh); color: #fff; }
+.wall-contact .label { color: rgba(255,255,255,.85); }
+.wall-contact h2 { margin: 0 0 clamp(2rem, 5vw, 3.6rem); font: italic 400 clamp(3.6rem, 10.5vw, 10.5rem)/.88 "Instrument Serif", Georgia, serif; letter-spacing: -.02em; }
+.wall-contact dl { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; max-width: 70rem; }
+.wall-contact dl div { padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.35); }
+.wall-contact dd a { color: inherit; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.5); }
+.wall-contact dt { font: 400 .64rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.75); margin-bottom: .55rem; }
+.wall-contact dd { margin: 0; font-size: 1.05rem; line-height: 1.45; }
+.wall-contact dd.todo { color: rgba(255,255,255,.7); font-style: italic; }
+@media (max-width: 760px) { .wall-contact dl { grid-template-columns: 1fr 1fr; } }
 
 /* ---------- Repris du portfolio de Gabriel, un peu changés ----------
    le curseur (ici en dégradé) et les boutons aimantés */
@@ -261,6 +269,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 </header>
 <ul class="nav" id="nav" data-open="false">
   <li><a href="#equipe">Qui sommes-nous</a></li>
+  <li><a href="#contact">Contact</a></li>
   <li><a href="./">Revoir l'intro</a></li>
   <li class="nav-foot"><button class="pill nav-close" type="button">Fermer ✕</button></li>
 </ul>
@@ -299,7 +308,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         </article>
       </div>
     </div>
-    <div class="pp right" data-a="#ff4f8b" data-b="#ff8a3d" data-c="#7a3cff" style="--a:#ff4f8b; --b:#ff8a3d; --c:#7a3cff">
+    <div class="pp right last" data-a="#ff4f8b" data-b="#ff8a3d" data-c="#7a3cff" style="--a:#ff4f8b; --b:#ff8a3d; --c:#7a3cff">
       <div class="pp-stage">
         <div class="pp-intro" aria-hidden="true"><p class="p-kicker">02 · Cofondateur</p><p class="p-name">Arthur <span class="serif">Goubill</span></p></div>
         <div class="pp-big" aria-hidden="true"><span>Arthur</span><i class="pp-pill"><b></b></i><span>Goubill</span></div>
@@ -316,16 +325,23 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   </div>
 </section>
 <div class="curtain" id="curtain" aria-hidden="true"></div>
-<section class="finale" id="fin" aria-label="Nos projets">
+<section class="finale" id="fin" aria-label="Nos projets et contact">
   <div class="fin-stage">
-    <div class="fin-track" id="fin-track">
-      <div class="fin-panel"><div class="fin-wall" id="fin-wall">
-        <div class="wall-text" id="wall-text"><p class="label">Obtura Studio · 2026</p><h2>Nos projets</h2><p>Ce qu'on a déjà fait, en attendant les sites de nos premiers clients.</p></div>
-      </div></div>
-      <div class="fin-panel works" id="works">
-        <div class="wk-col l" id="wk-l"></div>
-        <ul class="wk-cats" id="wk-cats"></ul>
-        <div class="wk-col r" id="wk-r"></div>
+    <div class="works" id="works">
+      <div class="wk-col l" id="wk-l"></div>
+      <ul class="wk-cats" id="wk-cats"></ul>
+      <div class="wk-col r" id="wk-r"></div>
+    </div>
+    <div class="fin-wall" id="fin-wall">
+      <div class="wall-contact" id="contact">
+        <p class="label">Contact</p>
+        <h2>Parlons de votre projet.</h2>
+        <dl>
+          <div><dt>E-mail</dt><dd><a href="mailto:contact@obturastudio.fr">contact@obturastudio.fr</a></dd></div>
+          <div><dt>Instagram et TikTok</dt><dd>Obtura Web</dd></div>
+          <div><dt>Où</dt><dd>Nantes</dd></div>
+          <div><dt>Qui</dt><dd>Gabriel Aillet et Arthur Goubill</dd></div>
+        </dl>
       </div>
     </div>
   </div>
@@ -958,7 +974,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const g = clamp((sy - P.y) / (vh * .8)), e = clamp(P.sp, 0, 1.04), ec = clamp(e);
         // le décor collant : en haut tant qu'on est dans la section, puis il remonte avec la page
         const stTop = sy < P.y ? P.y - sy : Math.min(0, P.y + P.h - vh - sy);
-        const S = P.start, E = P.end;
+        // à la fin, la carte d'Arthur part vers la gauche pendant que la page des projets arrive
+        const ox = P.el.classList.contains('last') ? (window.__slideX || 0) : 0, S = ox ? { ...P.start, x: P.start.x + ox } : P.start, E = ox ? { ...P.end, x: P.end.x + ox } : P.end;
         const r = { x: lerp(S.x, E.x, e), y: lerp(S.y, E.y, e) + stTop, w: lerp(S.w, E.w, e), h: lerp(S.h, E.h, e) };
         const cardY = S.y + stTop, white = 1 - sstep(vh * 1.02, vh * .7, cardY);   // elle sort du blanc en entrant à l'écran
         plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(16, 22, ec), seed: P.seed, zoom: 1 + .18 * Math.pow(1 - ec, 2), tint: 1, pal: [P.a, P.b, P.c],
@@ -987,11 +1004,14 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     requestAnimationFrame(frame);
   })();
 
-  /* ---------- La fin : le mur en dégradé monte avec son texte, puis glisse à gauche ; la page blanche des projets arrive ---------- */
+  /* ---------- La fin : après la carte d'Arthur, tout glisse vers la gauche et la page des projets arrive ;
+     on fait défiler les projets ; puis le mur en dégradé monte avec nos contacts ---------- */
   (function finale() {
     const fin = document.getElementById('fin'), wallEl = document.getElementById('fin-wall'), topbarEl = document.getElementById('topbar');
-    const track = document.getElementById('fin-track'), wtext = document.getElementById('wall-text');
+    const worksEl = document.getElementById('works'), arthur = document.querySelector('.pp.last .pp-stage');
     const colL = document.getElementById('wk-l'), colR = document.getElementById('wk-r'), cats = [];
+    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, C = v => Math.max(0, Math.min(1, v));
+    let lastLight = false, lastDark = false, lastR = -1, G = null, filter = null, lastCat = '';
     // nos projets, et des cartes blanches pour ceux à venir
     const WK = [
       { n: 'La boutique Obtura', t: 'Intro 3D', y: '2026', c: '3d', img: './img/boutique-obtura.jpg', href: './', alt: "La façade de la boutique Obtura en 3D, avec son enseigne" },
@@ -1013,39 +1033,40 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     document.getElementById('wk-cats').innerHTML = CATS.map(([f, l]) => `<li><button type="button" data-f="${f}">${l}<sup>(${f === 'all' ? WK.length : WK.filter(P => (P ? P.c : 'soon') === f).length})</sup></button></li>`).join('');
     cats.splice(0, cats.length, ...document.querySelectorAll('#wk-cats button'));
     const works = [...document.querySelectorAll('.wk')], imgs = works.map(w => w.querySelector('img'));
-    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, C = v => Math.max(0, Math.min(1, v));
-    let lastLight = false, lastR = -1, G = null, filter = null, lastCat = '';
     // les longueurs : glissement vers la gauche (90 % d'écran), puis le défilement des colonnes
     function finLayout() {
       const H = innerHeight, narrow = innerWidth < 760, top0 = narrow ? H * .3 : H * .14;
       // comme la photo : les colonnes couvrent tout l'écran du début à la fin (des projets coupés en haut et en bas)
       const hL = colL.offsetHeight, hR = colR.offsetHeight, edge = H * .2;
       const trL = Math.max(H * .5, hL - H - 2 * edge), trR = Math.max(H * .5, hR - H - 2 * edge), travel = Math.max(trL, trR);
-      G = { H, slide: H * .9, travel, top0, hL, hR, edge, trL, trR };
-      fin.style.height = (H + G.slide + travel) + 'px';
+      G = { H, slide: H * .9, travel, top0, hL, hR, edge, trL, trR, rise: H * .9 };
+      fin.style.height = (H + G.slide + travel + G.rise) + 'px';
     }
     finLayout(); addEventListener('resize', finLayout); addEventListener('load', finLayout);
     window.__finStops = () => { if (!G) return []; let y = 0, e = fin; while (e) { y += e.offsetTop; e = e.offsetParent; }
-      return [y, y + G.slide, y + G.slide + G.travel * .5, y + G.slide + G.travel]; };
+      return [y + G.slide, y + G.slide + G.travel * .5, y + G.slide + G.travel, y + G.slide + G.travel + G.rise]; };
     cats.forEach(b => b.addEventListener('click', () => { filter = b.dataset.f === 'all' ? null : b.dataset.f;
       works.forEach(w => w.classList.toggle('dim', !!filter && w.dataset.cat !== filter)); lastCat = ''; }));
     (function frame() {
       requestAnimationFrame(frame);
       const H = innerHeight, r = fin.getBoundingClientRect(), on = r.top < H && r.bottom > 0;
-      window.__finCover = on && r.top <= 0;
-      if (!on || !G) { if (lastLight) { lastLight = false; topbarEl.classList.remove('light2'); } return; }
-      const rel = Math.max(0, -r.top), sp = ease(C(rel / G.slide)), cp = C((rel - G.slide) / G.travel);
-      const light = r.top < 50 && sp < .5;
-      if (light !== lastLight) { lastLight = light; topbarEl.classList.toggle('light2', light); }
-      const rr = +(1 - ease(C((H - r.top) / H))).toFixed(3);   // le bord du haut du mur, arrondi, s'aplatit en montant
+      const rel = Math.max(0, -r.top), sp = G ? ease(C(rel / G.slide)) : 0;
+      window.__finCover = on && r.top <= 0 && sp > .99;
+      window.__slideX = on && r.top <= 0 ? -sp * innerWidth : 0;   // la carte d'Arthur (WebGL) part vers la gauche
+      if (arthur) arthur.style.transform = window.__slideX ? `translate3d(${window.__slideX.toFixed(1)}px, 0, 0)` : '';
+      if (!on || !G) { if (lastLight) { lastLight = false; topbarEl.classList.remove('light2'); } if (lastDark) { lastDark = false; topbarEl.classList.remove('dark2'); } return; }
+      const cp = C((rel - G.slide) / G.travel), wp = C((rel - G.slide - G.travel) / G.rise);
+      // la page des projets arrive de la droite pendant que la carte d'Arthur part à gauche
+      worksEl.style.transform = `translate3d(${((1 - (r.top <= 0 ? sp : 0)) * 100).toFixed(3)}%, 0, 0)`;
+      // à la fin, le mur en dégradé monte, son bord du haut arrondi s'aplatit en montant
+      const we = ease(wp), rr = +(1 - we).toFixed(3);
+      wallEl.style.transform = `translate3d(0, ${((1 - we) * 101).toFixed(2)}%, 0)`;
       if (rr !== lastR) { lastR = rr; wallEl.style.borderRadius = `${50 * rr}% ${50 * rr}% 0 0 / ${14 * rr}% ${14 * rr}% 0 0`; }
-      // le texte du mur arrive en montant
-      const wt = C((H * .45 - r.top) / (H * .45));
-      wtext.style.opacity = wt.toFixed(3); wtext.style.transform = `translateY(${((1 - ease(wt)) * 60).toFixed(1)}px)`;
-      // tout glisse vers la gauche
-      track.style.transform = `translate3d(${(-sp * 100).toFixed(3)}vw, 0, 0)`;
+      const light = we > .92, dark = sp > .5 && !light;
+      if (light !== lastLight) { lastLight = light; topbarEl.classList.toggle('light2', light); }
+      if (dark !== lastDark) { lastDark = dark; topbarEl.classList.toggle('dark2', dark); }
       // les colonnes : celle de gauche monte, celle de droite descend (comme la photo)
-      const tL = -G.edge - cp * G.trL, tR = -G.edge - G.trR + cp * G.trR;   // gauche monte, droite descend
+      const tL = -G.edge - cp * G.trL, tR = -G.edge - G.trR + cp * G.trR;
       colL.style.transform = `translate3d(0, ${tL.toFixed(1)}px, 0)`; colR.style.transform = `translate3d(0, ${tR.toFixed(1)}px, 0)`;
       // dans chaque cadre, l'image glisse un peu (parallaxe), dans le sens inverse de sa colonne
       if (sp > .02) works.forEach((w, k) => { const im = imgs[k]; if (!im) return; const b = w.getBoundingClientRect();
