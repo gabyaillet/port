@@ -157,34 +157,36 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .pj-cap img.on { opacity: 1; transform: scale(1); }
 .pj-note { position: absolute; left: max(20px, 6vw); bottom: calc(env(safe-area-inset-bottom, 0px) + 8svh); margin: 0; max-width: 22rem; font: 400 .95rem/1.45 var(--f); color: var(--muted); opacity: 0; }
 .pj-num { position: absolute; right: max(20px, 6vw); bottom: calc(env(safe-area-inset-bottom, 0px) + 8svh); margin: 0; font: 400 .7rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); opacity: 0; }
-/* comme la photo : deux larges colonnes décalées, images en paysage dans un fin cadre blanc, catégories à gauche du centre */
-.wk-col { position: absolute; top: 0; width: 33vw; display: grid; gap: 15svh; will-change: transform; }
-.wk-col.l { left: 4vw; } .wk-col.r { right: 3vw; }
-.wk { display: block; color: inherit; text-decoration: none; transition: opacity .6s; }
-.wk.dim { opacity: .16; }
-.wk .im { position: relative; background: #fff; padding: 3px; overflow: hidden; box-shadow: 0 30px 60px -40px rgba(20,20,20,.25); }
-.wk .fr { position: relative; overflow: hidden; aspect-ratio: 1.44; background: #fff; }
-.wk img { position: absolute; left: 0; top: -8%; width: 100%; height: 116%; object-fit: cover; will-change: transform; }   /* l'image glisse un peu dans son cadre */
-.wk .cap { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 1rem; }
-.wk h3 { margin: 0; font: 400 clamp(1.25rem, 1.75vw, 1.7rem) "Instrument Serif", Georgia, serif; letter-spacing: -.005em; }
-.wk .mt { font: 400 .8rem var(--f); color: #5d5d5a; white-space: nowrap; display: flex; gap: .7rem; }
-.wk .fr::after { content: ""; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background .6s; }
-.wk:hover .fr::after { background: rgba(255,255,255,.08); }
-/* les projets à venir : des cartes blanches, avec seulement le petit cercle d'Obtura et un numéro */
-.wk.blank .fr { background: linear-gradient(160deg, #ffffff 0%, #f7f7f5 100%); display: grid; place-items: center; }
-.wk.blank .fr i { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid #d7d7d4; }
-.wk.blank .fr b { position: absolute; left: 14px; top: 12px; font: 400 .62rem var(--mono); letter-spacing: .18em; color: #b9b9b6; }
-.wk.blank h3 { color: #9a9a97; }
-.wk-cats { position: absolute; left: 41.5vw; top: 50%; transform: translateY(-50%); margin: 0; padding: 0; list-style: none; display: grid; gap: .05rem; }
-.wk-cats button { all: unset; cursor: pointer; font: 400 clamp(1.6rem, 2.35vw, 2.5rem)/1.22 var(--f); letter-spacing: -.035em; color: rgba(20,20,20,.22); transition: color .6s; white-space: nowrap; }
-.wk-cats button sup { font: 400 .36em "Instrument Serif", Georgia, serif; letter-spacing: .02em; margin-left: .35em; vertical-align: .95em; }
-.wk-cats button.on, .wk-cats button:hover { color: #141414; }
-.wk-cats button:focus-visible { outline: 1px solid #141414; outline-offset: 4px; }
+/* La page des projets : un index. À gauche la liste, à droite une grande image qui change au défilement (un projet par geste) */
+.ix-top { position: absolute; left: max(20px, 6vw); right: max(20px, 6vw); top: calc(env(safe-area-inset-top, 0px) + 5.6rem); display: flex; justify-content: space-between; font: 400 .68rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+.ix-list { position: absolute; left: max(20px, 6vw); width: 46vw; top: 50%; margin: 0; padding: 0; list-style: none; transform: translateY(-50%); }
+.ix-list li { border-top: 1px solid rgba(20,20,20,.13); }
+.ix-list li:last-child { border-bottom: 1px solid rgba(20,20,20,.13); }
+.ix-row { display: grid; grid-template-columns: 3.2rem 1fr auto; align-items: baseline; gap: 1rem; padding: clamp(.7rem, 1.6svh, 1.2rem) 0; color: rgba(20,20,20,.3); text-decoration: none; transition: color .6s cubic-bezier(.2,.7,.2,1); }
+.ix-row b { font: 400 .66rem var(--mono); letter-spacing: .16em; align-self: center; }
+.ix-row h3 { margin: 0; font: 400 clamp(2rem, 3.3vw, 3.6rem)/1 "Instrument Serif", Georgia, serif; letter-spacing: -.015em; transition: transform .7s cubic-bezier(.2,.7,.2,1); }
+.ix-row .mt { font: 400 .78rem var(--f); white-space: nowrap; display: flex; gap: .9rem; }
+.ix-row.on { color: #141414; }
+.ix-row.on h3 { transform: translateX(.35em); font-style: italic; }
+.ix-row.soon h3 { font-style: italic; }
+.ix-row:focus-visible { outline: 1px solid #141414; outline-offset: 4px; }
+.ix-view { position: absolute; right: max(20px, 6vw); top: 50%; width: 38vw; transform: translateY(-50%); }
+.ix-frame { position: relative; aspect-ratio: 1.3; overflow: hidden; background: #cfcfcd; box-shadow: 0 50px 90px -60px rgba(20,20,20,.45); }
+.ix-img { position: absolute; inset: 0; clip-path: inset(100% 0 0 0); transition: clip-path 1.05s cubic-bezier(.77,0,.18,1); }
+.ix-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.18); transition: transform 1.6s cubic-bezier(.2,.7,.2,1); }
+.ix-img.on { clip-path: inset(0 0 0 0); }
+.ix-img.on img { transform: scale(1); }
+.ix-img.out { clip-path: inset(0 0 0 0); }
+.ix-cap { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1rem; font: 400 .8rem var(--f); color: var(--muted); }
+.ix-cap a { color: #141414; text-decoration: none; border-bottom: 1px solid rgba(20,20,20,.35); padding-bottom: 2px; }
+.ix-cap a:hover { border-color: #141414; }
+.ix-n { position: absolute; right: 12px; top: 10px; z-index: 50; font: 400 .66rem var(--mono); letter-spacing: .16em; color: #fff; mix-blend-mode: difference; }
 @media (max-width: 760px) {
-  .wk-col { width: 45vw; gap: 9svh; } .wk-col.l { left: 3vw; } .wk-col.r { right: 3vw; }
-  .wk-cats { left: 50%; top: calc(env(safe-area-inset-top, 0px) + 4.2rem); transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .8rem; width: 100vw; z-index: 2; background: rgba(210,210,208,.82); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); padding: .4rem 3vw .7rem; }
-  .wk-cats button { font-size: 1.05rem; }
-  .wk .cap { flex-direction: column; gap: .2rem; margin-top: .6rem; } .wk h3 { font-size: 1.05rem; } .wk .mt { font-size: .7rem; }
+  .ix-top { top: calc(env(safe-area-inset-top, 0px) + 4.4rem); }
+  .ix-view { left: max(16px, 5vw); right: max(16px, 5vw); width: auto; top: calc(env(safe-area-inset-top, 0px) + 6.4rem); transform: none; }
+  .ix-list { left: max(16px, 5vw); right: max(16px, 5vw); width: auto; top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 4svh); transform: none; }
+  .ix-row { grid-template-columns: 2.2rem 1fr; padding: .55rem 0; } .ix-row .mt { display: none; }
+  .ix-row h3 { font-size: 1.75rem; }
 }
 .fin-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
 .fin-wall { position: absolute; inset: 0; overflow: hidden; z-index: 4; transform: translateY(101%); will-change: transform; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
@@ -353,9 +355,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       <p class="pj-num">Nos projets</p>
     </div>
     <div class="works" id="works">
-      <div class="wk-col l" id="wk-l"></div>
-      <ul class="wk-cats" id="wk-cats"></ul>
-      <div class="wk-col r" id="wk-r"></div>
+      <div class="ix-top"><span>Nos projets</span><span id="ix-count"></span></div>
+      <ol class="ix-list" id="ix-list"></ol>
+      <div class="ix-view"><div class="ix-frame" id="ix-frame"><span class="ix-n" id="ix-n"></span></div><div class="ix-cap"><span id="ix-meta"></span><a id="ix-go" href="#">Voir le projet</a></div></div>
     </div>
     <div class="fin-wall" id="fin-wall">
       <div class="wall-contact" id="contact">
@@ -1051,38 +1053,38 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       mz.style.setProperty('--mzg', g + 'px'); mz.innerHTML = html; mz.style.width = ''; mzCols = [...mz.children];
       mzCols[1].dataset.shift = (ch / 2).toFixed(0);   // la colonne du milieu est décalée d'une demi-photo
     }
-    const colL = document.getElementById('wk-l'), colR = document.getElementById('wk-r'), cats = [];
     const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, C = v => Math.max(0, Math.min(1, v));
-    let lastLight = false, lastDark = false, lastR = -1, G = null, filter = null, lastCat = '';
-    // nos projets, et des cartes blanches pour ceux à venir
+    let lastLight = false, lastDark = false, lastR = -1, G = null;
+    // nos projets (les vrais), puis une ligne pour ceux à venir
     const WK = [
-      { n: 'La boutique Obtura', t: 'Intro 3D', y: '2026', c: '3d', img: './img/boutique-obtura.jpg', href: './', alt: "La façade de la boutique Obtura en 3D, avec son enseigne" },
-      null,
-      { n: 'Boutique de vins', t: 'Site web', y: "Projet d'IUT", c: 'web', img: './img/boutique-vins.jpg', href: 'https://gabyaillet.github.io/port/projets.html', alt: 'Maquette du site Le Cellier : trois bouteilles stylisées et le nom en grand' },
-      null, null,
-      null,
-      { n: 'La ville en 2CV', t: '3D', y: 'Gabriel', c: '3d', img: './img/ville-2cv.jpg', href: 'https://gabyaillet.github.io/port/vitrine/', alt: "La place d'une petite ville en 3D, avec une 2CV devant les lettres BIENVENUE" },
-      null,
-      { n: 'Générateur de particules', t: 'Programmation', y: "Projet d'IUT", c: 'code', img: './img/particules.jpg', href: 'https://gabyaillet.github.io/port/projets.html', alt: 'Un nuage de particules blanches sur fond noir' },
-      null];
-    let blankN = 0;
-    const card = P => {
-      if (!P) { blankN++; return `<div class="wk blank" data-cat="soon"><div class="im"><div class="fr"><b>${String(blankN).padStart(2, '0')}</b><i></i></div></div><div class="cap"><h3>À venir</h3><span class="mt"><span>Projet</span><span>Bientôt</span></span></div></div>`; }
-      return `<a class="wk" data-cat="${P.c}" href="${P.href}"><div class="im"><div class="fr"><img src="${P.img}" alt="${P.alt}" loading="lazy" decoding="async"></div></div><div class="cap"><h3>${P.n}</h3><span class="mt"><span>${P.t}</span><span>${P.y}</span></span></div></a>`;
-    };
-    colL.innerHTML = WK.slice(0, 5).map(card).join(''); colR.innerHTML = WK.slice(5).map(card).join('');
-    const CATS = [['all', 'Tous'], ['3d', '3D'], ['web', 'Site web'], ['code', 'Programmation'], ['soon', 'À venir']];
-    document.getElementById('wk-cats').innerHTML = CATS.map(([f, l]) => `<li><button type="button" data-f="${f}">${l}<sup>(${f === 'all' ? WK.length : WK.filter(P => (P ? P.c : 'soon') === f).length})</sup></button></li>`).join('');
-    cats.splice(0, cats.length, ...document.querySelectorAll('#wk-cats button'));
-    const works = [...document.querySelectorAll('.wk')], imgs = works.map(w => w.querySelector('img'));
+      { n: 'La boutique Obtura', t: 'Intro 3D', y: '2026', img: './img/boutique-obtura.jpg', href: './', alt: "La façade de la boutique Obtura en 3D, avec son enseigne" },
+      { n: 'La ville en 2CV', t: '3D', y: 'Gabriel', img: './img/ville-2cv.jpg', href: 'https://gabyaillet.github.io/port/vitrine/', alt: "La place d'une petite ville en 3D, avec une 2CV devant les lettres BIENVENUE" },
+      { n: 'Boutique de vins', t: 'Site web', y: "Projet d'IUT", img: './img/boutique-vins.jpg', href: 'https://gabyaillet.github.io/port/projets.html', alt: 'Maquette du site Le Cellier : trois bouteilles stylisées et le nom en grand' },
+      { n: 'Générateur de particules', t: 'Programmation', y: "Projet d'IUT", img: './img/particules.jpg', href: 'https://gabyaillet.github.io/port/projets.html', alt: 'Un nuage de particules blanches sur fond noir' }];
+    const NP = WK.length, list = document.getElementById('ix-list'), ixFrame = document.getElementById('ix-frame');
+    list.innerHTML = WK.map((P, k) => `<li><a class="ix-row" href="${P.href}" data-k="${k}"><b>${String(k + 1).padStart(2, '0')}</b><h3>${P.n}</h3><span class="mt"><span>${P.t}</span><span>${P.y}</span></span></a></li>`).join('')
+      + `<li><span class="ix-row soon"><b>${String(NP + 1).padStart(2, '0')}</b><h3>À venir</h3><span class="mt"><span>Nos premiers clients</span></span></span></li>`;
+    ixFrame.insertAdjacentHTML('beforeend', WK.map(P => `<div class="ix-img"><img src="${P.img}" alt="${P.alt}" loading="lazy" decoding="async"></div>`).join(''));
+    document.getElementById('ix-count').textContent = `(${String(NP).padStart(2, '0')})`;
+    const rows = [...list.querySelectorAll('a.ix-row')], ims = [...ixFrame.querySelectorAll('.ix-img')];
+    const ixN = document.getElementById('ix-n'), ixMeta = document.getElementById('ix-meta'), ixGo = document.getElementById('ix-go');
+    let cur = -1, hover = -1, zTop = 1;
+    function showIx(k) {   // le nouveau projet se découvre par-dessus l'ancien, de bas en haut
+      if (k === cur) return; const prev = cur; cur = k;
+      ims.forEach((im, i) => { im.classList.toggle('on', i === k); im.classList.toggle('out', i === prev); if (i === k) im.style.zIndex = ++zTop; });
+      rows.forEach((r, i) => r.classList.toggle('on', i === k));
+      ixN.textContent = `${String(k + 1).padStart(2, '0')} / ${String(NP).padStart(2, '0')}`;
+      ixMeta.textContent = `${WK[k].t} · ${WK[k].y}`; ixGo.href = WK[k].href;
+    }
+    showIx(0);
+    if (matchMedia('(hover: hover)').matches) rows.forEach((r, i) => { r.addEventListener('pointerenter', () => { hover = i; showIx(i); }); r.addEventListener('pointerleave', () => { hover = -1; }); });
     // les longueurs : glissement vers la gauche (90 % d'écran), puis le défilement des colonnes
     function finLayout() {
       const H = innerHeight, narrow = innerWidth < 760, top0 = narrow ? H * .3 : H * .14;
       // comme la photo : les colonnes couvrent tout l'écran du début à la fin (des projets coupés en haut et en bas)
-      const hL = colL.offsetHeight, hR = colR.offsetHeight, edge = H * .2;
-      const trL = Math.max(H * .5, hL - H - 2 * edge), trR = Math.max(H * .5, hR - H - 2 * edge), travel = Math.max(trL, trR);
+      const travel = H * .6 * (NP - 1);   // un projet par geste
       // glissement, ouverture de la capsule, capsule en plein écran, défilement des projets, mur
-      G = { H, slide: H * .9, open: H * .75, exp: H * .9, travel, top0, hL, hR, edge, trL, trR, rise: H * .9 };
+      G = { H, slide: H * .9, open: H * .75, exp: H * .9, travel, top0, rise: H * .9 };
       buildMz(); G.M = mz.offsetWidth;
       // le trajet vers la gauche : la carte d'Arthur, un bon espace, la mosaïque, un petit espace, puis le mot « Projets »
       const W = innerWidth; G.padL = W * (narrow ? .14 : .17); G.gapR = W * (narrow ? .08 : .07);
@@ -1095,9 +1097,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     finLayout(); addEventListener('resize', finLayout); addEventListener('load', finLayout); if (document.fonts) document.fonts.ready.then(finLayout);
     window.__finSlide = () => { if (!G) return null; let y = 0, e = fin; while (e) { y += e.offsetTop; e = e.offsetParent; } return [y - innerHeight * .4, y + G.slide + G.open + 4, y + G.slide]; };
     window.__finStops = () => { if (!G) return []; let y = 0, e = fin; while (e) { y += e.offsetTop; e = e.offsetParent; }
-      return [y + G.slide + G.open, y + G.w0, y + G.w0 + G.travel * .5, y + G.w0 + G.travel, y + G.w0 + G.travel + G.rise]; };
-    cats.forEach(b => b.addEventListener('click', () => { filter = b.dataset.f === 'all' ? null : b.dataset.f;
-      works.forEach(w => w.classList.toggle('dim', !!filter && w.dataset.cat !== filter)); lastCat = ''; }));
+      return [y + G.slide + G.open, ...WK.map((P, k) => y + G.w0 + G.travel * k / (NP - 1)), y + G.w0 + G.travel + G.rise]; };
     (function frame() {
       requestAnimationFrame(frame);
       const H = innerHeight, r = fin.getBoundingClientRect(), on = r.top < H && r.bottom > 0;
@@ -1139,23 +1139,19 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       worksEl.style.visibility = ep > 0 ? 'visible' : 'hidden'; worksEl.style.opacity = fade.toFixed(3);
       worksEl.style.transform = ep > 0 && ep < 1 ? `translate3d(0, ${((1 - ease(fade)) * 4).toFixed(2)}svh, 0)` : '';
       if (ep > 0 && ep < 1) {
-        if (!flyTarget || flyFrom !== lastShow) { flyFrom = lastShow;
-          // la carte la plus près du centre de l'écran
-          let best = 1e9; flyTarget = null; const c0 = H / 2;
-          works.forEach((w, k) => { if (!imgs[k]) return; const b = w.querySelector('.fr').getBoundingClientRect(), d = Math.abs(b.top + b.height / 2 - c0) + Math.abs(b.left + b.width / 2 - W / 2) * .3; if (d < best) { best = d; flyTarget = k; } });
-          flyI[0].src = pjImgs[Math.max(0, lastShow)].src; flyI[1].src = imgs[flyTarget].src; }
-        const a = pjCap.getBoundingClientRect(), tEl = works[flyTarget].querySelector('.fr'), b = tEl.getBoundingClientRect();
+        if (flyTarget == null || flyFrom !== lastShow) { flyFrom = lastShow; flyTarget = 0;
+          flyI[0].src = pjImgs[Math.max(0, lastShow)].src; flyI[1].src = ims[0].querySelector('img').src; }
+        const a = pjCap.getBoundingClientRect(), b = ixFrame.getBoundingClientRect();
         const L = (u, v) => u + (v - u) * ee;
         fly.style.visibility = 'visible'; fly.style.width = L(a.width, b.width).toFixed(1) + 'px'; fly.style.height = L(a.height, b.height).toFixed(1) + 'px';
         fly.style.transform = `translate3d(${L(a.left, b.left).toFixed(1)}px, ${L(a.top, b.top).toFixed(1)}px, 0)`;
         fly.style.borderRadius = ((1 - ee) * a.height / 2).toFixed(1) + 'px';
-        const tr = parseFloat((imgs[flyTarget].style.transform.match(/,\s*(-?[\d.]+)%/) || [])[1] || 0);
-        flyI.forEach(im => { im.style.top = (-8 * ee) + '%'; im.style.height = (100 + 16 * ee) + '%'; im.style.transform = `translate3d(0, ${(tr * ee).toFixed(2)}%, 0)`; });
+        flyI.forEach(im => { im.style.top = '0'; im.style.height = '100%'; });
         flyI[1].style.opacity = flyI[0].src === flyI[1].src ? 1 : C((ep - .15) / .5).toFixed(3); flyI[0].style.opacity = 1;
-        pjCap.style.visibility = 'hidden'; works[flyTarget].querySelector('img').style.visibility = 'hidden';
+        pjCap.style.visibility = 'hidden'; ixFrame.style.visibility = 'hidden'; if (cur !== 0) showIx(0);
       } else {
         fly.style.visibility = 'hidden'; pjCap.style.visibility = '';
-        if (flyTarget != null) { works[flyTarget].querySelector('img').style.visibility = ''; flyTarget = null; }
+        if (flyTarget != null) { ixFrame.style.visibility = ''; flyTarget = null; }
       }
       pjEl.style.visibility = ep >= 1 ? 'hidden' : '';
       // à la fin, le mur en dégradé monte, son bord du haut arrondi s'aplatit en montant
@@ -1166,17 +1162,10 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       window.__finCover = we > .995;   // le mur des contacts couvre tout : inutile de dessiner le mur derrière
       if (light !== lastLight) { lastLight = light; topbarEl.classList.toggle('light2', light); }
       if (dark !== lastDark) { lastDark = dark; topbarEl.classList.toggle('dark2', dark); }
-      // les colonnes : celle de gauche monte, celle de droite descend (comme la photo)
-      const tL = -G.edge - cp * G.trL, tR = -G.edge - G.trR + cp * G.trR;
-      colL.style.transform = `translate3d(0, ${tL.toFixed(1)}px, 0)`; colR.style.transform = `translate3d(0, ${tR.toFixed(1)}px, 0)`;
-      // dans chaque cadre, l'image glisse un peu (parallaxe), dans le sens inverse de sa colonne
-      if (fade > 0) works.forEach((w, k) => { const im = imgs[k]; if (!im) return; const b = w.getBoundingClientRect();
-        if (b.bottom < -50 || b.top > H + 50) return; const d = (b.top + b.height / 2 - H / 2) / H; im.style.transform = `translate3d(0, ${(d * -7).toFixed(2)}%, 0)`; });
-      // au centre, la catégorie du projet le plus proche du milieu de l'écran s'allume (ou celle choisie)
-      let cat = filter || 'all';
-      if (!filter && fade > .5) { let best = 1e9;
-        works.forEach(w => { const b = w.getBoundingClientRect(), d = Math.abs(b.top + b.height / 2 - H / 2); if (d < best) { best = d; cat = w.dataset.cat; } }); }
-      if (cat !== lastCat) { lastCat = cat; cats.forEach(b => b.classList.toggle('on', b.dataset.f === cat)); }
+      // un projet par geste : le projet actif suit le défilement (sauf si la souris en survole un)
+      if (ep >= 1 && hover < 0) showIx(Math.min(NP - 1, Math.round(cp * (NP - 1))));
+      // la liste remonte doucement avec le défilement
+      list.style.transform = innerWidth < 760 ? '' : `translateY(calc(-50% + ${((.5 - cp) * H * .06).toFixed(1)}px))`;
     })();
   })();
 
