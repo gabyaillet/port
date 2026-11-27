@@ -133,9 +133,40 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .no-gl .pp-ini { display: block; }
 
 /* ---------- La fin : après nos cartes, le mur en dégradé monte et couvre l'écran ---------- */
-.finale { position: relative; z-index: 4; height: 100svh; }   /* le mur monte avec la page, et la page s'arrête quand il couvre l'écran */
+.finale { position: relative; z-index: 4; height: 400svh; }   /* hauteur recalculée selon les projets */
+/* Le mur en dégradé monte avec un texte ; puis tout glisse vers la gauche et une page blanche arrive :
+   nos projets en deux colonnes sur les côtés (celle de gauche monte, celle de droite descend) et, au centre, les catégories */
+.fin-track { position: absolute; left: 0; top: 0; height: 100%; width: 200vw; display: flex; will-change: transform; }
+.fin-panel { position: relative; flex: none; width: 100vw; height: 100%; overflow: hidden; }
+.wall-text { position: absolute; left: max(20px, 6vw); right: max(20px, 6vw); bottom: calc(env(safe-area-inset-bottom, 0px) + 12svh); color: #fff; will-change: opacity, transform; }
+.wall-text .label { color: rgba(255,255,255,.85); }
+.wall-text h2 { margin: 0; font: italic 400 clamp(4rem, 13vw, 13rem)/.86 "Instrument Serif", Georgia, serif; letter-spacing: -.02em; }
+.wall-text p:last-child { margin: 1.4rem 0 0; max-width: 26rem; font-size: 1.05rem; line-height: 1.5; color: rgba(255,255,255,.88); }
+.works { background: #efefed; color: #141414; }
+.wk-col { position: absolute; top: 0; width: min(32vw, 30rem); display: grid; gap: 16svh; will-change: transform; }
+.wk-col.l { left: max(20px, 4vw); } .wk-col.r { right: max(20px, 4vw); }
+.wk { display: block; color: inherit; text-decoration: none; transition: opacity .5s; }
+.wk.dim { opacity: .18; }
+.wk .im { background: #fff; padding: 4px; box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+.wk img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10.5; object-fit: cover; transition: transform 1s cubic-bezier(.16,1,.3,1); }
+.wk:hover img { transform: scale(1.03); }
+.wk .im { overflow: hidden; }
+.wk .cap { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: .9rem; }
+.wk h3 { margin: 0; font: 400 clamp(1.2rem, 1.7vw, 1.6rem) "Instrument Serif", Georgia, serif; letter-spacing: -.005em; }
+.wk .mt { font: 400 .8rem var(--f); color: #6d6d6a; white-space: nowrap; }
+.wk-cats { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 0; list-style: none; display: grid; gap: .15rem; }
+.wk-cats button { all: unset; cursor: pointer; font: 500 clamp(1.7rem, 2.6vw, 2.7rem)/1.18 var(--f); letter-spacing: -.035em; color: #c9c9c6; transition: color .5s; white-space: nowrap; }
+.wk-cats button sup { font: 400 .34em "Instrument Serif", Georgia, serif; letter-spacing: 0; margin-left: .3em; vertical-align: .9em; }
+.wk-cats button.on, .wk-cats button:hover { color: #141414; }
+.wk-cats button:focus-visible { outline: 1px solid #141414; outline-offset: 4px; }
+@media (max-width: 760px) {
+  .wk-col { width: 44vw; gap: 10svh; } .wk-col.l { left: 12px; } .wk-col.r { right: 12px; }
+  .wk-cats { top: calc(env(safe-area-inset-top, 0px) + 4.4rem); transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: .2rem .8rem; width: 92vw; z-index: 2; background: #efefed; padding: .4rem 0 .6rem; }
+  .wk-cats button { font-size: 1.05rem; }
+  .wk .cap { flex-direction: column; gap: .2rem; } .wk h3 { font-size: 1.05rem; }
+}
 .fin-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
-.fin-wall { position: absolute; inset: 0; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
+.fin-wall { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
 .topbar.light2 { --ink: #f4f4f2; --wall: #0d0d0d; }
 
 /* ---------- Repris du portfolio de Gabriel, un peu changés ----------
@@ -278,8 +309,30 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   </div>
 </section>
 <div class="curtain" id="curtain" aria-hidden="true"></div>
-<section class="finale" id="fin" aria-hidden="true">
-  <div class="fin-stage"><div class="fin-wall" id="fin-wall"></div></div>
+<section class="finale" id="fin" aria-label="Nos projets">
+  <div class="fin-stage">
+    <div class="fin-track" id="fin-track">
+      <div class="fin-panel"><div class="fin-wall" id="fin-wall">
+        <div class="wall-text" id="wall-text"><p class="label">Obtura Studio · 2026</p><h2>Nos projets</h2><p>Ce qu'on a déjà fait, en attendant les sites de nos premiers clients.</p></div>
+      </div></div>
+      <div class="fin-panel works" id="works">
+        <div class="wk-col l" id="wk-l">
+          <a class="wk" data-cat="3d" href="./"><div class="im"><img src="./img/boutique-obtura.jpg" alt="La façade de la boutique Obtura en 3D, avec son enseigne" width="1200" height="750" loading="lazy" decoding="async"></div><div class="cap"><h3>La boutique Obtura</h3><span class="mt">Intro 3D · 2026</span></div></a>
+          <a class="wk" data-cat="web" href="https://gabyaillet.github.io/port/projets.html"><div class="im"><img src="./img/boutique-vins.jpg" alt="Maquette du site Le Cellier : trois bouteilles stylisées et le nom en grand" width="1200" height="750" loading="lazy" decoding="async"></div><div class="cap"><h3>Boutique de vins</h3><span class="mt">Site web · Projet d'IUT</span></div></a>
+        </div>
+        <ul class="wk-cats" id="wk-cats">
+          <li><button type="button" data-f="all">Tous<sup>(4)</sup></button></li>
+          <li><button type="button" data-f="3d">3D<sup>(2)</sup></button></li>
+          <li><button type="button" data-f="web">Site web<sup>(1)</sup></button></li>
+          <li><button type="button" data-f="code">Programmation<sup>(1)</sup></button></li>
+        </ul>
+        <div class="wk-col r" id="wk-r">
+          <a class="wk" data-cat="3d" href="https://gabyaillet.github.io/port/vitrine/"><div class="im"><img src="./img/ville-2cv.jpg" alt="La place d'une petite ville en 3D, avec une 2CV devant les lettres BIENVENUE" width="1200" height="750" loading="lazy" decoding="async"></div><div class="cap"><h3>La ville en 2CV</h3><span class="mt">3D · Gabriel</span></div></a>
+          <a class="wk" data-cat="code" href="https://gabyaillet.github.io/port/projets.html"><div class="im"><img src="./img/particules.jpg" alt="Un nuage de particules blanches sur fond noir" width="1200" height="750" loading="lazy" decoding="async"></div><div class="cap"><h3>Générateur de particules</h3><span class="mt">Programmation · Projet d'IUT</span></div></a>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <script>
@@ -938,20 +991,49 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     requestAnimationFrame(frame);
   })();
 
-  /* ---------- La fin : le mur en dégradé qui monte (le même rideau que pour quitter la page) ---------- */
+  /* ---------- La fin : le mur en dégradé monte avec son texte, puis glisse à gauche ; la page blanche des projets arrive ---------- */
   (function finale() {
     const fin = document.getElementById('fin'), wallEl = document.getElementById('fin-wall'), topbarEl = document.getElementById('topbar');
+    const track = document.getElementById('fin-track'), wtext = document.getElementById('wall-text');
+    const colL = document.getElementById('wk-l'), colR = document.getElementById('wk-r'), cats = [...document.querySelectorAll('#wk-cats button')];
+    const works = [...document.querySelectorAll('.wk')];
     const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, C = v => Math.max(0, Math.min(1, v));
-    let lastLight = false, lastR = -1;
+    let lastLight = false, lastR = -1, G = null, filter = null, lastCat = '';
+    // les longueurs : glissement vers la gauche (90 % d'écran), puis le défilement des colonnes
+    function finLayout() {
+      const H = innerHeight, narrow = innerWidth < 760, top0 = narrow ? H * .3 : H * .14;
+      const hL = colL.offsetHeight, hR = colR.offsetHeight, travel = Math.max(H * .5, Math.max(hL, hR) - H * .55);
+      G = { H, slide: H * .9, travel, top0, hL, hR };
+      fin.style.height = (H + G.slide + travel) + 'px';
+    }
+    finLayout(); addEventListener('resize', finLayout); addEventListener('load', finLayout);
+    window.__finStops = () => { if (!G) return []; let y = 0, e = fin; while (e) { y += e.offsetTop; e = e.offsetParent; }
+      return [y, y + G.slide, y + G.slide + G.travel * .5, y + G.slide + G.travel]; };
+    cats.forEach(b => b.addEventListener('click', () => { filter = b.dataset.f === 'all' ? null : b.dataset.f;
+      works.forEach(w => w.classList.toggle('dim', !!filter && w.dataset.cat !== filter)); lastCat = ''; }));
     (function frame() {
       requestAnimationFrame(frame);
       const H = innerHeight, r = fin.getBoundingClientRect(), on = r.top < H && r.bottom > 0;
       window.__finCover = on && r.top <= 0;
-      const light = on && r.top < 50;
+      if (!on || !G) { if (lastLight) { lastLight = false; topbarEl.classList.remove('light2'); } return; }
+      const rel = Math.max(0, -r.top), sp = ease(C(rel / G.slide)), cp = C((rel - G.slide) / G.travel);
+      const light = r.top < 50 && sp < .5;
       if (light !== lastLight) { lastLight = light; topbarEl.classList.toggle('light2', light); }
-      if (!on) return;
-      const rr = +(1 - ease(C((H - r.top) / H))).toFixed(3);   // son bord du haut, arrondi, s'aplatit en montant
+      const rr = +(1 - ease(C((H - r.top) / H))).toFixed(3);   // le bord du haut du mur, arrondi, s'aplatit en montant
       if (rr !== lastR) { lastR = rr; wallEl.style.borderRadius = `${50 * rr}% ${50 * rr}% 0 0 / ${14 * rr}% ${14 * rr}% 0 0`; }
+      // le texte du mur arrive en montant
+      const wt = C((H * .45 - r.top) / (H * .45));
+      wtext.style.opacity = wt.toFixed(3); wtext.style.transform = `translateY(${((1 - ease(wt)) * 60).toFixed(1)}px)`;
+      // tout glisse vers la gauche
+      track.style.transform = `translate3d(${(-sp * 100).toFixed(3)}vw, 0, 0)`;
+      // les colonnes : celle de gauche monte, celle de droite descend (comme la photo)
+      const tL = G.top0 + H * .15 - cp * (G.travel + H * .15), tR = G.top0 - G.travel + cp * G.travel;
+      colL.style.transform = `translate3d(0, ${tL.toFixed(1)}px, 0)`; colR.style.transform = `translate3d(0, ${tR.toFixed(1)}px, 0)`;
+      // au centre, la catégorie du projet le plus proche du milieu de l'écran s'allume (ou celle choisie)
+      let cat = filter || 'all';
+      if (!filter && sp > .9) { let best = 1e9;
+        works.forEach(w => { const b = w.getBoundingClientRect(), d = Math.abs(b.top + b.height / 2 - H / 2); if (d < best) { best = d; cat = w.dataset.cat; } }); }
+      if (cat !== lastCat) { lastCat = cat; cats.forEach(b => b.classList.toggle('on', b.dataset.f === cat)); }
     })();
   })();
 
@@ -988,7 +1070,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const vh = innerHeight, b = id => docBox(document.getElementById(id)), pts = [0];
       pts.push(Math.max(0, b('team-head').y - vh * .16));
       document.querySelectorAll('.pp').forEach(el => pts.push(docBox(el).y + vh * .86));
-      pts.push(document.documentElement.scrollHeight - vh);   // le mur couvre l'écran
+      // le mur et son texte, la page blanche, le milieu et la fin des projets
+      (window.__finStops ? window.__finStops() : []).forEach(v => pts.push(v));
       stops = [...new Set(pts.map(Math.round))].sort((a, c) => a - c);
     }
     computeStops(); addEventListener('resize', () => setTimeout(computeStops, 200)); addEventListener('load', computeStops);
