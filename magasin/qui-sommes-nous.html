@@ -76,7 +76,7 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
    courbant comme une feuille, prend ses vraies couleurs et finit en grand ; nos infos apparaissent dessus.
    Le panneau est dessiné par la carte graphique (WebGL) sur une toile fixe, derrière les textes. */
 .gl-view { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; display: block; }
-.pp { position: relative; height: 240svh; }
+.pp { position: relative; height: 205svh; }   /* ouverture sur 80 % d'écran, puis une courte pause pour lire, et la page repart */
 .pp-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
 .pp-intro { position: absolute; left: 42vw; top: 38svh; max-width: 52vw; will-change: opacity, transform; }
 .pp.right .pp-intro { left: 6vw; }   /* panneau à droite : le nom passe à gauche */
@@ -808,7 +808,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       // le ressort des panneaux : la taille suit le défilement avec de l'inertie, comme un liquide qui a du poids
       const dts = Math.min(.05, lastSpT ? (now - lastSpT) / 1000 : 1 / 60); lastSpT = now;
       for (const P of people) {
-        P.tg = ease(clamp((sy - P.y) / (vh * .95)));
+        P.tg = ease(clamp((sy - P.y) / (vh * .8)));
         if (P.sp < 0 || reduce) { P.sp = P.tg; P.sv = 0; continue; }
         const steps = Math.max(1, Math.ceil(dts / .008)), h = dts / steps;
         for (let i = 0; i < steps; i++) { const acc = 150 * (P.tg - P.sp) - 15 * P.sv; P.sv += acc * h; P.sp += P.sv * h; }
@@ -835,7 +835,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       gl.uniform2f(U.uRes, vw, vh); gl.uniform1f(U.uTime, (now - t0) / 1000); gl.uniform1f(U.uDpr, dpr);
       for (const P of people) {
         if (!(P.y - sy < vh && P.y + P.h - sy > 0)) { if (P.oo !== 0) { P.oo = 0; P.over.style.opacity = 0; P.over.classList.remove('on'); } continue; }
-        const g = clamp((sy - P.y) / (vh * .95)), e = clamp(P.sp, 0, 1.04), ec = clamp(e);
+        const g = clamp((sy - P.y) / (vh * .8)), e = clamp(P.sp, 0, 1.04), ec = clamp(e);
         // le décor collant : en haut tant qu'on est dans la section, puis il remonte avec la page
         const stTop = sy < P.y ? P.y - sy : Math.min(0, P.y + P.h - vh - sy);
         const S = P.start, E = P.end;
@@ -843,7 +843,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(14, 24, ec), bend: 0, liq: clamp(Math.sin(Math.PI * ec) * .55 + Math.abs(P.sv) * .18), rip: Math.sin(Math.PI * ec), seed: P.seed, tint: 1 - sstep(.25, .9, ec), pal: [P.a, P.b, P.c] });
         if (ec > .97 && stTop === 0) cover = true;
         if (r.y < 60 && r.y + r.h > 20) dark = true;
-        const oo = clamp((g - .84) / .14), io = clamp(1 - g * 2.6);
+        const oo = clamp((g - .78) / .17), io = clamp(1 - g * 2.6);
         if (Math.abs(oo - P.oo) > .002) { P.oo = oo; P.over.style.opacity = oo.toFixed(3); P.over.classList.toggle('on', oo > .5); }
         if (Math.abs(io - P.io) > .002) { P.io = io; P.intro.style.opacity = io.toFixed(3); P.intro.style.transform = `translateY(${(-(1 - io) * 40).toFixed(1)}px)`; }
       }
