@@ -30,7 +30,6 @@ img { display: block; max-width: 100%; }
 /* Le trait : posé sur la page (il défile avec elle), devant les lettres, derrière les cartes */
 .ribbon { position: absolute; left: 0; top: 0; width: 100%; z-index: 2; pointer-events: none; overflow: visible; display: block; }
 .ribbon path { fill: none; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
-.ribbon path.hl { stroke: rgba(255,255,255,.34); }
 
 /* Le titre et sa chute */
 .fall { position: relative; height: 165svh; }
@@ -499,9 +498,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         gr.setAttribute('x1', X[i0].toFixed(1)); gr.setAttribute('y1', Y[i0].toFixed(1)); gr.setAttribute('x2', (X[i1] + (X[i1] === X[i0] && Y[i1] === Y[i0] ? 1 : 0)).toFixed(1)); gr.setAttribute('y2', Y[i1].toFixed(1));
         gr.innerHTML = `<stop offset="0" stop-color="${colorAt(S[i0])}"/><stop offset="1" stop-color="${colorAt(S[i1])}"/>`; defs.appendChild(gr);
         const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.style.strokeWidth = sw; p.setAttribute('stroke', `url(#rg${ci})`); rib.appendChild(p);
-        // un reflet clair sur le dessus : le trait ressemble à un tube, comme sur la vidéo
-        const h = document.createElementNS(NS, 'path'); h.setAttribute('d', d); h.setAttribute('class', 'hl'); h.style.strokeWidth = (sw * .28).toFixed(1); h.setAttribute('transform', `translate(0 ${(-sw * .17).toFixed(1)})`); rib.appendChild(h);
-        chunks.push({ el: p, hl: h, s0: S[i0], s1: S[i1], len: S[i1] - S[i0], st: '' });
+        chunks.push({ el: p, s0: S[i0], s1: S[i1], len: S[i1] - S[i0], st: '' });
       }
     });
     lastL = -1;
@@ -515,10 +512,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       L = S[lo] + (S[hi] - S[lo]) * (key - K[lo]) / Math.max(1e-3, K[hi] - K[lo]); }
     if (Math.abs(L - lastL) < .3) return; lastL = L;
     for (const c of chunks) {
-      if (L >= c.s1) { if (c.st !== 'full') { c.st = 'full'; for (const e of [c.el, c.hl]) { e.style.visibility = 'visible'; e.style.strokeDasharray = 'none'; } } }
-      else if (L <= c.s0 + .5) { if (c.st !== 'off') { c.st = 'off'; c.el.style.visibility = c.hl.style.visibility = 'hidden'; } }
-      else { c.st = 'part'; const da = `${c.len.toFixed(1)} ${(c.len + 40).toFixed(1)}`, dof = (c.len - (L - c.s0)).toFixed(1);
-        for (const e of [c.el, c.hl]) { e.style.visibility = 'visible'; e.style.strokeDasharray = da; e.style.strokeDashoffset = dof; } }
+      if (L >= c.s1) { if (c.st !== 'full') { c.st = 'full'; c.el.style.visibility = 'visible'; c.el.style.strokeDasharray = 'none'; } }
+      else if (L <= c.s0 + .5) { if (c.st !== 'off') { c.st = 'off'; c.el.style.visibility = 'hidden'; } }
+      else { c.st = 'part'; c.el.style.visibility = 'visible'; c.el.style.strokeDasharray = `${c.len.toFixed(1)} ${(c.len + 40).toFixed(1)}`; c.el.style.strokeDashoffset = (c.len - (L - c.s0)).toFixed(1); }
     }
   }
 
