@@ -1085,7 +1085,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       G = { H, slide: H * .9, open: H * .75, exp: H * .9, travel, top0, hL, hR, edge, trL, trR, rise: H * .9 };
       buildMz(); G.M = mz.offsetWidth;
       // le trajet vers la gauche : la carte d'Arthur, un bon espace, la mosaïque, un petit espace, puis le mot « Projets »
-      const W = innerWidth; G.padL = W * (narrow ? .25 : .32); G.gapR = W * (narrow ? .08 : .07);
+      const W = innerWidth; G.padL = W * (narrow ? .14 : .17); G.gapR = W * (narrow ? .08 : .07);
       pjCap.style.width = '2px'; G.wordW = pjW.offsetWidth;
       G.track = W + G.padL + G.M + G.gapR - (W - G.wordW) / 2; G.slide = H * .9 * G.track / W;
       G.w0 = G.slide + G.open + G.exp;
@@ -1093,6 +1093,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       fin.style.height = (H + G.w0 + travel + G.rise) + 'px';
     }
     finLayout(); addEventListener('resize', finLayout); addEventListener('load', finLayout); if (document.fonts) document.fonts.ready.then(finLayout);
+    window.__finSlide = () => { if (!G) return null; let y = 0, e = fin; while (e) { y += e.offsetTop; e = e.offsetParent; } return [y - innerHeight * .4, y + G.slide + G.open + 4]; };
     window.__finStops = () => { if (!G) return []; let y = 0, e = fin; while (e) { y += e.offsetTop; e = e.offsetParent; }
       return [y + G.slide + G.open, y + G.w0, y + G.w0 + G.travel * .5, y + G.w0 + G.travel, y + G.w0 + G.travel + G.rise]; };
     cats.forEach(b => b.addEventListener('click', () => { filter = b.dataset.f === 'all' ? null : b.dataset.f;
@@ -1100,7 +1101,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     (function frame() {
       requestAnimationFrame(frame);
       const H = innerHeight, r = fin.getBoundingClientRect(), on = r.top < H && r.bottom > 0;
-      const rel = Math.max(0, -r.top), sp = G ? ease(C(rel / G.slide)) : 0, W = innerWidth, X = G && r.top <= 0 ? sp * G.track : 0;
+      const rel = Math.max(0, -r.top), W = innerWidth;
+      // glissement régulier (sans accélération au milieu), qui ralentit seulement en arrivant sur « Projets », pendant que la capsule commence à s'ouvrir
+      const ux = G ? C(rel / (G.slide + G.open * .45)) : 0, gx = ux < .8 ? ux / .9 : (.8 + (ux - .8) - (ux - .8) * (ux - .8) / .4) / .9, X = G && r.top <= 0 ? G.track * gx : 0, sp = G ? X / G.track : 0;
       window.__finCover = false;
       window.__slideX = on && r.top <= 0 ? -X : 0;   // la carte d'Arthur (WebGL) part vers la gauche, puis la mosaïque passe, puis le mot « Projets »
       if (arthur) arthur.style.transform = window.__slideX ? `translate3d(${window.__slideX.toFixed(1)}px, 0, 0)` : '';
@@ -1233,6 +1236,16 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const segs = []; for (let i = 0; i < knots.length - 1; i++) { const d = Math.abs(knots[i + 1] - knots[i]) / vh;
         segs.push({ a: knots[i], b: knots[i + 1], T: !fast ? (inZone(knots[i], knots[i + 1]) ? Math.max(1.2, 2.8 * d / .8) : Math.max(.5, .45 + d * .5)) * (dir > 0 ? 1 : .8) : Math.max(.3, .25 + d * .28) }); }   // en remontant : pareil, 20 % plus vite ; en enchaînant : vite
       if (segs.length === 1) segs[0].T = Math.min(3.4, Math.max(!fast ? 1 : .8, segs[0].T + (!fast ? .3 : .2)));
+      // le glissement vers la gauche (carte d'Arthur → mosaïque → « Projets ») : vitesse régulière, comme la vidéo
+      const fr = window.__finSlide && window.__finSlide();
+      if (fr && segs.length === 1 && lo >= fr[0] && hi <= fr[1]) {
+        const T = (fast ? .7 : 1) * Math.min(3.2, 1 + .55 * (hi - lo) / vh), r = .2, vm = 1 / (1 - r), a0 = y, d0 = to - y, t0 = performance.now();
+        const prof = u => u < r ? .5 * vm * u * u / r : u < 1 - r ? .5 * vm * r + vm * (u - r) : 1 - .5 * vm * (1 - u) * (1 - u) / r;
+        const stepL = now => { if (id !== runId) return; const u = Math.min(1, (now - t0) / 1000 / T), yy = a0 + d0 * prof(u);
+          if (window.__lenis) window.__lenis.scrollTo(yy, { immediate: true, force: true }); else scrollTo(0, yy);
+          if (u < 1) requestAnimationFrame(stepL); else done(); };
+        requestAnimationFrame(stepL); return;
+      }
       const v = []; for (let i = 0; i <= segs.length; i++) { if (i === 0 || i === segs.length) { v.push(0); continue; }
         const s1 = (segs[i - 1].b - segs[i - 1].a) / segs[i - 1].T, s2 = (segs[i].b - segs[i].a) / segs[i].T; v.push(Math.sign(s1) * Math.min(Math.abs(s1), Math.abs(s2))); }
       const herm = (sg, v0, v1, u) => { const T = sg.T, u2 = u * u, u3 = u2 * u; return (2 * u3 - 3 * u2 + 1) * sg.a + (u3 - 2 * u2 + u) * T * v0 + (-2 * u3 + 3 * u2) * sg.b + (u3 - u2) * T * v1; };
