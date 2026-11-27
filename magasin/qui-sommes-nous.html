@@ -730,7 +730,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         // la carte devient un trapèze dont le bord avant penche et dont les bords se courbent, puis elle se pose à plat.
         if (uMorph > .5) {
           float lead = (uDirX > 0. ? aUv.x : 1. - aUv.x) * .8 + (1. - aUv.y) * .2;
-          float D = .46, dl = (1. - lead) * D;   // le bout avant part loin devant, le coin arrière traîne
+          float D = .4, dl = (1. - lead) * D;   // le bout avant part loin devant, le coin arrière traîne
           float lt = clamp((uProg - dl) / (1. - D), 0., 1.);
           lt = lt < .5 ? 4. * lt * lt * lt : 1. - pow(-2. * lt + 2., 3.) / 2.;
           vec2 pm = mix(uStart.xy + aUv * uStart.zw, uEnd.xy + aUv * uEnd.zw, lt);
@@ -972,7 +972,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         P.tg = ease(clamp((sy - P.y) / (vh * .8)));
         if (P.sp < 0 || reduce) { P.sp = P.tg; P.sv = 0; continue; }
         const steps = Math.max(1, Math.ceil(dts / .008)), h = dts / steps;
-        for (let i = 0; i < steps; i++) { const acc = 150 * (P.tg - P.sp) - 15 * P.sv; P.sv += acc * h; P.sp += P.sv * h; }
+        for (let i = 0; i < steps; i++) { const acc = 260 * (P.tg - P.sp) - 27 * P.sv; P.sv += acc * h; P.sp += P.sv * h; }
         if (Math.abs(P.tg - P.sp) < .0005 && Math.abs(P.sv) < .002) { P.sp = P.tg; P.sv = 0; }
       }
       const busy = dy !== 0 || vel !== 0 || projects.some(P => Math.abs(P.hoverT - P.hover) > .002) || people.some(P => P.sv !== 0);
@@ -984,7 +984,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         if (!(P.y - sy < vh && P.y + P.h - sy > 0) || now - P.artT < 30) continue;
         if (!artOn) { artOn = true; useArt(); gl.disable(gl.BLEND); }
         P.artT = now;
-        const e = clamp(P.sp, 0, 1.04), w = lerp(P.start.w, P.end.w, e), h = lerp(P.start.h, P.end.h, e);
+        const e = Math.min(1.04, Math.max(0, P.sp) / .72), w = lerp(P.start.w, P.end.w, e), h = lerp(P.start.h, P.end.h, e);
         gl.bindFramebuffer(gl.FRAMEBUFFER, P.fb); gl.viewport(0, 0, P.fw, P.fh);
         gl.uniform1f(AU.uTime, tsec); gl.uniform1f(AU.uAspect, w / h); gl.uniform3fv(AU.uA, P.a); gl.uniform3fv(AU.uB, P.b); gl.uniform3fv(AU.uC, P.c);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -996,17 +996,17 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       gl.uniform2f(U.uRes, vw, vh); gl.uniform1f(U.uTime, (now - t0) / 1000); gl.uniform1f(U.uDpr, dpr);
       for (const P of people) {
         if (!(P.y - sy < vh && P.y + P.h - sy > 0)) { if (P.oo !== 0) { P.oo = 0; P.over.style.opacity = 0; P.over.classList.remove('on'); } continue; }
-        const g = clamp((sy - P.y) / (vh * .8)), e = clamp(P.sp, 0, 1.04), ec = clamp(e);
+        const g = clamp((sy - P.y) / (vh * .8)), ec = clamp(P.sp, 0, 1.04), e = Math.min(1.04, Math.max(0, P.sp) / .72), em = clamp(e);   // la forme se transforme plus vite (sur 72 % du trajet), le reste suit le défilement
         // le décor collant : en haut tant qu'on est dans la section, puis il remonte avec la page
         const stTop = sy < P.y ? P.y - sy : Math.min(0, P.y + P.h - vh - sy);
         // à la fin, la carte d'Arthur part vers la gauche pendant que la page des projets arrive
         const ox = P.el.classList.contains('last') ? (window.__slideX || 0) : 0, S = ox ? { ...P.start, x: P.start.x + ox } : P.start, E = ox ? { ...P.end, x: P.end.x + ox } : P.end;
         const r = { x: lerp(S.x, E.x, e), y: lerp(S.y, E.y, e) + stTop, w: lerp(S.w, E.w, e), h: lerp(S.h, E.h, e) };
         const cardY = S.y + stTop, white = 1 - sstep(vh * 1.02, vh * .7, cardY);   // elle sort du blanc en entrant à l'écran
-        plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(16, 22, ec), seed: P.seed, zoom: 1 + .18 * Math.pow(1 - ec, 2), tint: 1, pal: [P.a, P.b, P.c],
+        plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(16, 22, em), seed: P.seed, zoom: 1 + .18 * Math.pow(1 - em, 2), tint: 1, pal: [P.a, P.b, P.c],
           white, ghost: Math.max(-.02, Math.min(.02, vel * .0011)),
-          morph: { s: S, e: E, t: ec, dir: P.right ? -1 : 1, off: stTop } });
-        if (ec > .97 && stTop === 0) cover = true;
+          morph: { s: S, e: E, t: em, dir: P.right ? -1 : 1, off: stTop } });
+        if (em > .97 && stTop === 0) cover = true;
         if (r.y < 60 && r.y + r.h > 20) dark = true;
         // les deux grands mots : ils arrivent pendant que la carte grandit, puis laissent la place aux infos
         const bo = (.18 + .82 * sstep(.35, .85, ec)) * sstep(.04, .2, ec) * (1 - sstep(.86, .99, g));
@@ -1130,7 +1130,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const mx = W + G.padL - X - op * ((W - G.wordW) / 2 - G.gapR + G.M * .05 + 20);   // pendant que la capsule s'ouvre, « Pro » pousse la mosaïque hors de l'écran
       if (mx < W && mx > -G.M) { mz.style.visibility = ''; mz.style.transform = `translate3d(${mx.toFixed(1)}px, 0, 0)`;
         const q = X / G.track;
-        mzCols.forEach((c, i) => { const d = i % 2 ? 1 : -1, off = -H * .6 - (+c.dataset.shift || 0) + d * (q - .5) * H * .9; c.style.transform = `translate3d(0, ${off.toFixed(1)}px, 0)`; }); }
+        mzCols.forEach((c, i) => { const d = i % 2 ? 1 : -1, off = -H * .6 - (+c.dataset.shift || 0) + d * (q - .5) * H * .32; c.style.transform = `translate3d(0, ${off.toFixed(1)}px, 0)`; }); }
       else mz.style.visibility = 'hidden';
       const mzDark = mx < 60 && mx + G.M > W - 60;   // l'en-tête ne passe en clair que si la mosaïque est sous tout l'en-tête   // la mosaïque noire est sous l'en-tête : il passe en clair
       // le trait s'ouvre en capsule (comme la vidéo), puis la capsule grandit jusqu'à tout l'écran
