@@ -140,13 +140,10 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
    nos projets en deux colonnes sur les côtés (celle de gauche monte, celle de droite descend) et, au centre, les catégories */
 .works { position: absolute; inset: 0; overflow: hidden; color: #141414; opacity: 0; visibility: hidden; will-change: opacity, transform; }   /* même fond que le reste du site : le mur reste visible derrière */
 /* Pendant le glissement vers la gauche : des colonnes de cartes, une sur deux monte et l'autre descend (comme la vidéo de Kove) */
-.mz { position: absolute; left: 0; top: 0; height: 100%; display: flex; justify-content: center; gap: 4.5vw; background: #0d0d0d; will-change: transform; transform: translateX(100vw); }
-.mz-col { flex: none; display: flex; flex-direction: column; gap: 4.5vw; will-change: transform; }
-.mz-c { flex: none; background: #fff; padding: 3px; }
-.mz-c > div { position: relative; width: 100%; height: 100%; overflow: hidden; background: linear-gradient(160deg, #ffffff 0%, #f5f5f3 100%); display: grid; place-items: center; }
+.mz { position: absolute; left: 0; top: 0; height: 100%; display: flex; gap: var(--mzg, 6px); padding: 0 var(--mzg, 6px); background: #0d0d0d; will-change: transform; transform: translateX(100vw); }
+.mz-col { flex: none; display: flex; flex-direction: column; gap: var(--mzg, 6px); will-change: transform; }
+.mz-c { flex: none; position: relative; overflow: hidden; background: #1c1c1c; }   /* comme la vidéo : des photos de même taille, collées, séparées d'un fin trait noir */
 .mz-c img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.mz-c i { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #d7d7d4; }
-.mz-c b { position: absolute; left: 12px; top: 10px; font: 400 .6rem var(--mono); letter-spacing: .18em; color: #b9b9b6; }
 /* la capsule se pose sur sa carte dans la page des projets */
 .pj-fly { position: absolute; left: 0; top: 0; z-index: 3; overflow: hidden; pointer-events: none; visibility: hidden; background: #fff; will-change: transform, width, height; }
 .pj-fly img { position: absolute; left: 0; width: 100%; object-fit: cover; transition: opacity .5s; }
@@ -1042,17 +1039,17 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const pjA = pjEl.querySelector('.pj-a'), pjB = pjEl.querySelector('.pj-b');
     const fly = document.getElementById('pj-fly'), flyI = [...fly.querySelectorAll('img')]; let flyTarget = null, flyFrom = -1;
     // la mosaïque du glissement : nos images et des cartes blanches, en colonnes
-    const mz = document.getElementById('mz'), MZI = ['./img/boutique-obtura.jpg', './img/ville-2cv.jpg', './img/boutique-vins.jpg', './img/particules.jpg'];
-    const MZA = [.8, 1.25, .95, 1.4, .75, 1.1, 1.3, .85]; let mzCols = [];
+    const mz = document.getElementById('mz');
+    let mzCols = [];
     function buildMz() {
-      const W = innerWidth, H = innerHeight, narrow = W < 760, n = 3, cw = (narrow ? .29 : .2) * W;   // trois colonnes, sur fond noir
-      let html = '', k = 0, blank = 0;
-      for (let c = 0; c < n; c++) { html += '<div class="mz-col">'; let h = 0, j = 0;
-        while (h < H * 2.3) { const a = MZA[(c * 3 + j) % MZA.length], ch = cw * a, isImg = (c + j) % 3 === (c % 2);
-          html += `<div class="mz-c" style="width:${cw.toFixed(0)}px;height:${ch.toFixed(0)}px"><div>${isImg ? `<img src="${MZI[k++ % MZI.length]}" alt="" loading="lazy" decoding="async">` : `<b>${String(++blank).padStart(2, '0')}</b><i></i>`}</div></div>`;
-          h += ch + W * .045; j++; }
+      // trois colonnes de photos de paysage, toutes de la même taille, une colonne décalée sur deux
+      const W = innerWidth, H = innerHeight, narrow = W < 760, cw = Math.round((narrow ? .31 : .2) * W), ch = Math.round(cw * 1.267), g = Math.max(5, Math.round(W * .0065));
+      let html = '';
+      for (let c = 0; c < 3; c++) { html += '<div class="mz-col">'; const nb = Math.ceil(H * 2.4 / (ch + g));
+        for (let j = 0; j < nb; j++) html += `<div class="mz-c" style="width:${cw}px;height:${ch}px"><img src="./img/paysages/${String((c * 5 + j * 3) % 16 + 1).padStart(2, '0')}.jpg" alt="" loading="lazy" decoding="async"></div>`;
         html += '</div>'; }
-      mz.innerHTML = html; mz.style.width = (W * (narrow ? 1.25 : 1.2)).toFixed(0) + 'px'; mzCols = [...mz.children]; G && (G.M = mz.scrollWidth);
+      mz.style.setProperty('--mzg', g + 'px'); mz.innerHTML = html; mz.style.width = ''; mzCols = [...mz.children];
+      mzCols[1].dataset.shift = (ch / 2).toFixed(0);   // la colonne du milieu est décalée d'une demi-photo
     }
     const colL = document.getElementById('wk-l'), colR = document.getElementById('wk-r'), cats = [];
     const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, C = v => Math.max(0, Math.min(1, v));
@@ -1113,7 +1110,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const mx = W - X;
       if (mx < W && mx > -G.M) { mz.style.visibility = ''; mz.style.transform = `translate3d(${mx.toFixed(1)}px, 0, 0)`;
         const q = X / (W + G.M);
-        mzCols.forEach((c, i) => { const d = i % 2 ? 1 : -1, off = -H * .55 + d * (q - .5) * H * .9; c.style.transform = `translate3d(0, ${off.toFixed(1)}px, 0)`; }); }
+        mzCols.forEach((c, i) => { const d = i % 2 ? 1 : -1, off = -H * .6 - (+c.dataset.shift || 0) + d * (q - .5) * H * .9; c.style.transform = `translate3d(0, ${off.toFixed(1)}px, 0)`; }); }
       else mz.style.visibility = 'hidden';
       const mzDark = mx < 60 && mx + G.M > 60;   // la mosaïque noire est sous l'en-tête : il passe en clair
       // le trait s'ouvre en capsule (comme la vidéo), puis la capsule grandit jusqu'à tout l'écran
