@@ -143,9 +143,6 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .wall-text h2 { margin: 0; font: italic 400 clamp(4rem, 13vw, 13rem)/.86 "Instrument Serif", Georgia, serif; letter-spacing: -.02em; }
 .wall-text p:last-child { margin: 1.4rem 0 0; max-width: 26rem; font-size: 1.05rem; line-height: 1.5; color: rgba(255,255,255,.88); }
 .works { background: #f0f0ee; color: #141414; }
-.works::before, .works::after { content: ""; position: absolute; left: 0; right: 0; height: 13svh; z-index: 3; pointer-events: none; }   /* les projets s'effacent en douceur en haut et en bas */
-.works::before { top: 0; background: linear-gradient(#f0f0ee 35%, rgba(240,240,238,0)); }
-.works::after { bottom: 0; background: linear-gradient(rgba(240,240,238,0), #f0f0ee 80%); }
 /* comme la photo : deux larges colonnes décalées, images en paysage dans un fin cadre blanc, catégories à gauche du centre */
 .wk-col { position: absolute; top: 0; width: 33vw; display: grid; gap: 15svh; will-change: transform; }
 .wk-col.l { left: 4vw; } .wk-col.r { right: 3vw; }
@@ -1021,8 +1018,10 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     // les longueurs : glissement vers la gauche (90 % d'écran), puis le défilement des colonnes
     function finLayout() {
       const H = innerHeight, narrow = innerWidth < 760, top0 = narrow ? H * .3 : H * .14;
-      const hL = colL.offsetHeight, hR = colR.offsetHeight, travel = Math.max(H * .5, Math.max(hL, hR) - H * .55);
-      G = { H, slide: H * .9, travel, top0, hL, hR };
+      // comme la photo : les colonnes couvrent tout l'écran du début à la fin (des projets coupés en haut et en bas)
+      const hL = colL.offsetHeight, hR = colR.offsetHeight, edge = H * .2;
+      const trL = Math.max(H * .5, hL - H - 2 * edge), trR = Math.max(H * .5, hR - H - 2 * edge), travel = Math.max(trL, trR);
+      G = { H, slide: H * .9, travel, top0, hL, hR, edge, trL, trR };
       fin.style.height = (H + G.slide + travel) + 'px';
     }
     finLayout(); addEventListener('resize', finLayout); addEventListener('load', finLayout);
@@ -1046,7 +1045,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       // tout glisse vers la gauche
       track.style.transform = `translate3d(${(-sp * 100).toFixed(3)}vw, 0, 0)`;
       // les colonnes : celle de gauche monte, celle de droite descend (comme la photo)
-      const tL = G.top0 + H * .15 - cp * (G.travel + H * .15), tR = G.top0 - G.travel + cp * G.travel;
+      const tL = -G.edge - cp * G.trL, tR = -G.edge - G.trR + cp * G.trR;   // gauche monte, droite descend
       colL.style.transform = `translate3d(0, ${tL.toFixed(1)}px, 0)`; colR.style.transform = `translate3d(0, ${tR.toFixed(1)}px, 0)`;
       // dans chaque cadre, l'image glisse un peu (parallaxe), dans le sens inverse de sa colonne
       if (sp > .02) works.forEach((w, k) => { const im = imgs[k]; if (!im) return; const b = w.getBoundingClientRect();
