@@ -1046,7 +1046,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const W = innerWidth, H = innerHeight, narrow = W < 760, cw = Math.round((narrow ? .31 : .2) * W), ch = Math.round(cw * 1.267), g = Math.max(5, Math.round(W * .0065));
       let html = '';
       for (let c = 0; c < 3; c++) { html += '<div class="mz-col">'; const nb = Math.ceil(H * 2.4 / (ch + g));
-        for (let j = 0; j < nb; j++) html += `<div class="mz-c" style="width:${cw}px;height:${ch}px"><img src="./img/paysages/${String((c * 5 + j * 3) % 16 + 1).padStart(2, '0')}.jpg" alt="" loading="lazy" decoding="async"></div>`;
+        for (let j = 0; j < nb; j++) html += `<div class="mz-c" style="width:${cw}px;height:${ch}px"><img src="./img/mosaique/${String((c * 5 + j * 3) % 16 + 1).padStart(2, '0')}.jpg" alt="" loading="lazy" decoding="async"></div>`;
         html += '</div>'; }
       mz.style.setProperty('--mzg', g + 'px'); mz.innerHTML = html; mz.style.width = ''; mzCols = [...mz.children];
       mzCols[1].dataset.shift = (ch / 2).toFixed(0);   // la colonne du milieu est décalée d'une demi-photo
