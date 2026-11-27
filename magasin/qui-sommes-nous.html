@@ -1093,7 +1093,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       fin.style.height = (H + G.w0 + travel + G.rise) + 'px';
     }
     finLayout(); addEventListener('resize', finLayout); addEventListener('load', finLayout); if (document.fonts) document.fonts.ready.then(finLayout);
-    window.__finSlide = () => { if (!G) return null; let y = 0, e = fin; while (e) { y += e.offsetTop; e = e.offsetParent; } return [y - innerHeight * .4, y + G.slide + G.open + 4]; };
+    window.__finSlide = () => { if (!G) return null; let y = 0, e = fin; while (e) { y += e.offsetTop; e = e.offsetParent; } return [y - innerHeight * .4, y + G.slide + G.open + 4, y + G.slide]; };
     window.__finStops = () => { if (!G) return []; let y = 0, e = fin; while (e) { y += e.offsetTop; e = e.offsetParent; }
       return [y + G.slide + G.open, y + G.w0, y + G.w0 + G.travel * .5, y + G.w0 + G.travel, y + G.w0 + G.travel + G.rise]; };
     cats.forEach(b => b.addEventListener('click', () => { filter = b.dataset.f === 'all' ? null : b.dataset.f;
@@ -1111,7 +1111,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const cp = C((rel - G.w0) / G.travel), wp = C((rel - G.w0 - G.travel) / G.rise);
       // le mot « Projets » arrive de la droite pendant que la carte d'Arthur part à gauche ; un trait se dessine entre « Pro » et « jets »
       const lp = ease(C((rel - G.slide * .8) / (G.slide * .2)));
-      const op = ease(C((rel - G.slide) / G.open)), ep = C((rel - G.slide - G.open) / G.exp), ee = ease(ep);
+      const op = .5 - .5 * Math.cos(Math.PI * C((rel - G.slide) / G.open)), ep = C((rel - G.slide - G.open) / G.exp), ee = ease(ep);
       pjEl.style.transform = `translate3d(${Math.max(0, G.track - X).toFixed(1)}px, 0, 0)`;
       // la mosaïque : elle traverse l'écran, ses colonnes montent et descendent une sur deux
       const mx = W + G.padL - X - op * ((W - G.wordW) / 2 - G.gapR + G.M * .05 + 20);   // pendant que la capsule s'ouvre, « Pro » pousse la mosaïque hors de l'écran
@@ -1241,6 +1241,17 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       if (fr && segs.length === 1 && lo >= fr[0] && hi <= fr[1]) {
         const T = (fast ? .7 : 1) * Math.min(3.2, 1 + .55 * (hi - lo) / vh), r = .2, vm = 1 / (1 - r), a0 = y, d0 = to - y, t0 = performance.now();
         const prof = u => u < r ? .5 * vm * u * u / r : u < 1 - r ? .5 * vm * r + vm * (u - r) : 1 - .5 * vm * (1 - u) * (1 - u) / r;
+        // en descendant jusqu'à « Projets » : le glissement garde sa vitesse, puis la capsule s'ouvre lentement (on la voit bien)
+        if (dir > 0 && !fast && fr[2] > y + 20 && fr[2] < to - 20) {
+          const dA = fr[2] - y, dB = to - fr[2], TA = Math.min(2.6, .8 + .5 * dA / vh), rA = .3, TB = 2.4;
+          const vA = dA / (TA * (1 - rA / 2));
+          const stepO = now => { if (id !== runId) return; const t = (now - t0) / 1000; let yy;
+            if (t < TA) { const u = t / TA; yy = y + (u < rA ? .5 * vA * TA * u * u / rA : vA * TA * (u - rA / 2)); }
+            else { const u = Math.min(1, (t - TA) / TB), h = u < .65 ? u / .825 : (.65 + (u - .65) - (u - .65) * (u - .65) / .7) / .825; yy = fr[2] + dB * h; }   // l'ouverture : vitesse lente et régulière, puis elle se pose
+            if (window.__lenis) window.__lenis.scrollTo(yy, { immediate: true, force: true }); else scrollTo(0, yy);
+            if (t < TA + TB) requestAnimationFrame(stepO); else done(); };
+          requestAnimationFrame(stepO); return;
+        }
         const stepL = now => { if (id !== runId) return; const u = Math.min(1, (now - t0) / 1000 / T), yy = a0 + d0 * prof(u);
           if (window.__lenis) window.__lenis.scrollTo(yy, { immediate: true, force: true }); else scrollTo(0, yy);
           if (u < 1) requestAnimationFrame(stepL); else done(); };
