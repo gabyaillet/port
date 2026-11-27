@@ -718,7 +718,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       uniform vec4 uRect; uniform vec2 uRes; uniform float uBend; uniform float uVel; uniform float uApp;
       uniform vec4 uWarp; uniform float uTwist;
       uniform float uRotY; uniform float uRotX; uniform float uCurve;
-      uniform float uZoom; uniform float uMorph; uniform vec4 uStart; uniform vec4 uEnd; uniform float uProg; uniform float uDirX; uniform float uOffY;
+      uniform float uZoom; uniform float uMorph; uniform vec4 uStart; uniform vec4 uEnd; uniform float uProg; uniform float uDirX; uniform float uOffY; uniform vec4 uMRnd;
       varying vec2 vUv; varying float vZ; varying vec2 vArt; varying float vLt;
       void main() {
         vUv = aUv; vArt = aUv; vLt = 1.;
@@ -730,14 +730,16 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         // selon sa place. Le coin haut côté écran part le premier, le coin bas opposé reste presque en place puis rattrape :
         // la carte devient un trapèze dont le bord avant penche et dont les bords se courbent, puis elle se pose à plat.
         if (uMorph > .5) {
-          float lead = (uDirX > 0. ? aUv.x : 1. - aUv.x) * .8 + (1. - aUv.y) * .2;
-          float D = .4, dl = (1. - lead) * D;   // le bout avant part loin devant, le coin arrière traîne
+          // le déploiement change au hasard pour chaque carte (uMRnd) : quel coin part en premier, combien il traîne, la bosse
+          float wy = abs(uMRnd.x), ly = uMRnd.x > 0. ? 1. - aUv.y : aUv.y;
+          float lead = (uDirX > 0. ? aUv.x : 1. - aUv.x) * (1. - wy) + ly * wy + sin(aUv.y * 6.283 + uMRnd.w) * .035;
+          float D = uMRnd.y, dl = (1. - clamp(lead, 0., 1.)) * D;   // le bout avant part loin devant, le coin arrière traîne
           float lt = clamp((uProg - dl) / (1. - D), 0., 1.);
           lt = lt * lt * (3. - 2. * lt);   // déploiement régulier, sans accélération brusque au milieu
           vec2 pm = mix(uStart.xy + aUv * uStart.zw, uEnd.xy + aUv * uEnd.zw, lt);
           // comme la vidéo : l'image ne s'étire pas, elle reste fixe (rapportée à la carte finale) et la forme s'ouvre autour
           vArt = (pm - uEnd.xy) / uEnd.zw; vLt = lt;
-          p = pm + vec2(0., uOffY);
+          p = pm + vec2(0., uOffY + sin(3.14159 * lt) * sin(3.14159 * aUv.x) * uMRnd.z * uEnd.w);
         }
         vec2 ctr = uRect.xy + uRect.zw * .5;
         vec3 q = vec3(p - ctr, 0.);
@@ -872,7 +874,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     catch (e) { root.classList.add('no-gl'); return; }
     gl.useProgram(prog);
     root.classList.add('gl');
-    const U = {}; ['uWhite', 'uGhost', 'uZoom', 'uMorph', 'uStart', 'uEnd', 'uProg', 'uDirX', 'uOffY', 'uRotY', 'uRotX', 'uCurve', 'uRip', 'uLiq', 'uSeed', 'uWarp', 'uTwist', 'uRect', 'uRes', 'uBend', 'uVel', 'uApp', 'uTex', 'uMode', 'uSize', 'uRad', 'uTime', 'uA', 'uB', 'uC', 'uTint', 'uMouse', 'uHover', 'uDpr'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+    const U = {}; ['uWhite', 'uGhost', 'uZoom', 'uMorph', 'uStart', 'uEnd', 'uProg', 'uDirX', 'uOffY', 'uMRnd', 'uRotY', 'uRotX', 'uCurve', 'uRip', 'uLiq', 'uSeed', 'uWarp', 'uTwist', 'uRect', 'uRes', 'uBend', 'uVel', 'uApp', 'uTex', 'uMode', 'uSize', 'uRad', 'uTime', 'uA', 'uB', 'uC', 'uTint', 'uMouse', 'uHover', 'uDpr'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
     // maillage 32 × 32 : assez fin pour des courbes lisses
     const N = 32, uvs = [], idx = [];
     for (let y = 0; y <= N; y++) for (let x = 0; x <= N; x++) uvs.push(x / N, y / N);
@@ -894,7 +896,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     // les présentations
     const people = [...document.querySelectorAll('.pp')].map(el => ({ el, over: el.querySelector('.pp-over'), big: el.querySelector('.pp-big'), bs: [...el.querySelectorAll('.pp-big span')], pill: el.querySelector('.pp-pill'), bo: -1, intro: el.querySelector('.pp-intro'),
       a: hex(el.dataset.a), b: hex(el.dataset.b), c: hex(el.dataset.c), y: 0, h: 1, end: null, oo: -1, io: -1, right: el.classList.contains('right'),
-      warp: [1, 0, 0, 0, 0], seed: Math.random() * 6.283, sp: -1, sv: 0, tg: 0 }));
+      warp: [1, 0, 0, 0, 0], seed: Math.random() * 6.283, rnd: (() => { const R = Math.random, sg = R() < .5 ? -1 : 1; return [sg * (.12 + R() * .38), .3 + R() * .26, (R() - .5) * .16, R() * 6.283]; })(), sp: -1, sv: 0, tg: 0 }));
     // les projets
     const projects = [...document.querySelectorAll('.card')].map(card => {
       const box = card.querySelector('.img'), img = box.querySelector('img');
@@ -948,7 +950,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     function plane(r, o) {
       gl.uniform4f(U.uRect, r.x, r.y, r.w, r.h); gl.uniform2f(U.uSize, r.w, r.h); gl.uniform1f(U.uRad, o.rad);
       const W = o.warp || NOWARP; gl.uniform4f(U.uWarp, W[0], W[1], W[2], W[3]); gl.uniform1f(U.uTwist, W[4]);
-      gl.uniform1f(U.uBend, o.bend || 0); gl.uniform1f(U.uLiq, o.liq || 0); gl.uniform1f(U.uSeed, o.seed || 0); gl.uniform1f(U.uRip, o.rip || 0); gl.uniform1f(U.uZoom, o.zoom || 1); gl.uniform1f(U.uWhite, o.white || 0); gl.uniform1f(U.uGhost, o.ghost || 0); gl.uniform1f(U.uMorph, o.morph ? 1 : 0); if (o.morph) { const a = o.morph; gl.uniform4f(U.uStart, a.s.x, a.s.y, a.s.w, a.s.h); gl.uniform4f(U.uEnd, a.e.x, a.e.y, a.e.w, a.e.h); gl.uniform1f(U.uProg, a.t); gl.uniform1f(U.uDirX, a.dir); gl.uniform1f(U.uOffY, a.off); } gl.uniform1f(U.uRotY, o.ry || 0); gl.uniform1f(U.uRotX, o.rx || 0); gl.uniform1f(U.uCurve, o.curve || 0); gl.uniform1f(U.uVel, o.vel || 0); gl.uniform1f(U.uApp, o.app == null ? 1 : o.app);
+      gl.uniform1f(U.uBend, o.bend || 0); gl.uniform1f(U.uLiq, o.liq || 0); gl.uniform1f(U.uSeed, o.seed || 0); gl.uniform1f(U.uRip, o.rip || 0); gl.uniform1f(U.uZoom, o.zoom || 1); gl.uniform1f(U.uWhite, o.white || 0); gl.uniform1f(U.uGhost, o.ghost || 0); gl.uniform1f(U.uMorph, o.morph ? 1 : 0); if (o.morph) { const a = o.morph; gl.uniform4f(U.uStart, a.s.x, a.s.y, a.s.w, a.s.h); gl.uniform4f(U.uEnd, a.e.x, a.e.y, a.e.w, a.e.h); gl.uniform1f(U.uProg, a.t); gl.uniform1f(U.uDirX, a.dir); gl.uniform1f(U.uOffY, a.off); const m = a.rnd || [.2, .4, 0, 0]; gl.uniform4f(U.uMRnd, m[0], m[1], m[2], m[3]); } gl.uniform1f(U.uRotY, o.ry || 0); gl.uniform1f(U.uRotX, o.rx || 0); gl.uniform1f(U.uCurve, o.curve || 0); gl.uniform1f(U.uVel, o.vel || 0); gl.uniform1f(U.uApp, o.app == null ? 1 : o.app);
       gl.uniform1f(U.uMode, o.mode); gl.uniform1f(U.uTint, o.tint || 0); gl.uniform1f(U.uHover, o.hover || 0); gl.uniform2f(U.uMouse, o.mx || 0, o.my || 0);
       if (o.pal) { gl.uniform3fv(U.uA, o.pal[0]); gl.uniform3fv(U.uB, o.pal[1]); gl.uniform3fv(U.uC, o.pal[2]); }
       gl.bindTexture(gl.TEXTURE_2D, o.tex || blank);
@@ -1007,16 +1009,21 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const cardY = S.y + stTop, white = 1 - sstep(vh * 1.02, vh * .7, cardY);   // elle sort du blanc en entrant à l'écran
         plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(16, 22, em), seed: P.seed, zoom: 1 + .18 * Math.pow(1 - em, 2), tint: 1, pal: [P.a, P.b, P.c],
           white, ghost: Math.max(-.02, Math.min(.02, vel * .0011)),
-          morph: { s: S, e: E, t: em, dir: P.right ? -1 : 1, off: stTop } });
+          morph: { s: S, e: E, t: em, dir: P.right ? -1 : 1, off: stTop, rnd: P.rnd } });
         if (em > .97 && stTop === 0) cover = true;
         if (r.y < 60 && r.y + r.h > 20) dark = true;
         // les deux grands mots : ils arrivent pendant que la carte grandit, puis laissent la place aux infos
         const bo = (.5 + .5 * sstep(.45, .85, ec)) * sstep(0, .1, ec) * (1 - sstep(.86, .99, g));
         if (Math.abs(bo - P.bo) > .002) { P.bo = bo; P.big.style.opacity = (bo * .95).toFixed(3); const sh = ((1 - sstep(.2, .8, ec)) * 50).toFixed(1); P.bs[0].style.transform = `translateX(${sh}px)`; P.bs[1].style.transform = `translateX(${-sh}px)`; P.big.style.transform = `translateY(${((1 - sstep(.12, .8, ec)) * vh * .26).toFixed(1)}px)`;
           P.pill.style.transform = `scale(${sstep(.7, .95, ec).toFixed(3)})`; }
-        const oo = sstep(.08, .42, (sy - P.y) / vh), io = 1 - sstep(.02, .09, P.sp);   // le nom en noir part dès que la carte se transforme ; les infos arrivent plus tôt   // les infos arrivent doucement vers la fin de la transformation   // le nom en noir s'efface dès que la carte part
+        const oo = sstep(.08, .42, (sy - P.y) / vh); let io = 1;   // le nom en noir part dès que la carte se transforme ; les infos arrivent plus tôt   // les infos arrivent doucement vers la fin de la transformation   // le nom en noir s'efface dès que la carte part
         if (Math.abs(oo - P.oo) > .002) { P.oo = oo; P.over.style.opacity = oo.toFixed(3); P.over.style.transform = `translateY(${((1 - oo) * 16).toFixed(1)}px)`; P.over.classList.toggle('on', oo > .5); }
-        if (Math.abs(io - P.io) > .002) { P.io = io; P.intro.style.opacity = io.toFixed(3); P.intro.style.transform = `translateY(${(-(1 - io) * 40).toFixed(1)}px)`; }
+        { const D = P.rnd[1], lf = clamp(em / (1 - D)), ef = lf * lf * (3 - 2 * lf), bx = lerp(S.x, E.x, ef), bw = lerp(S.w, E.w, ef);
+          const byT = lerp(S.y, E.y, ef) + stTop - Math.abs(P.rnd[2]) * E.h, byB = lerp(S.y + S.h, E.y + E.h, ef) + stTop + Math.abs(P.rnd[2]) * E.h;
+          const t = P.intro.getBoundingClientRect(), ty0 = t.top - (P.introDy || 0), ty1 = t.bottom - (P.introDy || 0);
+          const dx = Math.max(t.left - (bx + bw), bx - t.right, 0), dy = Math.max(ty0 - byB, byT - ty1, 0);
+          io = em <= 0 ? 1 : sstep(8, 70, Math.max(dx, dy)); }   // le nom reste jusqu'à ce que la carte arrive presque sur lui, sans le toucher
+        if (Math.abs(io - P.io) > .002 || P.io == null) { P.introDy = -(1 - io) * 40; P.io = io; P.intro.style.opacity = io.toFixed(3); P.intro.style.transform = `translateY(${(-(1 - io) * 40).toFixed(1)}px)`; }
       }
       for (const P of projects) {
         const top = P.y - sy; if (top > vh + 200 || top + P.h < -200) continue;
