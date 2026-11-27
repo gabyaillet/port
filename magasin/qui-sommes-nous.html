@@ -149,10 +149,10 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .fin-name { position: absolute; left: 50%; top: calc(46% + min(26vw, 20vh, 180px) + 1.6rem); transform: translateX(-50%); color: #fff; text-align: center; white-space: nowrap; opacity: 0; will-change: opacity, transform; }
 .fin-name span { display: block; font: 400 .64rem var(--mono); letter-spacing: .2em; text-transform: uppercase; opacity: .8; }
 .fin-name b { display: block; margin-top: .5rem; font: italic 400 clamp(2.2rem, 6vw, 4.2rem)/1 "Instrument Serif", Georgia, serif; }
-.fin-burst { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }   /* l'explosion : éclats de couleur et onde de choc */
 .fin-strings { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .fin-strings path, .c-thread path { fill: none; stroke-width: 1.2; stroke-linecap: round; }
-.fin-strings circle, .c-thread circle { opacity: 0; }
+.c-thread circle { opacity: 0; }
+.pt-o { fill: #141414; transition: opacity .3s; } .pt-o-ring { fill: none; stroke: rgba(20,20,20,.18); stroke-width: 1; transition: opacity .3s; }   /* le point de départ */
 .pt-a { fill: #2f45ff; filter: drop-shadow(0 0 6px #2f45ff) drop-shadow(0 0 14px rgba(47,69,255,.6)); }
 .pt-b { fill: #ff4f8b; filter: drop-shadow(0 0 6px #ff4f8b) drop-shadow(0 0 14px rgba(255,79,139,.6)); }
 .ln-a { stroke: rgba(47,69,255,.55); } .ln-b { stroke: rgba(255,79,139,.55); }
@@ -308,13 +308,11 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     <div class="fin-cards" id="fin-cards" aria-hidden="true"></div>
     <div class="fin-logo" id="fin-logo" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" pathLength="302"/></svg></div>
     <p class="fin-name" id="fin-name"><span>Obtura Studio</span><b>Web design · Nantes</b></p>
-    <canvas class="fin-burst" id="fin-burst" aria-hidden="true"></canvas>
-    <svg class="fin-strings" id="fin-strings" aria-hidden="true"><path class="ln-a"/><path class="ln-b"/><circle class="pt-a" r="5"/><circle class="pt-b" r="5"/></svg>
   </div>
 </section>
 
 <section class="contact" id="contact" aria-labelledby="c-title">
-  <svg class="c-thread" id="c-thread" aria-hidden="true"><path class="ln-a"/><path class="ln-b"/><circle class="pt-a" r="5"/><circle class="pt-b" r="5"/></svg>
+  <svg class="c-thread" id="c-thread" aria-hidden="true"><path class="ln-a"/><path class="ln-b"/><circle class="pt-o-ring" r="14"/><circle class="pt-o" r="4.5"/><circle class="pt-a" r="5"/><circle class="pt-b" r="5"/></svg>
   <div class="wrap c-in" id="c-in">
     <p class="label">Contact</p>
     <h2 class="c-title" id="c-title">Parlons de <span class="serif grad">votre projet.</span></h2>
@@ -441,6 +439,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   let introP = reduce ? 1 : 0;
   function buildRibbon() {
     let s = ribSeed; const R = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    rib.style.height = '0px';   // sinon la toile du trait garde son ancienne hauteur et rallonge la page
     const vw = innerWidth, vh = innerHeight, docH = document.documentElement.scrollHeight;
     rib.setAttribute('viewBox', `0 0 ${vw} ${docH}`); rib.style.height = docH + 'px';
     const wide = vw > 760, sw = Math.max(10, Math.min(20, vw * .013));
@@ -950,37 +949,12 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   (function finale() {
     const fin = document.getElementById('fin'), wallEl = document.getElementById('fin-wall'), cardsEl = document.getElementById('fin-cards');
     const logo = document.getElementById('fin-logo'), ring = logo.querySelector('circle'), name = document.getElementById('fin-name');
-    const finStage = fin.querySelector('.fin-stage'), bcv = document.getElementById('fin-burst'), bg = bcv.getContext('2d');
-    // l'explosion : quand toutes les cartes sont rentrées, le point tremble de plus en plus, puis éclate
-    const SPARK_COL = ['#2f45ff', '#7a3cff', '#ff4f8b', '#ff8a3d', '#22c1ff'];
-    const sparks = Array.from({ length: innerWidth < 760 ? 26 : 40 }, (_, i) => ({ a: (i / 40) * 6.283 + Math.random() * .5, v: .45 + Math.random() * .6, l: 18 + Math.random() * 46, w: 1.2 + Math.random() * 2.2, c: SPARK_COL[i % SPARK_COL.length], d: Math.random() * .12 }));
-    let burstAt = null, burstDrawn = false;
+    const finStage = fin.querySelector('.fin-stage');
+    // quand toutes les cartes sont rentrées, le point tremble de plus en plus, puis éclate en deux particules
+    let burstAt = null;
     const outExpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
-    function drawBurst(bt, W, H, ox, oy) {
-      const dpr = Math.min(devicePixelRatio || 1, 2);
-      if (bcv.width !== Math.round(W * dpr) || bcv.height !== Math.round(H * dpr)) { bcv.width = Math.round(W * dpr); bcv.height = Math.round(H * dpr); }
-      bg.setTransform(dpr, 0, 0, dpr, 0, 0); bg.clearRect(0, 0, W, H);
-      if (bt == null || bt > 1.5) { burstDrawn = false; return; }
-      burstDrawn = true;
-      const M = Math.hypot(W, H) * .5;
-      // éclair coloré au centre
-      if (bt < .45) { const gr = bg.createRadialGradient(ox, oy, 0, ox, oy, M * .5); const a = (1 - bt / .45) * .35;
-        gr.addColorStop(0, `rgba(122,60,255,${a})`); gr.addColorStop(.4, `rgba(255,79,139,${a * .5})`); gr.addColorStop(1, 'rgba(255,255,255,0)'); bg.fillStyle = gr; bg.fillRect(0, 0, W, H); }
-      // onde de choc
-      if (bt < 1) { bg.beginPath(); bg.arc(ox, oy, outExpo(bt / .9) * M * .8, 0, 7); bg.strokeStyle = `rgba(47,69,255,${(1 - bt) * .55})`; bg.lineWidth = 2.5 * (1 - bt) + .5; bg.stroke(); }
-      // éclats : ils jaillissent très vite puis ralentissent et s'éteignent
-      bg.lineCap = 'round';
-      for (const k of sparks) {
-        const u = Math.max(0, (bt - k.d) / 1.2); if (u <= 0 || u >= 1) continue;
-        const r1 = outExpo(u) * M * k.v, r0 = Math.max(0, r1 - k.l * (1 - u * .7)), ca = Math.cos(k.a), sa = Math.sin(k.a);
-        bg.globalAlpha = 1 - u; bg.strokeStyle = k.c; bg.lineWidth = k.w * (1 - u * .5);
-        bg.beginPath(); bg.moveTo(ox + ca * r0, oy + sa * r0); bg.lineTo(ox + ca * r1, oy + sa * r1); bg.stroke();
-      }
-      bg.globalAlpha = 1;
-    }
-    const strings = document.getElementById('fin-strings'), sP = [...strings.querySelectorAll('path')], sD = [...strings.querySelectorAll('circle')];
     const contact = document.getElementById('contact'), cIn = document.getElementById('c-in'), cSvg = document.getElementById('c-thread');
-    const cP = [...cSvg.querySelectorAll('path')], cD = [...cSvg.querySelectorAll('circle')], topbarEl = document.getElementById('topbar');
+    const cP = [...cSvg.querySelectorAll('path')], cD = [...cSvg.querySelectorAll('.pt-a, .pt-b')], cO = cSvg.querySelector('.pt-o'), cOr = cSvg.querySelector('.pt-o-ring'), topbarEl = document.getElementById('topbar');
     // de petites maquettes de sites (des formes, pas de faux contenu), aux couleurs variées
     const TH = [['#f4f2ee', '#141414', '#2f45ff', '#ffb066'], ['#0f0f13', '#ededeb', '#7a3cff', '#22c1ff'], ['#ece6da', '#2a2420', '#b8553c', '#e2b33c'],
       ['#1a1240', '#e9e4ff', '#8d8bff', '#ff4f8b'], ['#203126', '#e7efe2', '#a7c79a', '#f0c9a0'], ['#bfe0e6', '#0f2e36', '#1d6b78', '#ff8a3d'],
@@ -1001,84 +975,96 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     // les deux trajets des particules : de l'écran jusqu'au contact, tirés au hasard à chaque visite
     const seed = Math.random() * 1000;
     let cLen = [0, 0], cTo = [], cH = 1, cTop = 0, curY = 0, lastLight = false, lastWhite = null;
-    function curve(from, to, W, k) {
-      const dy = to.y - from.y, sw = Math.sin(seed + k * 2.1) * Math.min(W * .32, 380);
-      return `M ${from.x} ${from.y} C ${from.x + sw * .6} ${from.y + dy * .3}, ${to.x - sw} ${to.y - dy * .45}, ${to.x} ${to.y}`;
+    // les courbes : les mêmes que les points de la page « Tous mes projets » (deux arcs qui se raccordent sans cassure),
+    // tirées au hasard à chaque visite ; les deux particules partent chacune de leur côté
+    function rng(sd0) { let sd1 = sd0 | 0; return () => { sd1 = sd1 + 0x6D2B79F5 | 0; let x = Math.imul(sd1 ^ sd1 >>> 15, 1 | sd1); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; }
+    function curve(from, to, W, k, part) {
+      const Rn = rng(seed * 1000 + k * 7919 + part * 104729), sgn = k ? 1 : -1;
+      const dy = to.y - from.y, sw = sgn * (.45 + Rn() * .55) * Math.min(W * .38, 460);
+      const m = { x: Math.max(W * .06, Math.min(W * .94, (from.x + to.x) / 2 + sw)), y: from.y + dy * (.3 + Rn() * .3) };
+      const C1 = { x: m.x - sw * (.3 + Rn() * .5), y: m.y - dy * (.1 + Rn() * .15) };
+      let d = `M ${from.x} ${from.y} C ${from.x + sgn * Rn() * 24} ${from.y + dy * (.18 + Rn() * .12)}, ${C1.x} ${C1.y}, ${m.x} ${m.y}`;   // elles partent ensemble vers le bas, puis s'écartent
+      const kk = .6 + Rn() * .6;
+      d += ` C ${m.x + (m.x - C1.x) * kk} ${m.y + (m.y - C1.y) * kk}, ${to.x + (Rn() * 2 - 1) * 140} ${to.y - dy * (.15 + Rn() * .15)}, ${to.x} ${to.y}`;
+      return d;
     }
+    // les deux trajets partent d'un vrai point de départ : le point du logo, là où il a tremblé.
+    // Ils sont dessinés dans la page (sous le contact, en débordant vers le haut) : un seul trajet continu, sans coupure.
+    let oRel = null, Ox = 0;
     function layoutC() {
       const W = innerWidth, top = contact.offsetTop; cTop = top; cH = contact.offsetHeight;
       cSvg.setAttribute('viewBox', `0 0 ${W} ${cH}`); cSvg.style.height = cH + 'px';
       const t = cIn.offsetTop, title = document.getElementById('c-title');
       // elles arrivent de part et d'autre du titre « Parlons de votre projet »
       cTo = [{ x: Math.max(24, cIn.offsetLeft + 10), y: t + title.offsetTop - 26 }, { x: Math.min(W - 24, cIn.offsetLeft + title.offsetWidth * .72), y: t + title.offsetTop - 26 }];
-      const ex = [W * .44, W * .56];
-      cP.forEach((pa, k) => { pa.setAttribute('d', curve({ x: ex[k], y: 0 }, cTo[k], W, k)); cLen[k] = pa.getTotalLength(); pa.style.strokeDasharray = `${cLen[k]} ${cLen[k]}`; });
+      Ox = W / 2; oRel = null;
+    }
+    function paths(oy) {
+      oRel = oy;
+      cP.forEach((pa, k) => { pa.setAttribute('d', curve({ x: Ox, y: oy }, cTo[k], innerWidth, k, 1)); cLen[k] = pa.getTotalLength(); pa.style.strokeDasharray = `${cLen[k]} ${cLen[k]}`; });
+      cO.setAttribute('cx', Ox); cO.setAttribute('cy', oy); cOr.setAttribute('cx', Ox); cOr.setAttribute('cy', oy);
     }
     layoutC(); addEventListener('resize', layoutC); if (document.fonts) document.fonts.ready.then(layoutC);
+    let bt = null, shown = false;
     function frame(now) {
       requestAnimationFrame(frame);
       const t = now / 1000, W = innerWidth, H = innerHeight, r = fin.getBoundingClientRect();
       const onStage = r.top < H && r.bottom > 0;
       const p = C(-r.top / Math.max(1, r.height - H));
-      // 0 → .16 : le mur monte ; .1 → .26 : le cercle se dessine ; .3 → .7 : les sites sont aspirés, le cercle devient un point
-      const up = ease(C(p / .16)), white = p >= .72;
+      // 0 → .16 : le mur monte ; .1 → .26 : le cercle se dessine ; .3 → .8 : les sites sont aspirés, le cercle devient un point ;
+      // .84 → .985 : le point tremble de plus en plus ; puis le fond devient blanc et les deux particules partent
+      const up = ease(C(p / .16)), white = p >= .985;
       window.__finCover = onStage && up >= .999;
       const light = onStage && up > .9 && !white;
       if (light !== lastLight) { lastLight = light; topbarEl.classList.toggle('light2', light); }
       if (white !== lastWhite) { lastWhite = white; wallEl.classList.toggle('white', white); }
+      if (white && burstAt == null && !reduce) burstAt = now; if (p < .97 && r.top < H) burstAt = null;
+      bt = burstAt == null ? null : (now - burstAt) / 1000;
       if (!onStage) { contactFrame(); return; }
       wallEl.style.transform = `translateY(${((1 - up) * 101).toFixed(2)}%)`;
       const rr = 1 - up; wallEl.style.borderRadius = `${(50 * rr).toFixed(1)}% ${(50 * rr).toFixed(1)}% 0 0 / ${(14 * rr).toFixed(1)}% ${(14 * rr).toFixed(1)}% 0 0`;
-      const draw = C((p - .1) / .16), shr = ease(C((p - .3) / .4));
+      const draw = C((p - .1) / .16), shr = ease(C((p - .3) / .52));
       const w0 = logo.offsetWidth * .96 || 1, sc = 1 + (10 / w0 - 1) * shr;
       ring.style.strokeDasharray = '302 302'; ring.style.strokeDashoffset = (302 * (1 - draw)).toFixed(1);
-      const dotF = C((shr - .85) / .15);
-      ring.style.fill = `rgba(255,255,255,${dotF})`;
-      // juste avant l'explosion : le point tremble de plus en plus vite et brille
-      const pre = reduce ? 0 : C((p - .62) / .1), amp = pre * pre * 7;
+      ring.style.fill = `rgba(255,255,255,${C((shr - .85) / .15)})`;
+      // le point tremble de plus en plus vite et brille
+      const pre = reduce ? 0 : C((p - .84) / .14), amp = pre * pre * 7;
       const jx = Math.sin(t * 71) * amp + Math.sin(t * 43) * amp * .5, jy = Math.cos(t * 67) * amp + Math.cos(t * 37) * amp * .5;
       logo.style.transform = `translate(-50%, -50%) translate(${jx.toFixed(1)}px, ${jy.toFixed(1)}px) scale(${(sc * (1 + pre * .5 + Math.sin(t * 30) * pre * .12)).toFixed(4)})`;
       logo.style.filter = pre > 0 ? `drop-shadow(0 0 ${(4 + pre * 14).toFixed(1)}px rgba(255,255,255,${(.5 + pre * .5).toFixed(2)}))` : 'none';
-      logo.style.visibility = white ? 'hidden' : 'visible'; logo.style.opacity = C((p - .09) / .05).toFixed(3);   // le cercle n'apparaît qu'une fois le mur monté
+      logo.style.visibility = white ? 'hidden' : 'visible'; logo.style.opacity = C((p - .09) / .05).toFixed(3);
       name.style.opacity = (C((p - .16) / .08) * (1 - C((p - .3) / .08))).toFixed(3);
       name.style.transform = `translate(-50%, ${((1 - C((p - .16) / .08)) * 16).toFixed(1)}px)`;
       cards.forEach(c => {
         let age = (t - c.born) / c.life; if (age >= 1 && p < .3) { spawn(c, t, false); age = 0; } age = Math.min(age, 1);
-        const life = reduce ? 1 : Math.sin(Math.PI * age), q = ease(C((p - .3 - c.delay * .08) / .36));
+        const life = reduce ? 1 : Math.sin(Math.PI * age), q = ease(C((p - .3 - c.delay * .08) / .44));
         const z = (c.z0 + (c.z1 - c.z0) * age) * (1 - q) - 500 * q, spread = 1 + Math.max(0, -z) / 900 * .85;
         const x = c.x * W * .44 * spread * (1 - q), y = c.y * H * .38 * spread * (1 - q);
         c.el.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateY(${(c.ry * (1 - q)).toFixed(2)}deg) rotateX(${(c.rx * (1 - q)).toFixed(2)}deg) rotate(${(c.rz * (1 - q)).toFixed(2)}deg) scale(${(1 - q * .6).toFixed(3)})`;
         c.el.style.opacity = (C((p - .12) / .1) * Math.max(life, q < 1 ? q * .9 : 0) * (1 - C((q - .8) / .2))).toFixed(3);
       });
-      // les deux particules sortent du point et descendent jusqu'en bas de l'écran (le contact prend le relais)
-      // l'explosion se déclenche une fois quand on passe le cap, et se rejoue si on remonte puis redescend
-      if (white && burstAt == null && !reduce) burstAt = now; if (p < .7) burstAt = null;
-      const bt = burstAt == null ? null : (now - burstAt) / 1000;
-      const ox = W / 2, oy = H * .46, ex = [W * .44, W * .56];
-      if (bt != null || burstDrawn) drawBurst(bt, W, H, ox, oy);
-      // l'écran secoue un instant au moment de l'explosion
+      // l'écran tremble un instant quand le point éclate
       const shk = bt != null && bt < .5 ? Math.pow(1 - bt / .5, 2) * 9 : 0;
       finStage.style.transform = shk ? `translate(${(Math.sin(now * .09) * shk).toFixed(1)}px, ${(Math.cos(now * .11) * shk).toFixed(1)}px)` : '';
-      // les deux particules : elles partent très vite avec l'explosion puis ralentissent ; le défilement prend le relais
-      const th = Math.max(C((p - .72) / .28), bt == null ? 0 : .4 * outExpo(Math.min(1, bt / 1.1)));
-      strings.setAttribute('viewBox', `0 0 ${W} ${H}`);
-      sP.forEach((pa, k) => {
-        const sgn = k ? 1 : -1, ey = H + 2;
-        pa.setAttribute('d', `M ${ox} ${oy} C ${ox + sgn * W * .22} ${oy + (ey - oy) * .1}, ${ex[k] + sgn * W * .18} ${ey - (ey - oy) * .45}, ${ex[k]} ${ey}`);
-        const len = pa.getTotalLength(); pa.style.strokeDasharray = `${len} ${len}`; pa.style.strokeDashoffset = (len * (1 - th)).toFixed(1);
-        const pt = pa.getPointAtLength(len * th); sD[k].setAttribute('cx', pt.x.toFixed(1)); sD[k].setAttribute('cy', pt.y.toFixed(1)); sD[k].style.opacity = white && th < .999 ? 1 : 0;
-      });
       contactFrame();
     }
     function contactFrame() {
-      // dans le contact, le bout des deux trajets suit le défilement (lissé), comme les points de la page « Tous mes projets »
-      const target = reduce ? 1e9 : scrollY + innerHeight * .62 - cTop;
+      const H = innerHeight;
+      // le point de départ : le centre de l'écran tant que la fin est collée, puis il remonte avec la page
+      const oy = Math.min(scrollY + H * .46, fin.offsetTop + fin.offsetHeight - H + H * .46) - cTop;
+      if (oRel == null || Math.abs(oy - oRel) > .5) paths(oy);
+      const on = lastWhite || scrollY > fin.offsetTop + fin.offsetHeight - H;
+      if (on !== shown) { shown = on; [cO, cOr].forEach(c => c.style.opacity = on ? 1 : 0); }
+      // le bout des deux trajets : il jaillit avec l'explosion (vite, puis ralentit), puis suit le défilement (lissé),
+      // comme les points de la page « Tous mes projets »
+      const target = reduce ? 1e9 : scrollY + H * .62 - cTop;
       curY += (target - curY) * .14;
       cP.forEach((pa, k) => {
-        const tt = C(curY / Math.max(1, cTo[k] ? cTo[k].y : 1));
+        let tt = on ? C((curY - oRel) / Math.max(1, cTo[k].y - oRel)) : 0;
+        if (on && bt != null) tt = Math.max(tt, .14 * outExpo(Math.min(1, bt / 1.1)));
         pa.style.strokeDashoffset = (cLen[k] * (1 - tt)).toFixed(1);
         const pt = pa.getPointAtLength(cLen[k] * tt); cD[k].setAttribute('cx', pt.x.toFixed(1)); cD[k].setAttribute('cy', pt.y.toFixed(1));
-        cD[k].style.opacity = tt > .002 ? 1 : 0;
+        cD[k].style.opacity = on && tt > .002 ? 1 : 0;
       });
     }
     requestAnimationFrame(frame);
