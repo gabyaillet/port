@@ -140,9 +140,9 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
    nos projets en deux colonnes sur les côtés (celle de gauche monte, celle de droite descend) et, au centre, les catégories */
 .works { position: absolute; inset: 0; overflow: hidden; color: #141414; opacity: 0; visibility: hidden; will-change: opacity, transform; }   /* même fond que le reste du site : le mur reste visible derrière */
 /* Pendant le glissement vers la gauche : des colonnes de cartes, une sur deux monte et l'autre descend (comme la vidéo de Kove) */
-.mz { position: absolute; left: 0; top: 0; height: 100%; display: flex; gap: 12px; will-change: transform; transform: translateX(100vw); }
-.mz-col { flex: none; display: flex; flex-direction: column; gap: 12px; will-change: transform; }
-.mz-c { flex: none; background: #fff; padding: 3px; box-shadow: 0 30px 60px -40px rgba(20,20,20,.3); }
+.mz { position: absolute; left: 0; top: 0; height: 100%; display: flex; justify-content: center; gap: 4.5vw; background: #0d0d0d; will-change: transform; transform: translateX(100vw); }
+.mz-col { flex: none; display: flex; flex-direction: column; gap: 4.5vw; will-change: transform; }
+.mz-c { flex: none; background: #fff; padding: 3px; }
 .mz-c > div { position: relative; width: 100%; height: 100%; overflow: hidden; background: linear-gradient(160deg, #ffffff 0%, #f5f5f3 100%); display: grid; place-items: center; }
 .mz-c img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .mz-c i { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #d7d7d4; }
@@ -1045,14 +1045,14 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const mz = document.getElementById('mz'), MZI = ['./img/boutique-obtura.jpg', './img/ville-2cv.jpg', './img/boutique-vins.jpg', './img/particules.jpg'];
     const MZA = [.8, 1.25, .95, 1.4, .75, 1.1, 1.3, .85]; let mzCols = [];
     function buildMz() {
-      const W = innerWidth, H = innerHeight, narrow = W < 760, n = narrow ? 4 : 5, cw = (narrow ? .44 : .215) * W;
+      const W = innerWidth, H = innerHeight, narrow = W < 760, n = 3, cw = (narrow ? .29 : .2) * W;   // trois colonnes, sur fond noir
       let html = '', k = 0, blank = 0;
       for (let c = 0; c < n; c++) { html += '<div class="mz-col">'; let h = 0, j = 0;
         while (h < H * 2.3) { const a = MZA[(c * 3 + j) % MZA.length], ch = cw * a, isImg = (c + j) % 3 === (c % 2);
           html += `<div class="mz-c" style="width:${cw.toFixed(0)}px;height:${ch.toFixed(0)}px"><div>${isImg ? `<img src="${MZI[k++ % MZI.length]}" alt="" loading="lazy" decoding="async">` : `<b>${String(++blank).padStart(2, '0')}</b><i></i>`}</div></div>`;
-          h += ch + 12; j++; }
+          h += ch + W * .045; j++; }
         html += '</div>'; }
-      mz.innerHTML = html; mzCols = [...mz.children]; G && (G.M = mz.scrollWidth);
+      mz.innerHTML = html; mz.style.width = (W * (narrow ? 1.25 : 1.2)).toFixed(0) + 'px'; mzCols = [...mz.children]; G && (G.M = mz.scrollWidth);
     }
     const colL = document.getElementById('wk-l'), colR = document.getElementById('wk-r'), cats = [];
     const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, C = v => Math.max(0, Math.min(1, v));
@@ -1086,7 +1086,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const trL = Math.max(H * .5, hL - H - 2 * edge), trR = Math.max(H * .5, hR - H - 2 * edge), travel = Math.max(trL, trR);
       // glissement, ouverture de la capsule, capsule en plein écran, défilement des projets, mur
       G = { H, slide: H * .9, open: H * .75, exp: H * .9, travel, top0, hL, hR, edge, trL, trR, rise: H * .9 };
-      buildMz(); G.M = mz.scrollWidth + innerWidth * .08; G.slide = H * .9 * (innerWidth + G.M) / innerWidth;
+      buildMz(); G.M = mz.offsetWidth; G.slide = H * .9 * (innerWidth + G.M) / innerWidth;
       G.w0 = G.slide + G.open + G.exp;
       G.fs = parseFloat(getComputedStyle(pjW).fontSize);
       fin.style.height = (H + G.w0 + travel + G.rise) + 'px';
@@ -1115,6 +1115,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const q = X / (W + G.M);
         mzCols.forEach((c, i) => { const d = i % 2 ? 1 : -1, off = -H * .55 + d * (q - .5) * H * .9; c.style.transform = `translate3d(0, ${off.toFixed(1)}px, 0)`; }); }
       else mz.style.visibility = 'hidden';
+      const mzDark = mx < 60 && mx + G.M > 60;   // la mosaïque noire est sous l'en-tête : il passe en clair
       // le trait s'ouvre en capsule (comme la vidéo), puis la capsule grandit jusqu'à tout l'écran
       const fs = G.fs, narrow = innerWidth < 760;
       const pw = (narrow ? .34 : .3) * innerWidth, ph = fs * .8;
@@ -1157,7 +1158,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const we = ease(wp), rr = +(1 - we).toFixed(3);
       wallEl.style.transform = `translate3d(0, ${((1 - we) * 101).toFixed(2)}%, 0)`;
       if (rr !== lastR) { lastR = rr; wallEl.style.borderRadius = `${50 * rr}% ${50 * rr}% 0 0 / ${14 * rr}% ${14 * rr}% 0 0`; }
-      const light = we > .92, dark = sp > .5 && !light;
+      const light = we > .92 || mzDark, dark = sp > .5 && !light;
       window.__finCover = we > .995;   // le mur des contacts couvre tout : inutile de dessiner le mur derrière
       if (light !== lastLight) { lastLight = light; topbarEl.classList.toggle('light2', light); }
       if (dark !== lastDark) { lastDark = dark; topbarEl.classList.toggle('dark2', dark); }
