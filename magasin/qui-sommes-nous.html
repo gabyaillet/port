@@ -133,38 +133,7 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .no-gl .pp-ini { display: block; }
 
 /* ---------- La fin : après nos cartes, le mur en dégradé monte et couvre l'écran ---------- */
-.finale { position: relative; z-index: 4; height: calc(100svh + 3 * 55svh); }   /* le mur monte, puis chaque cran passe au projet suivant */
-/* ---------- Nos projets : « l'objectif » ----------
-   Obtura vient d'obturateur : les projets se regardent à travers un objectif photo. Une grande lentille en verre au centre
-   du mur montre le projet ; autour, la bague de mise au point graduée tourne au défilement. À chaque cran, l'image se floute
-   (la mise au point décroche), passe au projet suivant avec un petit éclair, puis redevient nette. */
-.lensv { position: absolute; inset: 0; opacity: 0; will-change: opacity; color: #fff; }
-.lens-gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
-.lens-ring { position: absolute; overflow: visible; pointer-events: none; will-change: transform; }
-.lens-ring line { stroke: rgba(255,255,255,.7); stroke-width: .35; }
-.lens-ring line.l { stroke: #fff; stroke-width: .5; }
-.lens-ring text { fill: rgba(255,255,255,.85); font: 400 3.2px var(--mono); letter-spacing: .4px; }
-.lens-ring .arc { fill: none; stroke: rgba(255,255,255,.35); stroke-width: .3; }
-.lens-br { position: absolute; pointer-events: none; will-change: transform; }
-.lens-br i { position: absolute; width: 22px; height: 22px; border: 0 solid rgba(255,255,255,.9); }
-.lens-br i:nth-child(1) { left: 0; top: 0; border-width: 1.5px 0 0 1.5px; } .lens-br i:nth-child(2) { right: 0; top: 0; border-width: 1.5px 1.5px 0 0; }
-.lens-br i:nth-child(3) { left: 0; bottom: 0; border-width: 0 0 1.5px 1.5px; } .lens-br i:nth-child(4) { right: 0; bottom: 0; border-width: 0 1.5px 1.5px 0; }
-.lens-link { position: absolute; border-radius: 50%; cursor: pointer; }
-.lens-link:focus-visible { outline: 2px solid #fff; outline-offset: 6px; }
-.lens-fallback { position: absolute; border-radius: 50%; overflow: hidden; display: none; }
-.lens-fallback img { width: 100%; height: 100%; object-fit: cover; transition: opacity .5s; }
-.no-gl .lens-fallback { display: block; }
-.lens-info { position: absolute; left: max(20px, 4vw); bottom: calc(env(safe-area-inset-bottom, 0px) + 2.2rem); right: max(20px, 4vw); display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem; pointer-events: none; }
-.lens-count { margin: 0 0 .7rem; font: 400 .64rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.85); }
-.lens-name { margin: 0; overflow: hidden; padding: .06em 0 .12em; font: italic 400 clamp(2.6rem, 6.4vw, 6.6rem)/.95 "Instrument Serif", Georgia, serif; letter-spacing: -.01em; }
-.lens-name span { display: inline-block; will-change: transform, opacity; }
-.lens-side { display: grid; justify-items: end; gap: .9rem; pointer-events: auto; }
-.lens-meta { font: 400 .64rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.85); }
-.lens-go { display: inline-flex; gap: .7rem; align-items: center; padding: .55rem .6rem .55rem 1.2rem; border-radius: 99px; background: #fff; color: #141414; font: 500 .9rem var(--f); text-decoration: none; }
-.lens-go span { display: grid; place-items: center; width: 1.8rem; aspect-ratio: 1; border-radius: 50%; color: #fff; background: linear-gradient(135deg, var(--c1), var(--c3)); transition: transform .4s cubic-bezier(.16,1,.3,1); }
-.lens-go:hover span { transform: rotate(-45deg); }
-.lens-hint { position: absolute; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 4.6rem); transform: translateX(-50%); margin: 0; font: 400 .62rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.85); white-space: nowrap; }
-@media (max-width: 760px) { .lens-info { flex-direction: column; align-items: flex-start; } .lens-side { justify-items: start; } }
+.finale { position: relative; z-index: 4; height: 100svh; }   /* le mur monte avec la page, et la page s'arrête quand il couvre l'écran */
 .fin-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
 .fin-wall { position: absolute; inset: 0; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
 .topbar.light2 { --ink: #f4f4f2; --wall: #0d0d0d; }
@@ -309,19 +278,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   </div>
 </section>
 <div class="curtain" id="curtain" aria-hidden="true"></div>
-<section class="finale" id="fin" aria-label="Nos projets">
-  <div class="fin-stage"><div class="fin-wall" id="fin-wall"></div><div class="lensv" id="lensv">
-      <canvas class="lens-gl" id="lens-gl" aria-hidden="true"></canvas>
-      <div class="lens-fallback" id="lens-fb"><img id="lens-fb-img" alt="" src="./img/boutique-obtura.jpg"></div>
-      <svg class="lens-ring" id="lens-ring" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
-      <div class="lens-br" id="lens-br" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-      <a class="lens-link" id="lens-link" href="./" aria-label="Voir le projet"></a>
-      <p class="lens-hint">Défiler pour faire la mise au point</p>
-      <div class="lens-info">
-        <div><p class="lens-count" id="lens-count">01 / 04</p><h3 class="lens-name" id="lens-name"><span>La boutique Obtura</span></h3></div>
-        <div class="lens-side"><span class="lens-meta" id="lens-meta">Obtura · Intro 3D</span><a class="lens-go" id="lens-go" href="./">Voir le projet <span aria-hidden="true">→</span></a></div>
-      </div>
-    </div></div>
+<section class="finale" id="fin" aria-hidden="true">
+  <div class="fin-stage"><div class="fin-wall" id="fin-wall"></div></div>
 </section>
 
 <script>
@@ -994,125 +952,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       if (!on) return;
       const rr = +(1 - ease(C((H - r.top) / H))).toFixed(3);   // son bord du haut, arrondi, s'aplatit en montant
       if (rr !== lastR) { lastR = rr; wallEl.style.borderRadius = `${50 * rr}% ${50 * rr}% 0 0 / ${14 * rr}% ${14 * rr}% 0 0`; }
-      lensFrame(r, H, performance.now());
     })();
-
-    /* ---------- Nos projets : l'objectif ---------- */
-    const PROJ = [
-      { n: 'La boutique Obtura', m: 'Obtura · Intro 3D', img: './img/boutique-obtura.jpg', href: './' },
-      { n: 'La ville en 2CV', m: 'Gabriel · 3D', img: './img/ville-2cv.jpg', href: 'https://gabyaillet.github.io/port/vitrine/' },
-      { n: 'Boutique de vins', m: "Gabriel · Projet d'IUT", img: './img/boutique-vins.jpg', href: 'https://gabyaillet.github.io/port/projets.html' },
-      { n: 'Générateur de particules', m: "Gabriel · Projet d'IUT", img: './img/particules.jpg', href: 'https://gabyaillet.github.io/port/projets.html' }];
-    const N = PROJ.length; window.__wheelN = N; window.__wheelStep = .55;
-    const lv = document.getElementById('lensv'), cv = document.getElementById('lens-gl'), ring = document.getElementById('lens-ring'), br = document.getElementById('lens-br');
-    const link = document.getElementById('lens-link'), go = document.getElementById('lens-go'), nameEl = document.getElementById('lens-name'), countEl = document.getElementById('lens-count'), metaEl = document.getElementById('lens-meta');
-    const fb = document.getElementById('lens-fb'), fbImg = document.getElementById('lens-fb-img');
-    // la bague : graduations, chiffres de mise au point et le nom du studio qui tourne
-    (function buildRing() {
-      let h = '<circle class="arc" r="93"/><circle class="arc" r="80"/>';
-      for (let k = 0; k < 120; k++) { const a = k / 120 * Math.PI * 2, L = k % 10 === 0, r0 = L ? 84 : 86.5, r1 = 90;
-        h += `<line class="${L ? 'l' : ''}" x1="${(Math.cos(a) * r0).toFixed(2)}" y1="${(Math.sin(a) * r0).toFixed(2)}" x2="${(Math.cos(a) * r1).toFixed(2)}" y2="${(Math.sin(a) * r1).toFixed(2)}"/>`; }
-      ['∞', '10', '5', '3', '2', '1.5', '1', '0.8', '0.6', '0.5', '0.45', '0.4'].forEach((t, k) => { const a = k / 12 * Math.PI * 2 - Math.PI / 2;
-        h += `<text x="${(Math.cos(a) * 96.5).toFixed(2)}" y="${(Math.sin(a) * 96.5 + 1.1).toFixed(2)}" text-anchor="middle">${t}</text>`; });
-      ring.innerHTML = h;
-    })();
-    // la lentille en WebGL : verre, léger effet fish-eye au bord, couleurs qui se séparent sur le bord, flou de mise au point
-    let gl = null; try { gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true }); } catch (e) {}
-    const VS = 'attribute vec2 p; varying vec2 v; void main(){ v = p * .5 + .5; gl_Position = vec4(p, 0., 1.); }';
-    const FS = `precision highp float;
-      uniform sampler2D uA; uniform sampler2D uB; uniform float uMix; uniform float uBlur; uniform float uFlash; uniform vec2 uRes; uniform vec2 uC; uniform float uR;
-      uniform vec2 uAspA; uniform vec2 uAspB; uniform vec2 uMouse; varying vec2 v;
-      vec3 tex(sampler2D t, vec2 uv, vec2 asp) { return texture2D(t, clamp((uv - .5) * asp + .5, .001, .999)).rgb; }
-      vec3 look(vec2 uv, vec2 off) {
-        vec3 a = tex(uA, uv + off, uAspA), b = tex(uB, uv + off, uAspB); return mix(a, b, uMix); }
-      void main() {
-        vec2 px = vec2(v.x, 1. - v.y) * uRes, d = (px - uC) / uR; float r = length(d);
-        if (r > 1.01) discard;
-        // le verre grossit un peu au centre et se courbe au bord
-        vec2 q = d * (.86 + .14 * r * r) + uMouse * .04 * (1. - r * r);
-        vec2 uv = q * .5 + .5;
-        vec2 ca = d * (pow(r, 3.) * .018 + uBlur * .012);
-        vec3 col = vec3(0.); float bl = uBlur * .045;
-        // flou de mise au point : quelques échantillons autour du point
-        for (int i = 0; i < 8; i++) { float a = float(i) * .785398; vec2 o = vec2(cos(a), sin(a)) * bl;
-          col += vec3(look(uv + ca, o).r, look(uv, o).g, look(uv - ca, o).b); }
-        col /= 8.;
-        col *= 1. - .38 * smoothstep(.55, 1., r);                              // vignettage de l'objectif
-        col += smoothstep(.93, 1., r) * .22;                                    // liseré de verre
-        col += .16 * smoothstep(.55, 0., length(d - vec2(-.38, -.46)));         // reflet en haut à gauche
-        col += .05 * smoothstep(.12, 0., abs(d.x * .7 + d.y * .3 + .55));       // reflet en bande
-        col = mix(col, vec3(1.), uFlash);
-        float a = smoothstep(1.005, .985, r);
-        gl_FragColor = vec4(col * a, a);
-      }`;
-    let prog = null, U = {}, texs = [], asp = [];
-    if (gl) {
-      try {
-        const sh = (t, src) => { const o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
-        prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
-        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error('link');
-        gl.useProgram(prog);
-        const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-        const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-        ['uA', 'uB', 'uMix', 'uBlur', 'uFlash', 'uRes', 'uC', 'uR', 'uAspA', 'uAspB', 'uMouse'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
-        gl.uniform1i(U.uA, 0); gl.uniform1i(U.uB, 1); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-        PROJ.forEach((P, k) => { const t = gl.createTexture(); texs[k] = t; asp[k] = [1, 1]; gl.bindTexture(gl.TEXTURE_2D, t);
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([200, 200, 200, 255]));
-          const im = new Image(); im.onload = () => { gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
-            [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(f => gl.texParameteri(gl.TEXTURE_2D, f, gl.LINEAR));
-            [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(f => gl.texParameteri(gl.TEXTURE_2D, f, gl.CLAMP_TO_EDGE));
-            const ar = im.width / im.height; asp[k] = ar > 1 ? [1 / ar, 1] : [1, ar]; dirty = true; }; im.src = P.img; });
-      } catch (e) { gl = null; }
-    }
-    if (!gl) fb.style.display = 'block';
-    let L = null, dirty = true, cur = 0, from = 0, tStart = -1, mx = 0, my = 0, tmx = 0, tmy = 0, ringRot = 0;
-    function lensLayout() {
-      const W = innerWidth, H = innerHeight, narrow = W < 760, dpr = Math.min(devicePixelRatio || 1, 2);
-      const R = narrow ? Math.min(W * .36, H * .22) : Math.min(W * .22, H * .27), cx = W / 2, cy = narrow ? H * .4 : H * .47;
-      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); if (gl) gl.viewport(0, 0, cv.width, cv.height);
-      const rs = R * 2 * 1.28; Object.assign(ring.style, { width: rs + 'px', height: rs + 'px', left: cx - rs / 2 + 'px', top: cy - rs / 2 + 'px' });
-      const bs = R * 2 * 1.45; Object.assign(br.style, { width: bs + 'px', height: bs + 'px', left: cx - bs / 2 + 'px', top: cy - bs / 2 + 'px' });
-      Object.assign(link.style, { width: 2 * R + 'px', height: 2 * R + 'px', left: cx - R + 'px', top: cy - R + 'px' });
-      Object.assign(fb.style, { width: 2 * R + 'px', height: 2 * R + 'px', left: cx - R + 'px', top: cy - R + 'px' });
-      L = { W, H, R, cx, cy, dpr }; dirty = true;
-    }
-    lensLayout(); addEventListener('resize', lensLayout);
-    addEventListener('pointermove', e => { if (!L) return; tmx = (e.clientX - L.cx) / L.W; tmy = (e.clientY - L.cy) / L.H; });
-    function show(k) {
-      const P = PROJ[k]; link.href = go.href = P.href; link.setAttribute('aria-label', 'Voir le projet : ' + P.n);
-      countEl.textContent = `0${k + 1} / 0${N}`; metaEl.textContent = P.m; fbImg.src = P.img;
-      // le nom : l'ancien monte et disparaît, le nouveau arrive du bas
-      const old = nameEl.firstElementChild, nw = document.createElement('span'); nw.textContent = P.n;
-      if (old && !reduce) { old.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(-105%)', opacity: 0 }], { duration: 420, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' }).onfinish = () => old.remove();
-        nw.style.position = 'absolute'; nw.style.left = '0'; nameEl.style.position = 'relative'; nameEl.appendChild(nw);
-        nw.animate([{ transform: 'translateY(105%)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 700, delay: 260, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }).onfinish = () => { nw.style.position = ''; };
-      } else { nameEl.textContent = ''; nameEl.appendChild(nw); }
-    }
-    function lensFrame(r, H, now) {
-      const op = +C((H * .3 - r.top) / (H * .3)).toFixed(3);
-      if (op !== lv._op) { lv._op = op; lv.style.opacity = op; lv.style.pointerEvents = op > .5 ? 'auto' : 'none'; }
-      if (op <= 0 || !L) return;
-      const prog = Math.max(0, Math.min(N - 1, -r.top / (H * .55))), k = Math.round(prog);
-      if (k !== cur) { from = cur; cur = k; tStart = now; show(k); }
-      // mise au point : le flou monte, l'image change à mi-chemin avec un petit éclair, puis tout redevient net
-      const t = tStart < 0 ? 1 : Math.min(1, (now - tStart) / 950), blur = Math.sin(Math.PI * Math.min(1, t * 1.05)) * (reduce ? 0 : 1);
-      const mix = C((t - .38) / .2), flash = reduce ? 0 : Math.max(0, 1 - Math.abs(t - .47) / .08) * .35;
-      mx += (tmx - mx) * .08; my += (tmy - my) * .08;
-      // la bague tourne avec le défilement, et d'un cran de plus pendant la mise au point
-      const rot = prog * 90 + Math.sin(Math.PI * t) * 14;
-      if (Math.abs(rot - ringRot) > .01) { ringRot = rot; ring.style.transform = `rotate(${rot.toFixed(2)}deg)`; }
-      br.style.transform = `scale(${(1 - blur * .05).toFixed(4)})`;
-      if (!gl) return;
-      if (!dirty && t >= 1 && Math.abs(tmx - mx) < .0005 && Math.abs(tmy - my) < .0005) return;
-      dirty = false;
-      const A = texs[t < 1 ? from : cur], B = texs[cur], aA = asp[t < 1 ? from : cur], aB = asp[cur];
-      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, A); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, B);
-      gl.uniform2f(U.uRes, L.W, L.H); gl.uniform2f(U.uC, L.cx + mx * 18, L.cy + my * 12); gl.uniform1f(U.uR, L.R);
-      gl.uniform2f(U.uAspA, aA[0], aA[1]); gl.uniform2f(U.uAspB, aB[0], aB[1]); gl.uniform2f(U.uMouse, mx * 2, my * 2);
-      gl.uniform1f(U.uMix, t < 1 ? mix : 1); gl.uniform1f(U.uBlur, blur); gl.uniform1f(U.uFlash, flash);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    }
   })();
 
   /* ---------- Repris du portfolio de Gabriel, un peu changés ---------- */
@@ -1148,8 +988,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const vh = innerHeight, b = id => docBox(document.getElementById(id)), pts = [0];
       pts.push(Math.max(0, b('team-head').y - vh * .16));
       document.querySelectorAll('.pp').forEach(el => pts.push(docBox(el).y + vh * .86));
-      // le mur, puis une page par carte du carrousel
-      const f = b('fin'); for (let k = 0; k < (window.__wheelN || 1); k++) pts.push(f.y + k * vh * (window.__wheelStep || .4));
+      pts.push(document.documentElement.scrollHeight - vh);   // le mur couvre l'écran
       stops = [...new Set(pts.map(Math.round))].sort((a, c) => a - c);
     }
     computeStops(); addEventListener('resize', () => setTimeout(computeStops, 200)); addEventListener('load', computeStops);
