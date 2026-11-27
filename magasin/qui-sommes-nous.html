@@ -12,7 +12,7 @@
 html.lenis, html.lenis body { height: auto; } .lenis.lenis-smooth { scroll-behavior: auto !important; } .lenis.lenis-stopped { overflow: hidden; }
 /* Un mur d'enduit gris où passent des ombres de feuillage ; au défilement, les lettres de « bienvenue » tombent une à une en s'effaçant
    et la caméra les suit. Un trait épais au bout rond se dessine avec le défilement, fait des boucles au hasard, suit la chute
-   puis mène à nos deux profils. Couleurs vives et transitions en rideau, dans l'esprit de lusion.co et unseen.co. */
+   puis mène à nos deux profils, avant un mur en dégradé qui monte. Couleurs vives et transitions en rideau, dans l'esprit de lusion.co et unseen.co. */
 :root { --wall: #d2d2d0; --ink: #141414; --muted: #5d5d5a; --card: #e6e6e4;
   --c1: #2f45ff; --c2: #7a3cff; --c3: #ff4f8b; --c4: #ff8a3d; --c5: #22c1ff;   /* les couleurs vives : bleu électrique, violet, rose, orange, cyan */
   --f: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; color-scheme: light; }
@@ -123,56 +123,14 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
   background: radial-gradient(60% 70% at 25% 25%, var(--a), transparent), radial-gradient(60% 70% at 80% 60%, var(--b), transparent), radial-gradient(50% 50% at 40% 90%, var(--c), transparent), #0e0e12; }
 .no-gl .pp-ini { display: block; }
 
-/* ---------- La fin (comme le village du site de la voiture) ----------
-   Un mur de couleur monte du bas ; au centre, le cercle du logo ; de petits sites flottent en profondeur autour,
-   puis sont aspirés dedans pendant que le cercle se resserre en un point. Là, le fond devient blanc d'un coup
-   et deux particules de couleur en sortent, avec leur reflet, jusqu'au contact. */
-.finale { position: relative; z-index: 4; height: 360svh; }
+/* ---------- La fin : après nos cartes, le mur en dégradé monte et couvre l'écran ---------- */
+.finale { position: relative; z-index: 4; height: 100svh; }   /* le mur monte avec la page, et la page s'arrête quand il couvre l'écran */
 .fin-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
 .fin-wall { position: absolute; inset: 0; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
-.fin-wall.white { background: #fff; }
-.fin-cards { position: absolute; inset: 0; perspective: 900px; perspective-origin: 50% 46%; transform-style: preserve-3d; pointer-events: none; }
-.fcard { position: absolute; left: 50%; top: 46%; width: clamp(104px, 12vw, 168px); height: calc(clamp(104px, 12vw, 168px) * 1.25); margin: 0; opacity: 0; will-change: transform, opacity; container-type: inline-size; }
-/* les cartes : blanches, nettes, ce qu'on fait écrit en grand en italique */
-.fc { width: 100%; height: 100%; border-radius: 16px; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; padding: 9cqw 9cqw 8cqw;
-  background: #f7f7f5; color: #141414; box-shadow: 0 40px 60px -30px rgba(20,10,60,.6), 0 0 0 1px rgba(255,255,255,.5); }
-.fc .tp { display: flex; justify-content: space-between; align-items: center; font: 400 6.4cqw var(--mono); letter-spacing: .14em; text-transform: uppercase; color: #6d6d6a; }
-.fc .tp i { width: 7cqw; height: 7cqw; border-radius: 50%; border: 1.4px solid currentColor; }
-.fc b { align-self: center; font: italic 400 19cqw/.95 "Instrument Serif", Georgia, serif; letter-spacing: -.01em; }
-.fc .bt { height: 3cqw; border-radius: 3cqw; }
-/* le logo d'Obtura, en petit : le cercle et le mot */
-.fin-logo { position: absolute; left: 50%; top: 46%; display: flex; align-items: center; gap: 14px; transform: translate(-50%, -50%); will-change: transform, opacity; pointer-events: none; color: #fff; }
-.fin-logo svg { width: 34px; height: 34px; overflow: visible; flex: none; }
-.fin-logo circle { fill: none; stroke: #fff; stroke-width: 2.4; vector-effect: non-scaling-stroke; }
-.fin-logo .wm { font: 600 1.45rem var(--f); letter-spacing: .3em; margin-right: -.3em; will-change: opacity; }
-.fin-name { position: absolute; left: 50%; top: calc(46% + 2.6rem); transform: translateX(-50%); color: rgba(255,255,255,.82); text-align: center; white-space: nowrap; opacity: 0; font: 400 .62rem var(--mono); letter-spacing: .22em; text-transform: uppercase; will-change: opacity, transform; }
-.fin-strings { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-.fin-strings path, .c-thread path { fill: none; stroke-width: 1.2; stroke-linecap: round; }
-.c-thread circle { opacity: 0; }
-.pt-o { fill: #141414; transition: opacity .3s; } .pt-o-ring { fill: none; stroke: rgba(20,20,20,.18); stroke-width: 1; transition: opacity .3s; }   /* le point de départ */
-.pt-a { fill: #2f45ff; filter: drop-shadow(0 0 6px #2f45ff) drop-shadow(0 0 14px rgba(47,69,255,.6)); }
-.pt-b { fill: #ff4f8b; filter: drop-shadow(0 0 6px #ff4f8b) drop-shadow(0 0 14px rgba(255,79,139,.6)); }
-.ln-a { stroke: rgba(47,69,255,.55); } .ln-b { stroke: rgba(255,79,139,.55); }
 .topbar.light2 { --ink: #f4f4f2; --wall: #0d0d0d; }
 
-/* Le contact, sur fond blanc : les deux particules y arrivent */
-.contact { position: relative; z-index: 4; background: #fff; padding: 34svh 0 0; }
-.c-thread { position: absolute; left: 0; top: 0; width: 100%; overflow: visible; pointer-events: none; }
-.c-in { position: relative; padding-bottom: 14svh; }
-.c-title { margin: 0 0 1.6rem; font: 500 clamp(3rem, 9vw, 8rem)/.9 var(--f); letter-spacing: -.055em; }
-.c-title .serif { font-size: 1.06em; }
-.c-lead { margin: 0 0 clamp(2.5rem, 6vw, 4.5rem); max-width: 32rem; font-size: 1.05rem; line-height: 1.55; color: #3a3a38; }
-.c-list { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; }
-.c-list div { padding-top: 1rem; border-top: 1px solid rgba(20,20,20,.15); }
-.c-list dt { font: 400 .64rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: .6rem; }
-.c-list dd { margin: 0; font-size: 1.05rem; line-height: 1.45; }
-.c-list dd.todo { color: #8a8a87; font-style: italic; }
-.contact .foot { position: relative; }
-@media (max-width: 760px) { .c-list { grid-template-columns: 1fr 1fr; } }
-
 /* ---------- Repris du portfolio de Gabriel, un peu changés ----------
-   le curseur (ici en dégradé), les boutons aimantés, les titres qui montent mot par mot,
-   les apparitions en cascade et le bandeau qui défile plus vite quand on défile */
+   le curseur (ici en dégradé) et les boutons aimantés */
 .cursor { position: fixed; left: 0; top: 0; z-index: 300; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; pointer-events: none;
   background: linear-gradient(135deg, var(--c1), var(--c3)); box-shadow: 0 0 0 1.5px rgba(255,255,255,.9); display: grid; place-items: center;
   transition: width .35s cubic-bezier(.2,.8,.2,1), height .35s cubic-bezier(.2,.8,.2,1), margin .35s cubic-bezier(.2,.8,.2,1); }
@@ -180,18 +138,6 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .cursor.big { width: 76px; height: 76px; margin: -38px 0 0 -38px; } .cursor.big span { opacity: 1; }
 .cursor.mid { width: 34px; height: 34px; margin: -17px 0 0 -17px; }
 @media (hover: none), (pointer: coarse) { .cursor { display: none; } }
-.rv-w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .12em; margin-bottom: -.12em; }
-.rv-w > span { display: inline-block; transition: transform 1.1s cubic-bezier(.16,1,.3,1); }
-.pre .rv-w > span { transform: translateY(115%) rotate(5deg); }
-.pre.in .rv-w > span { transform: none; }
-.fu { transition: opacity 1s cubic-bezier(.16,1,.3,1), transform 1.1s cubic-bezier(.16,1,.3,1); }
-.fu.pre { opacity: 0; transform: translateY(40px); } .fu.pre.in { opacity: 1; transform: none; }
-.marquee { overflow: hidden; padding-block: clamp(1.4rem, 3vw, 2.4rem); border-top: 1px solid rgba(20,20,20,.1); }
-.marquee .track { display: flex; width: max-content; will-change: transform; }
-.marquee span { font: 500 clamp(3rem, 9vw, 8rem)/1 var(--f); letter-spacing: -.05em; text-transform: uppercase; white-space: nowrap; padding-right: .45em; display: inline-flex; align-items: center; gap: .45em; }
-.marquee span::after { content: ""; width: .2em; height: .2em; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c3)); }
-.marquee span.o { color: transparent; -webkit-text-stroke: 1.5px #141414; }
-@media (prefers-reduced-motion: reduce) { .pre .rv-w > span, .fu.pre { transform: none; opacity: 1; } }
 
 /* Quand le trait passe sous un texte posé sur le mur, il s'interrompt autour des lettres : le texte reste lisible */
 .team > .wrap > .label { -webkit-text-stroke: 4px #d8d8d6; paint-order: stroke fill; }
@@ -268,7 +214,6 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 </header>
 <ul class="nav" id="nav" data-open="false">
   <li><a href="#equipe">Qui sommes-nous</a></li>
-  <li><a href="#contact">Contact</a></li>
   <li><a href="./">Revoir l'intro</a></li>
   <li class="nav-foot"><button class="pill nav-close" type="button">Fermer ✕</button></li>
 </ul>
@@ -322,30 +267,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   </div>
 </section>
 <div class="curtain" id="curtain" aria-hidden="true"></div>
-<section class="finale" id="fin" aria-label="Obtura Studio">
-  <div class="fin-stage">
-    <div class="fin-wall" id="fin-wall"></div>
-    <div class="fin-cards" id="fin-cards" aria-hidden="true"></div>
-    <div class="fin-logo" id="fin-logo" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" pathLength="302"/></svg><span class="wm" id="fin-wm">OBTURA</span></div>
-    <p class="fin-name" id="fin-name">Studio · Web design · Nantes</p>
-  </div>
-</section>
-
-<section class="contact" id="contact" aria-labelledby="c-title">
-  <svg class="c-thread" id="c-thread" aria-hidden="true"><path class="ln-a"/><path class="ln-b"/><circle class="pt-o-ring" r="14"/><circle class="pt-o" r="4.5"/><circle class="pt-a" r="5"/><circle class="pt-b" r="5"/></svg>
-  <div class="wrap c-in" id="c-in">
-    <p class="label">Contact</p>
-    <h2 class="c-title" id="c-title">Parlons de <span class="serif grad">votre projet.</span></h2>
-    <p class="c-lead">Un site à créer ou à entretenir pour votre entreprise ? On s'en occupe à deux, du design au développement.</p>
-    <dl class="c-list">
-      <div><dt>E-mail</dt><dd class="todo">À compléter</dd></div>
-      <div><dt>Instagram et TikTok</dt><dd>Obtura Web</dd></div>
-      <div><dt>Où</dt><dd>Nantes</dd></div>
-      <div><dt>Qui</dt><dd>Gabriel Aillet et Arthur Goubill</dd></div>
-    </dl>
-  </div>
-  <div class="marquee" aria-hidden="true"><div class="track" id="marquee-track"><span>Obtura Studio</span><span class="o">Web design</span><span>Création</span><span class="o">Maintenance</span><span>Nantes</span><span class="o">Obtura Studio</span></div></div>
-  <footer class="foot"><div class="wrap"><span>Obtura Studio · Nantes</span><a href="./">Revoir l'intro</a></div></footer>
+<section class="finale" id="fin" aria-hidden="true">
+  <div class="fin-stage"><div class="fin-wall" id="fin-wall"></div></div>
 </section>
 
 <script>
@@ -477,16 +400,11 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     // il entre par la gauche dès l'arrivée, passe sous le mot sans le barrer
     A.M(-60, vh * .1, false); A.M(vw * (.08 + R() * .06), vh * .5, false);
     let y = vh * .5, side = 1;
-    while (y < endFall - vh * .6) { y += vh * (.62 + R() * .2); side = -side; A.M(vw * (.5 + side * (.1 + R() * .14)), y, L(.35)); }   // moins de virages, plus amples
-    // il longe le texte « Qui sommes-nous » par la droite (sans le barrer), puis vient se poser au-dessus du panneau
-    A.M(wide ? vw * .86 : vw * .93, man.y + man.h * .35, false);
+    while (y < endFall - vh * .6) { y += vh * (.75 + R() * .2); side = -side; A.M(vw * (.5 + side * (.12 + R() * .12)), y, L(.35)); }   // de grandes vagues, jamais de demi-tour
+    // il longe le texte « Qui sommes-nous » par la droite (sans le barrer), puis descend en biais se poser au-dessus du panneau
+    A.M(wide ? vw * .93 : vw * .95, man.y + man.h * .2, false); A.M(wide ? vw * .9 : vw * .92, man.y + man.h + vh * .05, false);
     const startW = wide ? vw * .3 : vw * .62, startX = wide ? vw * .05 : 20;
     A.M(startX + startW * (wide ? .55 : .5), first.y + vh * (wide ? .38 : .5) - 44, false);
-    // 2e morceau : il reprend sous le dernier panneau, file vers le bas et sort de l'écran
-    const B = seg();
-    B.M(wide ? vw * .3 : vw * .25, last.y + last.h + 24, false);
-    B.M(vw * (wide ? .64 : .74), foot.y + vh * .05, false);
-    B.M(vw * .48, foot.y + vh * .5, false);   // il file vers le bas et passe sous le mur de couleur qui arrive
     // les textes que le trait ne doit pas barrer (agrandis de l'épaisseur du trait)
     const pad = sw / 2 + 10, obst = [];
     document.querySelectorAll('.hero-x, #title, #team-head .label, #manifesto').forEach(el => {
@@ -520,11 +438,10 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       // lissage large (≈ 90 px) : les virages deviennent de grandes courbes, plus aucun angle ;
       // puis on l'écarte des textes, en relissant à chaque fois pour ne pas recréer de coin
       smooth(smp, 4, 30);
-      for (let it = 0; it < 6; it++) { push(smp); smooth(smp, 1, 14); }
-      smooth(smp, 2, 10);
+      // (plus d'écartement forcé autour des textes : c'est lui qui créait des demi-tours ; le tracé passe déjà à côté)
       return { smp, idx: majIdx.map(k => Math.round(L0[ptToSmp[k]] / tot * m)), majors };
     }
-    const parts = [build(A), build(B)];
+    const parts = [build(A)];
     let n = 0; parts.forEach(P => n += P.smp.length);
     X = new Float32Array(n); Y = new Float32Array(n); S = new Float32Array(n); K = new Float32Array(n);
     const starts = []; let o = 0;
@@ -682,7 +599,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       attribute vec2 aUv;
       uniform vec4 uRect; uniform vec2 uRes; uniform float uBend; uniform float uVel; uniform float uApp;
       uniform vec4 uWarp; uniform float uTwist;
-      uniform float uRotY; uniform float uRotX; uniform float uCurve;   // la feuille en 3D : inclinaisons et courbure
+      uniform float uRotY; uniform float uRotX; uniform float uCurve;
+      uniform float uMorph; uniform vec4 uStart; uniform vec4 uEnd; uniform float uProg; uniform float uDirX; uniform float uOffY;
       varying vec2 vUv; varying float vZ;
       void main() {
         vUv = aUv;
@@ -690,6 +608,14 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         float sx = sin(3.14159 * aUv.x);
         // la feuille en 3D (présentations, comme la vidéo de lusion.co) : elle se cintre autour d'un axe vertical,
         // s'incline vers nous, puis la perspective fait courber ses bords haut et bas
+        // comme la vidéo de lusion.co : la carte s'étire du petit format au grand ; le coin du haut côté écran part
+        // en premier, le coin du bas à l'opposé suit en retard, ce qui courbe ses bords pendant le mouvement
+        if (uMorph > .5) {
+          float dl = ((uDirX > 0. ? 1. - aUv.x : aUv.x) * .7 + aUv.y * .3) * .3;
+          float lt = clamp((uProg - dl) / (1. - .3), 0., 1.);
+          lt = lt < .5 ? 4. * lt * lt * lt : 1. - pow(-2. * lt + 2., 3.) / 2.;
+          p = mix(uStart.xy + aUv * uStart.zw, uEnd.xy + aUv * uEnd.zw, lt) + vec2(0., uOffY);
+        }
         vec2 ctr = uRect.xy + uRect.zw * .5;
         vec3 q = vec3(p - ctr, 0.);
         if (abs(uCurve) > .001) { float Rr = uRect.z * .5 / uCurve, th = q.x / Rr; q.x = sin(th) * Rr; q.z = (1. - cos(th)) * Rr; }
@@ -818,7 +744,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     catch (e) { root.classList.add('no-gl'); return; }
     gl.useProgram(prog);
     root.classList.add('gl');
-    const U = {}; ['uRotY', 'uRotX', 'uCurve', 'uRip', 'uLiq', 'uSeed', 'uWarp', 'uTwist', 'uRect', 'uRes', 'uBend', 'uVel', 'uApp', 'uTex', 'uMode', 'uSize', 'uRad', 'uTime', 'uA', 'uB', 'uC', 'uTint', 'uMouse', 'uHover', 'uDpr'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+    const U = {}; ['uMorph', 'uStart', 'uEnd', 'uProg', 'uDirX', 'uOffY', 'uRotY', 'uRotX', 'uCurve', 'uRip', 'uLiq', 'uSeed', 'uWarp', 'uTwist', 'uRect', 'uRes', 'uBend', 'uVel', 'uApp', 'uTex', 'uMode', 'uSize', 'uRad', 'uTime', 'uA', 'uB', 'uC', 'uTint', 'uMouse', 'uHover', 'uDpr'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
     // maillage 32 × 32 : assez fin pour des courbes lisses
     const N = 32, uvs = [], idx = [];
     for (let y = 0; y <= N; y++) for (let x = 0; x <= N; x++) uvs.push(x / N, y / N);
@@ -889,7 +815,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     function plane(r, o) {
       gl.uniform4f(U.uRect, r.x, r.y, r.w, r.h); gl.uniform2f(U.uSize, r.w, r.h); gl.uniform1f(U.uRad, o.rad);
       const W = o.warp || NOWARP; gl.uniform4f(U.uWarp, W[0], W[1], W[2], W[3]); gl.uniform1f(U.uTwist, W[4]);
-      gl.uniform1f(U.uBend, o.bend || 0); gl.uniform1f(U.uLiq, o.liq || 0); gl.uniform1f(U.uSeed, o.seed || 0); gl.uniform1f(U.uRip, o.rip || 0); gl.uniform1f(U.uRotY, o.ry || 0); gl.uniform1f(U.uRotX, o.rx || 0); gl.uniform1f(U.uCurve, o.curve || 0); gl.uniform1f(U.uVel, o.vel || 0); gl.uniform1f(U.uApp, o.app == null ? 1 : o.app);
+      gl.uniform1f(U.uBend, o.bend || 0); gl.uniform1f(U.uLiq, o.liq || 0); gl.uniform1f(U.uSeed, o.seed || 0); gl.uniform1f(U.uRip, o.rip || 0); gl.uniform1f(U.uMorph, o.morph ? 1 : 0); if (o.morph) { const a = o.morph; gl.uniform4f(U.uStart, a.s.x, a.s.y, a.s.w, a.s.h); gl.uniform4f(U.uEnd, a.e.x, a.e.y, a.e.w, a.e.h); gl.uniform1f(U.uProg, a.t); gl.uniform1f(U.uDirX, a.dir); gl.uniform1f(U.uOffY, a.off); } gl.uniform1f(U.uRotY, o.ry || 0); gl.uniform1f(U.uRotX, o.rx || 0); gl.uniform1f(U.uCurve, o.curve || 0); gl.uniform1f(U.uVel, o.vel || 0); gl.uniform1f(U.uApp, o.app == null ? 1 : o.app);
       gl.uniform1f(U.uMode, o.mode); gl.uniform1f(U.uTint, o.tint || 0); gl.uniform1f(U.uHover, o.hover || 0); gl.uniform2f(U.uMouse, o.mx || 0, o.my || 0);
       if (o.pal) { gl.uniform3fv(U.uA, o.pal[0]); gl.uniform3fv(U.uB, o.pal[1]); gl.uniform3fv(U.uC, o.pal[2]); }
       gl.bindTexture(gl.TEXTURE_2D, o.tex || blank);
@@ -944,8 +870,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const stTop = sy < P.y ? P.y - sy : Math.min(0, P.y + P.h - vh - sy);
         const S = P.start, E = P.end;
         const r = { x: lerp(S.x, E.x, e), y: lerp(S.y, E.y, e) + stTop, w: lerp(S.w, E.w, e), h: lerp(S.h, E.h, e) };
-        const bnd = Math.sin(Math.PI * ec) * (vw < 760 ? .7 : 1), side = P.right ? -1 : 1;   // la feuille se cintre et s'incline pendant qu'elle grandit
-        plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(14, 24, ec), bend: 0, liq: 0, rip: 0, ry: side * .42 * bnd + P.sv * .04 * side, rx: -.16 * bnd, curve: .6 * bnd, seed: P.seed, tint: 1 - sstep(.25, .9, ec), pal: [P.a, P.b, P.c] });
+        plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(14, 24, ec), seed: P.seed, tint: 1 - sstep(.3, .95, ec), pal: [P.a, P.b, P.c],
+          morph: { s: S, e: E, t: ec, dir: P.right ? -1 : 1, off: stTop } });
         if (ec > .97 && stTop === 0) cover = true;
         if (r.y < 60 && r.y + r.h > 20) dark = true;
         const oo = clamp((g - .78) / .17), io = clamp(1 - g * 2.6);
@@ -965,170 +891,26 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     requestAnimationFrame(frame);
   })();
 
-  /* ---------- La fin : mur de couleur, logo, petits sites aspirés, puis fond blanc et deux particules ---------- */
+  /* ---------- La fin : le mur en dégradé qui monte (le même rideau que pour quitter la page) ---------- */
   (function finale() {
-    const fin = document.getElementById('fin'), wallEl = document.getElementById('fin-wall'), cardsEl = document.getElementById('fin-cards');
-    const logo = document.getElementById('fin-logo'), ring = logo.querySelector('circle'), name = document.getElementById('fin-name'), wm = document.getElementById('fin-wm');
-    const finStage = fin.querySelector('.fin-stage');
-    // quand toutes les cartes sont rentrées, le point tremble de plus en plus, puis éclate en deux particules
-    let burstAt = null;
-    const outExpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
-    const contact = document.getElementById('contact'), cIn = document.getElementById('c-in'), cSvg = document.getElementById('c-thread');
-    const cP = [...cSvg.querySelectorAll('path')], cD = [...cSvg.querySelectorAll('.pt-a, .pt-b')], cO = cSvg.querySelector('.pt-o'), cOr = cSvg.querySelector('.pt-o-ring'), topbarEl = document.getElementById('topbar');
-    // les cartes : ce qu'on fait (repris de notre accord), une à une ; chacune arrive du fond, se montre un instant
-    // puis file vers nous et disparaît
-    const WORDS = ['Création', 'Design', 'Développement', 'Maintenance', 'Sites web', 'Nantes'];
-    const DOTS = ['#2f45ff', '#7a3cff', '#ff4f8b', '#ff8a3d', '#22c1ff', '#2f45ff'];
-    const cards = WORDS.map((w, i) => {
-      const el = document.createElement('figure'); el.className = 'fcard';
-      el.innerHTML = `<div class="fc"><div class="tp"><span>Obtura</span><span>0${i + 1}</span></div><b style="font-size:${Math.min(19, 170 / w.length).toFixed(1)}cqw">${w}</b><span class="bt" style="background:linear-gradient(90deg, ${DOTS[i]}, ${DOTS[(i + 2) % 6]})"></span></div>`;
-      cardsEl.appendChild(el);
-      const a = -2.2 + i * 1.15 + (i % 2 ? .25 : -.2);                 // autour du logo, jamais dessus
-      return { el, ax: Math.cos(a), ay: Math.sin(a), rz: (i % 2 ? 1 : -1) * (4 + i), ry: (i % 2 ? -1 : 1) * 18, st: .05 + i * .075 };
-    });
-    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    const C = v => Math.max(0, Math.min(1, v));
-    // les deux trajets des particules : de l'écran jusqu'au contact, tirés au hasard à chaque visite
-    const seed = Math.random() * 1000;
-    let cLen = [0, 0], cTo = [], cH = 1, cTop = 0, curY = 0, lastLight = false, lastWhite = null;
-    // les courbes : les mêmes que les points de la page « Tous mes projets » (deux arcs qui se raccordent sans cassure),
-    // tirées au hasard à chaque visite ; les deux particules partent chacune de leur côté
-    function rng(sd0) { let sd1 = sd0 | 0; return () => { sd1 = sd1 + 0x6D2B79F5 | 0; let x = Math.imul(sd1 ^ sd1 >>> 15, 1 | sd1); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; }
-    function curve(from, to, W, k, part) {
-      const Rn = rng(seed * 1000 + k * 7919 + part * 104729), sgn = k ? 1 : -1;
-      const dy = to.y - from.y, sw = sgn * (.45 + Rn() * .55) * Math.min(W * .38, 460);
-      const m = { x: Math.max(W * .06, Math.min(W * .94, (from.x + to.x) / 2 + sw)), y: from.y + dy * (.3 + Rn() * .3) };
-      const C1 = { x: m.x - sw * (.3 + Rn() * .5), y: m.y - dy * (.1 + Rn() * .15) };
-      let d = `M ${from.x} ${from.y} C ${from.x + sgn * Rn() * 24} ${from.y + dy * (.18 + Rn() * .12)}, ${C1.x} ${C1.y}, ${m.x} ${m.y}`;   // elles partent ensemble vers le bas, puis s'écartent
-      const kk = .6 + Rn() * .6;
-      d += ` C ${m.x + (m.x - C1.x) * kk} ${m.y + (m.y - C1.y) * kk}, ${to.x + (Rn() * 2 - 1) * 140} ${to.y - dy * (.15 + Rn() * .15)}, ${to.x} ${to.y}`;
-      return d;
-    }
-    // les deux trajets partent d'un vrai point de départ : le point du logo, là où il a tremblé.
-    // Ils sont dessinés dans la page (sous le contact, en débordant vers le haut) : un seul trajet continu, sans coupure.
-    let oRel = null, Ox = 0;
-    function layoutC() {
-      const W = innerWidth, top = contact.offsetTop; cTop = top; cH = contact.offsetHeight;
-      cSvg.setAttribute('viewBox', `0 0 ${W} ${cH}`); cSvg.style.height = cH + 'px';
-      const t = cIn.offsetTop, title = document.getElementById('c-title');
-      // elles arrivent de part et d'autre du titre « Parlons de votre projet »
-      cTo = [{ x: Math.max(24, cIn.offsetLeft + 10), y: t + title.offsetTop - 26 }, { x: Math.min(W - 24, cIn.offsetLeft + title.offsetWidth * .72), y: t + title.offsetTop - 26 }];
-      Ox = W / 2; oRel = null;
-    }
-    function paths(oy) {
-      oRel = oy;
-      cP.forEach((pa, k) => { pa.setAttribute('d', curve({ x: Ox, y: oy }, cTo[k], innerWidth, k, 1)); cLen[k] = pa.getTotalLength(); pa.style.strokeDasharray = `${cLen[k]} ${cLen[k]}`; });
-      cO.setAttribute('cx', Ox); cO.setAttribute('cy', oy); cOr.setAttribute('cx', Ox); cOr.setAttribute('cy', oy);
-    }
-    layoutC(); addEventListener('resize', layoutC); if (document.fonts) document.fonts.ready.then(layoutC);
-    let bt = null, shown = false;
-    function frame(now) {
+    const fin = document.getElementById('fin'), wallEl = document.getElementById('fin-wall'), topbarEl = document.getElementById('topbar');
+    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, C = v => Math.max(0, Math.min(1, v));
+    let lastLight = false, lastR = -1;
+    (function frame() {
       requestAnimationFrame(frame);
-      const t = now / 1000, W = innerWidth, H = innerHeight, r = fin.getBoundingClientRect();
-      const onStage = r.top < H && r.bottom > 0;
-      const p = C(-r.top / Math.max(1, r.height - H));
-      // le mur arrive avec la page, sans attente : son bord du haut, arrondi, s'aplatit en montant.
-      // Puis : .0 → .08 le logo d'Obtura apparaît ; .05 → .6 les cartes passent une à une ;
-      // .58 → .8 le mot s'efface et le cercle se resserre en point ; .8 → .985 le point tremble ; puis blanc et particules
-      const up = C((H - r.top) / H), white = p >= .985;
-      window.__finCover = onStage && r.top <= 0;
-      const light = onStage && r.top < 50 && !white;
+      const H = innerHeight, r = fin.getBoundingClientRect(), on = r.top < H && r.bottom > 0;
+      window.__finCover = on && r.top <= 0;
+      const light = on && r.top < 50;
       if (light !== lastLight) { lastLight = light; topbarEl.classList.toggle('light2', light); }
-      if (white !== lastWhite) { lastWhite = white; wallEl.classList.toggle('white', white); }
-      if (white && burstAt == null && !reduce) burstAt = now; if (p < .97 && r.top < H) burstAt = null;
-      bt = burstAt == null ? null : (now - burstAt) / 1000;
-      if (!onStage) { contactFrame(); return; }
-      wallEl.style.transform = 'none';
-      const rr = 1 - ease(up); wallEl.style.borderRadius = `${(50 * rr).toFixed(1)}% ${(50 * rr).toFixed(1)}% 0 0 / ${(14 * rr).toFixed(1)}% ${(14 * rr).toFixed(1)}% 0 0`;
-      const draw = C(p / .08), wmOp = C(p / .06) * (1 - C((p - .58) / .06)), shr = ease(C((p - .6) / .2));
-      ring.style.strokeDasharray = '302 302'; ring.style.strokeDashoffset = (302 * (1 - draw)).toFixed(1);
-      ring.style.fill = `rgba(255,255,255,${C((shr - .7) / .3)})`;
-      wm.style.opacity = wmOp.toFixed(3);
-      // quand le mot s'efface, le cercle glisse au centre de l'écran
-      const shiftX = (wm.offsetWidth + 14) / 2 * C((p - .58) / .1);
-      // le point tremble de plus en plus vite et brille
-      const pre = reduce ? 0 : C((p - .8) / .18), amp = pre * pre * 7;
-      const jx = Math.sin(t * 71) * amp + Math.sin(t * 43) * amp * .5, jy = Math.cos(t * 67) * amp + Math.cos(t * 37) * amp * .5;
-      const sc = (1 - .72 * shr) * (1 + pre * .4 + Math.sin(t * 30) * pre * .1);
-      logo.style.transform = `translate(-50%, -50%) translate(${(shiftX + jx).toFixed(1)}px, ${jy.toFixed(1)}px) scale(${sc.toFixed(4)})`;
-      logo.style.filter = pre > 0 ? `drop-shadow(0 0 ${(4 + pre * 14).toFixed(1)}px rgba(255,255,255,${(.5 + pre * .5).toFixed(2)}))` : 'none';
-      logo.style.visibility = white ? 'hidden' : 'visible'; logo.style.opacity = C((p + .02) / .05).toFixed(3);
-      name.style.opacity = (C((p - .03) / .05) * (1 - C((p - .55) / .05))).toFixed(3);
-      name.style.transform = `translate(-50%, ${((1 - C((p - .03) / .05)) * 12).toFixed(1)}px)`;
-      // les cartes : elles arrivent du fond, se montrent un instant, puis filent vers nous et disparaissent
-      const rx = W * (W < 760 ? .26 : .3), ry = H * (W < 760 ? .27 : .26);
-      cards.forEach(c => {
-        const u = C((p - c.st) / .17);
-        if (u <= 0 || u >= 1) { if (c.vis) { c.vis = false; c.el.style.opacity = 0; } return; }
-        c.vis = true;
-        const a = ease(C(u / .32)), o = C((u - .6) / .4), o2 = o * o;
-        const k = .6 + .4 * a + 1.1 * o2;   // elles restent autour du logo, sans passer dessus
-        const x = c.ax * rx * k, y = c.ay * ry * k, z = -900 * (1 - a) + 650 * o2;
-        c.el.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateY(${(c.ry * (1 - a) - c.ry * .6 * o).toFixed(2)}deg) rotate(${(c.rz * (1 - a) + c.rz * .8 * o).toFixed(2)}deg)`;
-        c.el.style.opacity = (a * (1 - o)).toFixed(3);
-      });
-      // l'écran tremble un instant quand le point éclate
-      const shk = bt != null && bt < .5 ? Math.pow(1 - bt / .5, 2) * 9 : 0;
-      finStage.style.transform = shk ? `translate(${(Math.sin(now * .09) * shk).toFixed(1)}px, ${(Math.cos(now * .11) * shk).toFixed(1)}px)` : '';
-      contactFrame();
-    }
-    function contactFrame() {
-      const H = innerHeight;
-      // le point de départ : le centre de l'écran tant que la fin est collée, puis il remonte avec la page
-      const oy = Math.min(scrollY + H * .46, fin.offsetTop + fin.offsetHeight - H + H * .46) - cTop;
-      if (oRel == null || Math.abs(oy - oRel) > .5) paths(oy);
-      const on = lastWhite || scrollY > fin.offsetTop + fin.offsetHeight - H;
-      if (on !== shown) { shown = on; [cO, cOr].forEach(c => c.style.opacity = on ? 1 : 0); }
-      // le bout des deux trajets : il jaillit avec l'explosion (vite, puis ralentit), puis suit le défilement (lissé),
-      // comme les points de la page « Tous mes projets »
-      const target = reduce ? 1e9 : scrollY + H * .62 - cTop;
-      curY += (target - curY) * .14;
-      cP.forEach((pa, k) => {
-        let tt = on ? C((curY - oRel) / Math.max(1, cTo[k].y - oRel)) : 0;
-        if (on && bt != null) tt = Math.max(tt, .14 * outExpo(Math.min(1, bt / 1.1)));
-        pa.style.strokeDashoffset = (cLen[k] * (1 - tt)).toFixed(1);
-        const pt = pa.getPointAtLength(cLen[k] * tt); cD[k].setAttribute('cx', pt.x.toFixed(1)); cD[k].setAttribute('cy', pt.y.toFixed(1));
-        cD[k].style.opacity = on && tt > .002 ? 1 : 0;
-      });
-    }
-    requestAnimationFrame(frame);
+      if (!on) return;
+      const rr = +(1 - ease(C((H - r.top) / H))).toFixed(3);   // son bord du haut, arrondi, s'aplatit en montant
+      if (rr !== lastR) { lastR = rr; wallEl.style.borderRadius = `${50 * rr}% ${50 * rr}% 0 0 / ${14 * rr}% ${14 * rr}% 0 0`; }
+    })();
   })();
 
   /* ---------- Repris du portfolio de Gabriel, un peu changés ---------- */
   (function fromPortfolio() {
     const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
-    // titres qui montent mot par mot (les mots en dégradé gardent leur couleur)
-    document.querySelectorAll('#c-title').forEach(h => {
-      const walk = node => [...node.childNodes].forEach(n => {
-        if (n.nodeType === 3) { const f = document.createDocumentFragment();
-          n.textContent.split(/(\s+)/).forEach(w => { if (!w) return; if (/^\s+$/.test(w)) { f.appendChild(document.createTextNode(w)); return; }
-            const o = document.createElement('span'); o.className = 'rv-w'; const i = document.createElement('span'); i.textContent = w;
-            if (n.parentElement.closest('.grad')) i.className = 'grad'; o.appendChild(i); f.appendChild(o); });
-          n.replaceWith(f); }
-        else if (n.nodeType === 1 && !n.classList.contains('rv-w')) walk(n);
-      });
-      walk(h); h.querySelectorAll('.rv-w > span').forEach((sp, i) => sp.style.transitionDelay = (i * .07) + 's'); h.dataset.rv = 'words';
-    });
-    // apparitions en cascade
-    document.querySelectorAll('#contact .label, .c-lead, .c-list > div').forEach(el => el.classList.add('fu'));
-    document.querySelectorAll('.fu').forEach(el => { const sib = [...el.parentElement.children].filter(c => c.classList.contains('fu')); el.style.transitionDelay = (sib.indexOf(el) * .08) + 's'; });
-    const rev = [...document.querySelectorAll('[data-rv], .fu')];
-    if (!reduce && 'IntersectionObserver' in window) {
-      rev.forEach(el => el.classList.add('pre'));
-      const rio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rio.unobserve(e.target); } }), { rootMargin: '0px 0px -12% 0px' });
-      rev.forEach(el => rio.observe(el));
-    }
-    // bandeau qui défile, plus vite et penché quand on défile vite
-    const track = document.getElementById('marquee-track'); track.innerHTML += track.innerHTML;
-    let mx = 0, lastY = scrollY, v = 0, half = track.scrollWidth / 2, near = false;
-    addEventListener('resize', () => half = track.scrollWidth / 2);
-    if ('IntersectionObserver' in window) new IntersectionObserver(es => near = es[0].isIntersecting, { rootMargin: '200px' }).observe(track); else near = true;
-    (function tick() {
-      const y = scrollY; v += ((y - lastY) - v) * .1; lastY = y;
-      if (!reduce && near) { mx -= .6 + Math.abs(v) * .35; if (-mx > half) mx += half;
-        track.style.transform = `translate3d(${mx.toFixed(1)}px,0,0) skewX(${Math.max(-8, Math.min(8, -v * .25)).toFixed(2)}deg)`; }
-      requestAnimationFrame(tick);
-    })();
     // curseur en dégradé et boutons aimantés (ordinateur seulement)
     if (fine && !reduce) {
       const cur = document.createElement('div'); cur.className = 'cursor'; cur.innerHTML = '<span></span>'; document.body.appendChild(cur);
@@ -1150,8 +932,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
   /* ---------- Défilement par pages ----------
      Dès qu'on commence à défiler (molette, pavé tactile, doigt, flèches), la page part toute seule jusqu'à la
      « page » suivante (ou précédente) et va au bout, même si on lâche : comme la carte de lusion.co.
-     Pages : le début, le texte « Qui sommes-nous », la carte de Gabriel ouverte, celle d'Arthur, le logo sur le mur,
-     les deux particules, le contact, le bas de page. */
+     Pages : le début, le texte « Qui sommes-nous », la carte de Gabriel ouverte, celle d'Arthur, puis le mur. */
   (function pages() {
     if (reduce) return;
     const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -1160,9 +941,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const vh = innerHeight, b = id => docBox(document.getElementById(id)), pts = [0];
       pts.push(Math.max(0, b('team-head').y - vh * .16));
       document.querySelectorAll('.pp').forEach(el => pts.push(docBox(el).y + vh * .86));
-      const f = b('fin'); pts.push(f.y + (f.h - vh) * .07); pts.push(f.y + f.h - vh + vh * .12);
-      pts.push(b('c-in').y - vh * .2);
-      pts.push(document.documentElement.scrollHeight - vh);
+      pts.push(document.documentElement.scrollHeight - vh);   // le mur couvre l'écran
       stops = [...new Set(pts.map(Math.round))].sort((a, c) => a - c);
     }
     computeStops(); addEventListener('resize', () => setTimeout(computeStops, 200)); addEventListener('load', computeStops);
