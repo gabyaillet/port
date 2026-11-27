@@ -502,7 +502,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     // il entre par la gauche dès l'arrivée, passe sous le mot sans le barrer
     A.M(-60, vh * .1, false); A.M(vw * (.08 + R() * .06), vh * .5, false);
     let y = vh * .5, side = 1;
-    while (y < endFall - vh * .6) { y += vh * (.75 + R() * .2); side = -side; A.M(vw * (.5 + side * (.12 + R() * .12)), y, L(.35)); }   // de grandes vagues, jamais de demi-tour
+    while (y < Math.min(endFall, man.y - vh * .2) - vh * .6) { y += vh * (.75 + R() * .2);   /* les vagues s'arrêtent au-dessus du texte */ side = -side; A.M(vw * (.5 + side * (.12 + R() * .12)), y, L(.35)); }   // de grandes vagues, jamais de demi-tour
     // il longe le texte « Qui sommes-nous » par la droite (sans le barrer), puis descend en biais se poser au-dessus du panneau
     A.M(wide ? vw * .93 : vw * .95, man.y + man.h * .2, false); A.M(wide ? vw * .9 : vw * .92, man.y + man.h + vh * .05, false);
     // comme la vidéo : il passe au-dessus de la petite carte de Gabriel, descend sur son côté, passe dessous et sort à droite ;
