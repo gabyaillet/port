@@ -133,12 +133,23 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .no-gl .pp-ini { display: block; }
 
 /* ---------- La fin : après nos cartes, le mur en dégradé monte et couvre l'écran ---------- */
-.finale { position: relative; z-index: 4; height: 400svh; margin-top: calc(-100svh - 90svh); pointer-events: none; }   /* hauteur recalculée ; elle commence pendant que la carte d'Arthur est encore là */
-.pp.last { height: calc(205svh + 90svh); }   /* la carte d'Arthur reste en place le temps de glisser vers la gauche */
+.finale { position: relative; z-index: 4; height: 400svh; margin-top: calc(-100svh - 120svh); pointer-events: none; }   /* hauteur recalculée ; elle commence pendant que la carte d'Arthur est encore là */
+.pp.last { height: calc(205svh + 120svh); }   /* la carte d'Arthur reste en place le temps de glisser vers la gauche */
 .fin-stage > * { pointer-events: auto; }
 /* Le mur en dégradé monte avec un texte ; puis tout glisse vers la gauche et une page blanche arrive :
    nos projets en deux colonnes sur les côtés (celle de gauche monte, celle de droite descend) et, au centre, les catégories */
 .works { position: absolute; inset: 0; overflow: hidden; color: #141414; opacity: 0; visibility: hidden; will-change: opacity, transform; }   /* même fond que le reste du site : le mur reste visible derrière */
+/* Pendant le glissement vers la gauche : des colonnes de cartes, une sur deux monte et l'autre descend (comme la vidéo de Kove) */
+.mz { position: absolute; left: 0; top: 0; height: 100%; display: flex; gap: 12px; will-change: transform; transform: translateX(100vw); }
+.mz-col { flex: none; display: flex; flex-direction: column; gap: 12px; will-change: transform; }
+.mz-c { flex: none; background: #fff; padding: 3px; box-shadow: 0 30px 60px -40px rgba(20,20,20,.3); }
+.mz-c > div { position: relative; width: 100%; height: 100%; overflow: hidden; background: linear-gradient(160deg, #ffffff 0%, #f5f5f3 100%); display: grid; place-items: center; }
+.mz-c img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mz-c i { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #d7d7d4; }
+.mz-c b { position: absolute; left: 12px; top: 10px; font: 400 .6rem var(--mono); letter-spacing: .18em; color: #b9b9b6; }
+/* la capsule se pose sur sa carte dans la page des projets */
+.pj-fly { position: absolute; left: 0; top: 0; z-index: 3; overflow: hidden; pointer-events: none; visibility: hidden; background: #fff; will-change: transform, width, height; }
+.pj-fly img { position: absolute; left: 0; width: 100%; object-fit: cover; transition: opacity .5s; }
 /* Le mot « Projets » : un trait entre « Pro » et « jets » s'ouvre en capsule où passent nos projets, puis elle grandit jusqu'à tout l'écran */
 .pj { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #141414; transform: translateX(100%); will-change: transform; }
 .pj-w { display: flex; align-items: center; font: 500 clamp(4.6rem, 16vw, 17rem)/1 var(--f); letter-spacing: -.055em; white-space: nowrap; }
@@ -337,6 +348,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 <div class="curtain" id="curtain" aria-hidden="true"></div>
 <section class="finale" id="fin" aria-label="Nos projets et contact">
   <div class="fin-stage">
+    <div class="mz" id="mz" aria-hidden="true"></div>
+    <div class="pj-fly" id="pj-fly" aria-hidden="true"><img alt="" decoding="async"><img alt="" decoding="async"></div>
     <div class="pj" id="pj" aria-hidden="true">
       <div class="pj-w"><span class="pj-a">Pro</span><span class="pj-cap" id="pj-cap"><img src="./img/boutique-obtura.jpg" alt="" decoding="async"><img src="./img/ville-2cv.jpg" alt="" decoding="async"><img src="./img/boutique-vins.jpg" alt="" decoding="async"><img src="./img/particules.jpg" alt="" decoding="async"></span><span class="pj-b sf">jets</span></div>
       <p class="pj-note">Ce qu'on a déjà fait, en attendant les sites de nos premiers clients.</p>
@@ -1026,6 +1039,21 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const worksEl = document.getElementById('works'), arthur = document.querySelector('.pp.last .pp-stage');
     const pjEl = document.getElementById('pj'), pjW = pjEl.querySelector('.pj-w'), pjCap = document.getElementById('pj-cap'), pjImgs = [...pjCap.querySelectorAll('img')];
     const pjNote = pjEl.querySelector('.pj-note'), pjNum = pjEl.querySelector('.pj-num'); let lastShow = -2;
+    const pjA = pjEl.querySelector('.pj-a'), pjB = pjEl.querySelector('.pj-b');
+    const fly = document.getElementById('pj-fly'), flyI = [...fly.querySelectorAll('img')]; let flyTarget = null, flyFrom = -1;
+    // la mosaïque du glissement : nos images et des cartes blanches, en colonnes
+    const mz = document.getElementById('mz'), MZI = ['./img/boutique-obtura.jpg', './img/ville-2cv.jpg', './img/boutique-vins.jpg', './img/particules.jpg'];
+    const MZA = [.8, 1.25, .95, 1.4, .75, 1.1, 1.3, .85]; let mzCols = [];
+    function buildMz() {
+      const W = innerWidth, H = innerHeight, narrow = W < 760, n = narrow ? 4 : 5, cw = (narrow ? .44 : .215) * W;
+      let html = '', k = 0, blank = 0;
+      for (let c = 0; c < n; c++) { html += '<div class="mz-col">'; let h = 0, j = 0;
+        while (h < H * 2.3) { const a = MZA[(c * 3 + j) % MZA.length], ch = cw * a, isImg = (c + j) % 3 === (c % 2);
+          html += `<div class="mz-c" style="width:${cw.toFixed(0)}px;height:${ch.toFixed(0)}px"><div>${isImg ? `<img src="${MZI[k++ % MZI.length]}" alt="" loading="lazy" decoding="async">` : `<b>${String(++blank).padStart(2, '0')}</b><i></i>`}</div></div>`;
+          h += ch + 12; j++; }
+        html += '</div>'; }
+      mz.innerHTML = html; mzCols = [...mz.children]; G && (G.M = mz.scrollWidth);
+    }
     const colL = document.getElementById('wk-l'), colR = document.getElementById('wk-r'), cats = [];
     const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, C = v => Math.max(0, Math.min(1, v));
     let lastLight = false, lastDark = false, lastR = -1, G = null, filter = null, lastCat = '';
@@ -1058,51 +1086,78 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const trL = Math.max(H * .5, hL - H - 2 * edge), trR = Math.max(H * .5, hR - H - 2 * edge), travel = Math.max(trL, trR);
       // glissement, ouverture de la capsule, capsule en plein écran, défilement des projets, mur
       G = { H, slide: H * .9, open: H * .75, exp: H * .9, travel, top0, hL, hR, edge, trL, trR, rise: H * .9 };
+      buildMz(); G.M = mz.scrollWidth + innerWidth * .08; G.slide = H * .9 * (innerWidth + G.M) / innerWidth;
       G.w0 = G.slide + G.open + G.exp;
       G.fs = parseFloat(getComputedStyle(pjW).fontSize);
       fin.style.height = (H + G.w0 + travel + G.rise) + 'px';
     }
     finLayout(); addEventListener('resize', finLayout); addEventListener('load', finLayout);
     window.__finStops = () => { if (!G) return []; let y = 0, e = fin; while (e) { y += e.offsetTop; e = e.offsetParent; }
-      return [y + G.slide + G.open, y + G.w0, y + G.w0 + G.travel * .5, y + G.w0 + G.travel, y + G.w0 + G.travel + G.rise]; };
+      return [y + G.slide * .5, y + G.slide + G.open, y + G.w0, y + G.w0 + G.travel * .5, y + G.w0 + G.travel, y + G.w0 + G.travel + G.rise]; };
     cats.forEach(b => b.addEventListener('click', () => { filter = b.dataset.f === 'all' ? null : b.dataset.f;
       works.forEach(w => w.classList.toggle('dim', !!filter && w.dataset.cat !== filter)); lastCat = ''; }));
     (function frame() {
       requestAnimationFrame(frame);
       const H = innerHeight, r = fin.getBoundingClientRect(), on = r.top < H && r.bottom > 0;
-      const rel = Math.max(0, -r.top), sp = G ? ease(C(rel / G.slide)) : 0;
+      const rel = Math.max(0, -r.top), sp = G ? ease(C(rel / G.slide)) : 0, W = innerWidth, X = G && r.top <= 0 ? sp * (W + G.M) : 0;
       window.__finCover = false;
-      window.__slideX = on && r.top <= 0 ? -sp * innerWidth : 0;   // la carte d'Arthur (WebGL) part vers la gauche
+      window.__slideX = on && r.top <= 0 ? -X : 0;   // la carte d'Arthur (WebGL) part vers la gauche, puis la mosaïque passe, puis le mot « Projets »
       if (arthur) arthur.style.transform = window.__slideX ? `translate3d(${window.__slideX.toFixed(1)}px, 0, 0)` : '';
       if (!on || !G) { if (lastLight) { lastLight = false; topbarEl.classList.remove('light2'); } if (lastDark) { lastDark = false; topbarEl.classList.remove('dark2'); } return; }
       const cp = C((rel - G.w0) / G.travel), wp = C((rel - G.w0 - G.travel) / G.rise);
       // le mot « Projets » arrive de la droite pendant que la carte d'Arthur part à gauche ; un trait se dessine entre « Pro » et « jets »
-      const sx = r.top <= 0 ? sp : 0, lp = ease(C((rel - G.slide * .55) / (G.slide * .45)));
-      const op = ease(C((rel - G.slide) / G.open)), ep = C((rel - G.slide - G.open) / G.exp), ee = ease(C(ep / .75)), fade = C((ep - .62) / .38);
-      pjEl.style.transform = `translate3d(${((1 - sx) * 100).toFixed(3)}%, 0, 0)`;
+      const lp = ease(C((rel - G.slide * .8) / (G.slide * .2)));
+      const op = ease(C((rel - G.slide) / G.open)), ep = C((rel - G.slide - G.open) / G.exp), ee = ease(ep);
+      pjEl.style.transform = `translate3d(${Math.max(0, W + G.M - X).toFixed(1)}px, 0, 0)`;
+      // la mosaïque : elle traverse l'écran, ses colonnes montent et descendent une sur deux
+      const mx = W - X;
+      if (mx < W && mx > -G.M) { mz.style.visibility = ''; mz.style.transform = `translate3d(${mx.toFixed(1)}px, 0, 0)`;
+        const q = X / (W + G.M);
+        mzCols.forEach((c, i) => { const d = i % 2 ? 1 : -1, off = -H * .55 + d * (q - .5) * H * .9; c.style.transform = `translate3d(0, ${off.toFixed(1)}px, 0)`; }); }
+      else mz.style.visibility = 'hidden';
       // le trait s'ouvre en capsule (comme la vidéo), puis la capsule grandit jusqu'à tout l'écran
       const fs = G.fs, narrow = innerWidth < 760;
       const pw = (narrow ? .34 : .3) * innerWidth, ph = fs * .8;
-      const cw = 2 + op * (pw - 2) + ee * (innerWidth + 4 - pw), chh = ph * lp + ee * (H + 4 - ph);
+      const cw = 2 + op * (pw - 2), chh = ph * lp;
       pjCap.style.width = cw.toFixed(1) + 'px'; pjCap.style.height = chh.toFixed(1) + 'px';
-      pjCap.style.borderRadius = ee > 0 ? `${((1 - ee) * ph / 2).toFixed(1)}px` : '';
-      // les lettres sont poussées par la capsule ; en plein écran elles sortent de l'écran
       pjCap.style.background = op > .02 ? '#e9e9e7' : '#141414';
       pjNote.style.opacity = pjNum.style.opacity = (C((op - .4) / .6) * (1 - C(ep * 3))).toFixed(3);
+      // ensuite « Pro » et « jets » s'écartent et s'effacent
+      pjA.style.transform = ep > 0 ? `translate3d(${(-ee * W * .35).toFixed(1)}px, 0, 0)` : ''; pjB.style.transform = ep > 0 ? `translate3d(${(ee * W * .35).toFixed(1)}px, 0, 0)` : '';
+      pjA.style.opacity = pjB.style.opacity = ep > 0 ? (1 - C(ep * 1.6)).toFixed(3) : '';
       // les projets passent dans la capsule, un à un
-      const show = ep > 0 ? (lastShow < 0 ? 0 : lastShow) : op > .15 ? Math.floor(performance.now() / 1150) % pjImgs.length : (op > 0 ? 0 : -1);   // en grandissant, on garde le projet affiché
+      const show = ep > 0 ? (lastShow < 0 ? 0 : lastShow) : op > .15 ? Math.floor(performance.now() / 1150) % pjImgs.length : (op > 0 ? 0 : -1);
       if (show !== lastShow) { lastShow = show; pjImgs.forEach((im, k) => im.classList.toggle('on', k === show)); }
-      // une fois la capsule en plein écran, elle s'efface sur la page des projets
-      // une fois en plein écran, l'image remonte comme un rideau et découvre la page des projets
-      const wipe = ease(fade);
-      pjEl.style.clipPath = wipe > 0 ? `inset(0 0 ${(wipe * 100).toFixed(2)}% 0)` : ''; pjEl.style.visibility = fade >= 1 ? 'hidden' : '';
-      worksEl.style.opacity = fade > 0 ? '1' : '0'; worksEl.style.visibility = fade > 0 ? 'visible' : 'hidden';
-      worksEl.style.transform = `translate3d(0, ${((1 - wipe) * 6).toFixed(2)}svh, 0)`;
+      // la capsule ne zoome plus : elle glisse et se pose sur la carte de son projet dans la page des projets,
+      // pendant que les autres projets apparaissent autour
+      const fade = C((ep - .25) / .6);
+      worksEl.style.visibility = ep > 0 ? 'visible' : 'hidden'; worksEl.style.opacity = fade.toFixed(3);
+      worksEl.style.transform = ep > 0 && ep < 1 ? `translate3d(0, ${((1 - ease(fade)) * 4).toFixed(2)}svh, 0)` : '';
+      if (ep > 0 && ep < 1) {
+        if (!flyTarget || flyFrom !== lastShow) { flyFrom = lastShow;
+          // la carte la plus près du centre de l'écran
+          let best = 1e9; flyTarget = null; const c0 = H / 2;
+          works.forEach((w, k) => { if (!imgs[k]) return; const b = w.querySelector('.fr').getBoundingClientRect(), d = Math.abs(b.top + b.height / 2 - c0) + Math.abs(b.left + b.width / 2 - W / 2) * .3; if (d < best) { best = d; flyTarget = k; } });
+          flyI[0].src = pjImgs[Math.max(0, lastShow)].src; flyI[1].src = imgs[flyTarget].src; }
+        const a = pjCap.getBoundingClientRect(), tEl = works[flyTarget].querySelector('.fr'), b = tEl.getBoundingClientRect();
+        const L = (u, v) => u + (v - u) * ee;
+        fly.style.visibility = 'visible'; fly.style.width = L(a.width, b.width).toFixed(1) + 'px'; fly.style.height = L(a.height, b.height).toFixed(1) + 'px';
+        fly.style.transform = `translate3d(${L(a.left, b.left).toFixed(1)}px, ${L(a.top, b.top).toFixed(1)}px, 0)`;
+        fly.style.borderRadius = ((1 - ee) * a.height / 2).toFixed(1) + 'px';
+        const tr = parseFloat((imgs[flyTarget].style.transform.match(/,\s*(-?[\d.]+)%/) || [])[1] || 0);
+        flyI.forEach(im => { im.style.top = (-8 * ee) + '%'; im.style.height = (100 + 16 * ee) + '%'; im.style.transform = `translate3d(0, ${(tr * ee).toFixed(2)}%, 0)`; });
+        flyI[1].style.opacity = flyI[0].src === flyI[1].src ? 1 : C((ep - .15) / .5).toFixed(3); flyI[0].style.opacity = 1;
+        pjCap.style.visibility = 'hidden'; works[flyTarget].querySelector('img').style.visibility = 'hidden';
+      } else {
+        fly.style.visibility = 'hidden'; pjCap.style.visibility = '';
+        if (flyTarget != null) { works[flyTarget].querySelector('img').style.visibility = ''; flyTarget = null; }
+      }
+      pjEl.style.visibility = ep >= 1 ? 'hidden' : '';
       // à la fin, le mur en dégradé monte, son bord du haut arrondi s'aplatit en montant
       const we = ease(wp), rr = +(1 - we).toFixed(3);
       wallEl.style.transform = `translate3d(0, ${((1 - we) * 101).toFixed(2)}%, 0)`;
       if (rr !== lastR) { lastR = rr; wallEl.style.borderRadius = `${50 * rr}% ${50 * rr}% 0 0 / ${14 * rr}% ${14 * rr}% 0 0`; }
-      const light = we > .92 || (ee > .5 && fade < .6), dark = sp > .5 && !light;
+      const light = we > .92, dark = sp > .5 && !light;
       window.__finCover = we > .995;   // le mur des contacts couvre tout : inutile de dessiner le mur derrière
       if (light !== lastLight) { lastLight = light; topbarEl.classList.toggle('light2', light); }
       if (dark !== lastDark) { lastDark = dark; topbarEl.classList.toggle('dark2', dark); }
