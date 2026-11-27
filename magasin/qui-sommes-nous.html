@@ -133,7 +133,15 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .no-gl .pp-ini { display: block; }
 
 /* ---------- La fin : après nos cartes, le mur en dégradé monte et couvre l'écran ---------- */
-.finale { position: relative; z-index: 4; height: 100svh; }   /* le mur monte avec la page, et la page s'arrête quand il couvre l'écran */
+.finale { position: relative; z-index: 4; height: calc(100svh + 8 * 40svh); }   /* le mur monte, puis chaque cran fait tourner le carrousel d'une carte */
+/* Le carrousel (comme la vidéo) : des cartes blanches posées sur le haut d'une grande roue, chacune penchée selon sa place ;
+   celle du centre est plus grande. Leur forme : le haut un peu plus large que le bas, le haut bombé, le bas creusé. */
+.wheel { position: absolute; inset: 0; pointer-events: none; opacity: 0; will-change: opacity; }
+.wheel-disc { position: absolute; border-radius: 50%; background: rgba(255,255,255,.13); }
+.wcard { position: absolute; left: 0; top: 0; transform-origin: 50% 50%; will-change: transform; filter: drop-shadow(0 22px 34px rgba(30,10,90,.28)); }
+.wcard svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.wcard path { fill: #fff; }
+.wheel-hint { position: absolute; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 4.6rem); transform: translateX(-50%); margin: 0; font: 400 .62rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.85); white-space: nowrap; }
 .fin-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
 .fin-wall { position: absolute; inset: 0; background: linear-gradient(115deg, var(--c1) 0%, var(--c2) 40%, var(--c3) 75%, var(--c4) 100%); border-radius: 50% 50% 0 0 / 14% 14% 0 0; }   /* le même rideau en dégradé que quand on clique sur « Son portfolio » : bord du haut arrondi qui s'aplatit en montant */
 .topbar.light2 { --ink: #f4f4f2; --wall: #0d0d0d; }
@@ -279,7 +287,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
 </section>
 <div class="curtain" id="curtain" aria-hidden="true"></div>
 <section class="finale" id="fin" aria-hidden="true">
-  <div class="fin-stage"><div class="fin-wall" id="fin-wall"></div></div>
+  <div class="fin-stage"><div class="fin-wall" id="fin-wall"></div><div class="wheel" id="wheel"><div class="wheel-disc" id="wheel-disc"></div><p class="wheel-hint">Défiler pour explorer</p></div></div>
 </section>
 
 <script>
@@ -952,7 +960,42 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       if (!on) return;
       const rr = +(1 - ease(C((H - r.top) / H))).toFixed(3);   // son bord du haut, arrondi, s'aplatit en montant
       if (rr !== lastR) { lastR = rr; wallEl.style.borderRadius = `${50 * rr}% ${50 * rr}% 0 0 / ${14 * rr}% ${14 * rr}% 0 0`; }
+      wheelFrame(r, H);
     })();
+
+    /* ---------- Le carrousel en roue (comme la vidéo) : chaque cran de défilement fait tourner d'une carte ---------- */
+    const N = 9; window.__wheelN = N;
+    const wheel = document.getElementById('wheel'), disc = document.getElementById('wheel-disc');
+    // la forme d'une carte : haut un peu plus large que le bas, haut bombé, bas creusé, coins arrondis
+    const SHAPE = 'M8 2.6 Q50 -2.8 92 2.6 Q99.6 3.6 99.2 11 L95.4 58 Q94.6 66.2 86.6 65.8 Q50 61.2 13.4 65.8 Q5.4 66.2 4.6 58 L.8 11 Q.4 3.6 8 2.6 Z';
+    const cards = Array.from({ length: N }, () => { const el = document.createElement('div'); el.className = 'wcard';
+      el.innerHTML = `<svg viewBox="0 0 100 69" preserveAspectRatio="none"><path d="${SHAPE}"/></svg>`; wheel.appendChild(el); return el; });
+    let G = null, lastRot = null, lastOp = -1;
+    function wheelLayout() {
+      const W = innerWidth, H = innerHeight, narrow = W < 760;
+      const cw = narrow ? W * .66 : Math.min(W * .45, H * .66 * 1.45), ch = cw * .69;   // la carte du centre : ~45 % de la largeur, comme la vidéo
+      const Rc = narrow ? W * 1.7 : Math.max(W * .62, cw * 1.6);                       // rayon de la roue (au centre des cartes)
+      const cy = H * (narrow ? .42 : .4) + Rc, step = 2 * Math.asin(Math.min(.9, cw * .43 / Rc));   // une carte d'écart ≈ 0,86 largeur
+      const Rd = Rc - ch * .36;
+      Object.assign(disc.style, { width: 2 * Rd + 'px', height: 2 * Rd + 'px', left: W / 2 - Rd + 'px', top: cy - Rd + 'px' });
+      cards.forEach(el => { el.style.width = cw + 'px'; el.style.height = ch + 'px'; });
+      G = { W, H, cw, ch, Rc, cy, step }; lastRot = null;
+    }
+    wheelLayout(); addEventListener('resize', wheelLayout);
+    function wheelFrame(r, H) {
+      const op = +C((H * .3 - r.top) / (H * .3)).toFixed(3);   // le carrousel apparaît quand le mur a couvert l'écran
+      if (op !== lastOp) { lastOp = op; wheel.style.opacity = op; }
+      if (!G || op <= 0) return;
+      const rot = Math.max(0, Math.min(N - 1, -r.top / (H * .4)));   // 40 % d'écran de défilement = une carte
+      if (rot === lastRot) return; lastRot = rot;
+      cards.forEach((el, i) => {
+        const a = (i - rot) * G.step, k = Math.max(0, 1 - Math.abs(i - rot)), sc = .74 + .26 * k;
+        const x = G.W / 2 + G.Rc * Math.sin(a) - G.cw / 2, y = G.cy - G.Rc * Math.cos(a) - G.ch / 2;
+        el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) rotate(${(a * 57.2958).toFixed(2)}deg) scale(${sc.toFixed(3)})`;
+        el.style.zIndex = 100 - Math.round(Math.abs(i - rot) * 10);
+        el.style.opacity = Math.abs(a) > 1.6 ? 0 : 1;
+      });
+    }
   })();
 
   /* ---------- Repris du portfolio de Gabriel, un peu changés ---------- */
@@ -988,7 +1031,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const vh = innerHeight, b = id => docBox(document.getElementById(id)), pts = [0];
       pts.push(Math.max(0, b('team-head').y - vh * .16));
       document.querySelectorAll('.pp').forEach(el => pts.push(docBox(el).y + vh * .86));
-      pts.push(document.documentElement.scrollHeight - vh);   // le mur couvre l'écran
+      // le mur, puis une page par carte du carrousel
+      const f = b('fin'); for (let k = 0; k < (window.__wheelN || 1); k++) pts.push(f.y + k * vh * .4);
       stops = [...new Set(pts.map(Math.round))].sort((a, c) => a - c);
     }
     computeStops(); addEventListener('resize', () => setTimeout(computeStops, 200)); addEventListener('load', computeStops);
