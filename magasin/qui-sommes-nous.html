@@ -1014,7 +1014,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const bo = (.5 + .5 * sstep(.45, .85, ec)) * sstep(0, .1, ec) * (1 - sstep(.86, .99, g));
         if (Math.abs(bo - P.bo) > .002) { P.bo = bo; P.big.style.opacity = (bo * .95).toFixed(3); const sh = ((1 - sstep(.2, .8, ec)) * 50).toFixed(1); P.bs[0].style.transform = `translateX(${sh}px)`; P.bs[1].style.transform = `translateX(${-sh}px)`; P.big.style.transform = `translateY(${((1 - sstep(.12, .8, ec)) * vh * .26).toFixed(1)}px)`;
           P.pill.style.transform = `scale(${sstep(.7, .95, ec).toFixed(3)})`; }
-        const oo = sstep(.26, .64, (sy - P.y) / vh), io = clamp(1 - g * 5);   // les infos arrivent doucement vers la fin de la transformation   // le nom en noir s'efface dès que la carte part
+        const oo = sstep(.08, .42, (sy - P.y) / vh), io = 1 - sstep(.02, .09, P.sp);   // le nom en noir part dès que la carte se transforme ; les infos arrivent plus tôt   // les infos arrivent doucement vers la fin de la transformation   // le nom en noir s'efface dès que la carte part
         if (Math.abs(oo - P.oo) > .002) { P.oo = oo; P.over.style.opacity = oo.toFixed(3); P.over.style.transform = `translateY(${((1 - oo) * 16).toFixed(1)}px)`; P.over.classList.toggle('on', oo > .5); }
         if (Math.abs(io - P.io) > .002) { P.io = io; P.intro.style.opacity = io.toFixed(3); P.intro.style.transform = `translateY(${(-(1 - io) * 40).toFixed(1)}px)`; }
       }
