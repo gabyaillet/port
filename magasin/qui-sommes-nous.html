@@ -628,9 +628,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       uniform vec4 uWarp; uniform float uTwist;
       uniform float uRotY; uniform float uRotX; uniform float uCurve;
       uniform float uZoom; uniform float uMorph; uniform vec4 uStart; uniform vec4 uEnd; uniform float uProg; uniform float uDirX; uniform float uOffY;
-      varying vec2 vUv; varying float vZ;
+      varying vec2 vUv; varying float vZ; varying vec2 vArt; varying float vLt;
       void main() {
-        vUv = aUv;
+        vUv = aUv; vArt = aUv; vLt = 1.;
         vec2 p = uRect.xy + aUv * uRect.zw;
         float sx = sin(3.14159 * aUv.x);
         // la feuille en 3D (présentations, comme la vidéo de lusion.co) : elle se cintre autour d'un axe vertical,
@@ -639,11 +639,14 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         // selon sa place. Le coin haut côté écran part le premier, le coin bas opposé reste presque en place puis rattrape :
         // la carte devient un trapèze dont le bord avant penche et dont les bords se courbent, puis elle se pose à plat.
         if (uMorph > .5) {
-          float lead = (uDirX > 0. ? aUv.x : 1. - aUv.x) * .74 + (1. - aUv.y) * .26;
-          float D = .38, dl = (1. - lead) * D;
+          float lead = (uDirX > 0. ? aUv.x : 1. - aUv.x) * .8 + (1. - aUv.y) * .2;
+          float D = .46, dl = (1. - lead) * D;   // le bout avant part loin devant, le coin arrière traîne
           float lt = clamp((uProg - dl) / (1. - D), 0., 1.);
           lt = lt < .5 ? 4. * lt * lt * lt : 1. - pow(-2. * lt + 2., 3.) / 2.;
-          p = mix(uStart.xy + aUv * uStart.zw, uEnd.xy + aUv * uEnd.zw, lt) + vec2(0., uOffY);
+          vec2 pm = mix(uStart.xy + aUv * uStart.zw, uEnd.xy + aUv * uEnd.zw, lt);
+          // comme la vidéo : l'image ne s'étire pas, elle reste fixe (rapportée à la carte finale) et la forme s'ouvre autour
+          vArt = (pm - uEnd.xy) / uEnd.zw; vLt = lt;
+          p = pm + vec2(0., uOffY);
         }
         vec2 ctr = uRect.xy + uRect.zw * .5;
         vec3 q = vec3(p - ctr, 0.);
@@ -669,10 +672,10 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       uniform sampler2D uTex; uniform float uMode; uniform vec2 uSize; uniform float uRad; uniform float uTime;
       uniform vec3 uA; uniform vec3 uB; uniform vec3 uC; uniform float uTint; uniform float uApp; uniform float uVel;
       uniform vec2 uMouse; uniform float uHover; uniform float uDpr;
-      varying vec2 vUv; varying float vZ;
+      varying vec2 vUv; varying float vZ; varying vec2 vArt; varying float vLt;
       float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
       float sdRR(vec2 p, vec2 b, float r) { vec2 q = abs(p) - b + r; return length(max(q, 0.)) + min(max(q.x, q.y), 0.) - r; }
-      uniform float uLiq; uniform float uSeed; uniform float uRip; uniform float uZoom; uniform float uWhite; uniform float uGhost;
+      uniform float uLiq; uniform float uSeed; uniform float uRip; uniform float uZoom; uniform float uWhite; uniform float uGhost; uniform float uMorph;
       // la forme du panneau : un rectangle arrondi qui, pendant l'ouverture, devient une goutte qui ondule
       float shape(vec2 c) {
         float m = min(uSize.x, uSize.y), amp = uLiq * m * .06;
@@ -721,7 +724,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
           float rr = length(c) / min(uSize.x, uSize.y), ph = rr * 24. - uTime * 4.5 + uSeed;
           float env = uRip * smoothstep(0., .12, rr) * exp(-rr * 1.4);
           vec2 rip = c / max(length(c), 1.) * sin(ph) * env * .016;
-          vec2 uv = (vUv - .5) / uZoom + .5 - n * edge * edge * (.07 + uLiq * .04) + flow + rip, ca = n * edge * (.008 + uLiq * .006) + rip * .6;   // uZoom : l'image part zoomée puis se recale, comme la vidéo
+          vec2 uv = ((uMorph > .5 ? vArt : vUv) - .5) / uZoom + .5 - n * edge * edge * (.07 + uLiq * .04) + flow + rip, ca = n * edge * (.008 + uLiq * .006) + rip * .6;   // uZoom : l'image part zoomée puis se recale, comme la vidéo
           col = vec3(texture2D(uTex, uv + ca).r, texture2D(uTex, uv).g, texture2D(uTex, uv - ca).b);
           // dédoublement vertical pendant le défilement, comme sur la vidéo
           if (abs(uGhost) > .0005) col = mix(col, (texture2D(uTex, uv + vec2(0., uGhost)).rgb + texture2D(uTex, uv - vec2(0., uGhost)).rgb) * .5, .5);
@@ -741,7 +744,9 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         }
         // la teinte violette (bichromie) du début
         float lum = dot(col, vec3(.299, .587, .114));
-        col = mix(col, mix(vec3(.36, .31, .9), vec3(.9, .89, .99), smoothstep(0., .8, lum)), uTint);
+        // la couleur revient d'abord du côté qui arrive en premier (comme la vidéo), le reste reste violet un peu plus
+        float tnt = uMorph > .5 ? uTint * (1. - smoothstep(.55, 1., vLt)) : uTint;
+        col = mix(col, mix(vec3(.36, .31, .9), vec3(.9, .89, .99), smoothstep(0., .8, lum)), tnt);
         col *= 1. - vZ * .12;
         col = mix(col, vec3(.95, .95, .97), uWhite);   // la carte sort du blanc en arrivant
         gl_FragColor = vec4(col * a, a);
@@ -907,7 +912,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const S = P.start, E = P.end;
         const r = { x: lerp(S.x, E.x, e), y: lerp(S.y, E.y, e) + stTop, w: lerp(S.w, E.w, e), h: lerp(S.h, E.h, e) };
         const cardY = S.y + stTop, white = 1 - sstep(vh * 1.02, vh * .7, cardY);   // elle sort du blanc en entrant à l'écran
-        plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(16, 22, ec), seed: P.seed, zoom: 1 + .35 * Math.pow(1 - ec, 2), tint: 1 - sstep(.5, 1, ec), pal: [P.a, P.b, P.c],
+        plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(16, 22, ec), seed: P.seed, zoom: 1 + .18 * Math.pow(1 - ec, 2), tint: 1, pal: [P.a, P.b, P.c],
           white, ghost: Math.max(-.02, Math.min(.02, vel * .0011)),
           morph: { s: S, e: E, t: ec, dir: P.right ? -1 : 1, off: stTop } });
         if (ec > .97 && stTop === 0) cover = true;
