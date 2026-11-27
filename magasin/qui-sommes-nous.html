@@ -86,6 +86,10 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 .p-name .serif { display: block; font-size: 1.08em; letter-spacing: -.02em; padding-left: .5em; }
 .pp-intro .p-name, .pp-intro .p-kicker { -webkit-text-stroke: 4px #d8d8d6; paint-order: stroke fill; }
 .pp-intro .p-name .serif { -webkit-text-stroke-width: 4px; }
+.pp-big { position: absolute; display: flex; justify-content: space-between; align-items: center; padding: 0 clamp(1rem, 3vw, 2.6rem); pointer-events: none; opacity: 0; z-index: 1;
+  font: 400 clamp(2.6rem, 9.5vw, 9.5rem)/1 var(--f); letter-spacing: -.04em; text-transform: uppercase; color: #fff; will-change: opacity; }   /* comme « PLAY / REEL » sur la vidéo */
+.pp-big span { display: inline-block; will-change: transform; }
+.no-gl .pp-big { display: none; }
 .pp-over { position: absolute; color: #fff; padding: clamp(1.2rem, 3vw, 2.6rem); display: grid; grid-template-rows: auto 1fr auto; opacity: 0; pointer-events: none; border-radius: 24px; }
 .pp-over.on { pointer-events: auto; }
 .pp-top { display: flex; justify-content: space-between; align-items: center; font: 400 .62rem var(--mono); letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.85); }
@@ -109,6 +113,7 @@ h2 { margin: 0; font: 500 clamp(2.6rem, 7vw, 5.6rem)/.95 var(--f); letter-spacin
 @media (max-width: 760px) {
   .pp-intro, .pp.right .pp-intro { left: 20px; right: 20px; top: 17svh; max-width: none; }
   .pp-ini { display: none; }
+  .pp-big { flex-direction: column; justify-content: space-between; padding: 22svh 0; font-size: clamp(2.8rem, 14vw, 4.2rem); }
   .pp-bot { grid-template-columns: 1fr; gap: .8rem; }
   .pp-bot .p-name { font-size: clamp(2.4rem, 12vw, 3.4rem); }
   .p-facts div { grid-template-columns: 1fr; gap: .15rem; padding: .6rem 0; }
@@ -241,6 +246,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     <div class="pp" data-a="#2f45ff" data-b="#7a3cff" data-c="#22c1ff" style="--a:#2f45ff; --b:#7a3cff; --c:#22c1ff">
       <div class="pp-stage">
         <div class="pp-intro" aria-hidden="true"><p class="p-kicker">01 · Cofondateur</p><p class="p-name">Gabriel <span class="serif">Aillet</span></p></div>
+        <div class="pp-big" aria-hidden="true"><span>Gabriel</span><span>Aillet</span></div>
         <article class="pp-over">
           <div class="pp-top"><span><i></i>Obtura Studio · N° 01</span><span>Nantes</span></div>
           <div class="pp-ini" aria-hidden="true">G.A</div>
@@ -254,6 +260,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     <div class="pp right" data-a="#ff4f8b" data-b="#ff8a3d" data-c="#7a3cff" style="--a:#ff4f8b; --b:#ff8a3d; --c:#7a3cff">
       <div class="pp-stage">
         <div class="pp-intro" aria-hidden="true"><p class="p-kicker">02 · Cofondateur</p><p class="p-name">Arthur <span class="serif">Goubill</span></p></div>
+        <div class="pp-big" aria-hidden="true"><span>Arthur</span><span>Goubill</span></div>
         <article class="pp-over">
           <div class="pp-top"><span><i></i>Obtura Studio · N° 02</span><span>Nantes</span></div>
           <div class="pp-ini" aria-hidden="true">A.G</div>
@@ -390,7 +397,8 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     // peu de boucles : deux au plus, seulement pendant la chute
     let loops = 0; const L = p => (loops < 1 && R() < p) ? (loops++, true) : false;   // une boucle au plus
     // une suite de points de passage, toujours plus bas les uns que les autres
-    const seg = () => { const m = []; m.M = (x, y, loop) => { const prev = m[m.length - 1]; m.push({ x, y: prev ? Math.max(y, prev.y + 40) : y, loop }); }; return m; };
+    // chaque point de passage a sa position et sa « clé » : le moment du défilement où le bout du trait y arrive
+    const seg = () => { const m = []; m.M = (x, y, loop, key) => { const prev = m[m.length - 1]; const yy = prev ? Math.max(y, prev.y + 40) : y; m.push({ x, y: yy, loop, k: Math.max(key == null ? yy : key, prev ? prev.k + 20 : -1e9) }); }; return m; };
     const box = id => docBox(typeof id === 'string' ? document.getElementById(id) : id);
     const fb = docBox(fall), endFall = fb.y + fb.h - vh * .35;
     const people = [...document.querySelectorAll('.pp')], first = box(people[0]), last = box(people[people.length - 1]);
@@ -403,8 +411,14 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     while (y < endFall - vh * .6) { y += vh * (.75 + R() * .2); side = -side; A.M(vw * (.5 + side * (.12 + R() * .12)), y, L(.35)); }   // de grandes vagues, jamais de demi-tour
     // il longe le texte « Qui sommes-nous » par la droite (sans le barrer), puis descend en biais se poser au-dessus du panneau
     A.M(wide ? vw * .93 : vw * .95, man.y + man.h * .2, false); A.M(wide ? vw * .9 : vw * .92, man.y + man.h + vh * .05, false);
-    const startW = wide ? vw * .3 : vw * .62, startX = wide ? vw * .05 : 20;
-    A.M(startX + startW * (wide ? .55 : .5), first.y + vh * (wide ? .38 : .5) - 44, false);
+    // comme la vidéo : il passe au-dessus de la petite carte de Gabriel, descend sur son côté, passe dessous et sort à droite ;
+    // la carte se déploie ensuite par-dessus, et on ne le voit plus. Il va plus vite que le défilement pour avoir fini avant.
+    const startW = wide ? vw * .3 : vw * .62, startX = wide ? vw * .05 : 20, cTop = first.y + vh * (wide ? .38 : .5), cBot = cTop + startW * .62;
+    const k0 = man.y + man.h + vh * .05, kEnd = first.y + vh * .42;
+    A.M(startX + startW * .9, cTop - vh * .1, false, k0 + (kEnd - k0) * .3);
+    A.M(Math.max(14, startX * .45), (cTop + cBot) / 2, false, k0 + (kEnd - k0) * .55);
+    A.M(startX + startW * .6, cBot + vh * .07, false, k0 + (kEnd - k0) * .8);
+    A.M(vw + 90, cBot + vh * .12, false, kEnd);
     // les textes que le trait ne doit pas barrer (agrandis de l'épaisseur du trait)
     const pad = sw / 2 + 10, obst = [];
     document.querySelectorAll('.hero-x, #title, #team-head .label, #manifesto').forEach(el => {
@@ -450,7 +464,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       P.smp.forEach((q, i) => { const k = o + i; X[k] = q.x; Y[k] = q.y; S[k] = k ? S[k - 1] + (i ? Math.hypot(q.x - P.smp[i - 1].x, q.y - P.smp[i - 1].y) : 1) : 0; });
       // le bout du trait avance au rythme du défilement ; entre les deux morceaux, il attend
       for (let m = 0; m < P.idx.length - 1; m++) {
-        const a = o + P.idx[m], b = o + P.idx[m + 1], ya = P.majors[m].y, yb = P.majors[m + 1].y, sa = S[a], sb = S[b] || sa + 1;
+        const a = o + P.idx[m], b = o + P.idx[m + 1], ya = P.majors[m].k, yb = P.majors[m + 1].k, sa = S[a], sb = S[b] || sa + 1;
         for (let i = a; i <= b; i++) K[i] = ya + (yb - ya) * (S[i] - sa) / Math.max(1, sb - sa);
       }
       // 2e morceau : on ne le suit plus, il file vers le bas bien plus vite que le défilement et sort de l'écran
@@ -600,7 +614,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       uniform vec4 uRect; uniform vec2 uRes; uniform float uBend; uniform float uVel; uniform float uApp;
       uniform vec4 uWarp; uniform float uTwist;
       uniform float uRotY; uniform float uRotX; uniform float uCurve;
-      uniform float uMorph; uniform vec4 uStart; uniform vec4 uEnd; uniform float uProg; uniform float uDirX; uniform float uOffY;
+      uniform float uZoom; uniform float uMorph; uniform vec4 uStart; uniform vec4 uEnd; uniform float uProg; uniform float uDirX; uniform float uOffY;
       varying vec2 vUv; varying float vZ;
       void main() {
         vUv = aUv;
@@ -643,7 +657,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       varying vec2 vUv; varying float vZ;
       float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
       float sdRR(vec2 p, vec2 b, float r) { vec2 q = abs(p) - b + r; return length(max(q, 0.)) + min(max(q.x, q.y), 0.) - r; }
-      uniform float uLiq; uniform float uSeed; uniform float uRip;
+      uniform float uLiq; uniform float uSeed; uniform float uRip; uniform float uZoom;
       // la forme du panneau : un rectangle arrondi qui, pendant l'ouverture, devient une goutte qui ondule
       float shape(vec2 c) {
         float m = min(uSize.x, uSize.y), amp = uLiq * m * .06;
@@ -692,7 +706,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
           float rr = length(c) / min(uSize.x, uSize.y), ph = rr * 24. - uTime * 4.5 + uSeed;
           float env = uRip * smoothstep(0., .12, rr) * exp(-rr * 1.4);
           vec2 rip = c / max(length(c), 1.) * sin(ph) * env * .016;
-          vec2 uv = vUv - n * edge * edge * (.07 + uLiq * .04) + flow + rip, ca = n * edge * (.008 + uLiq * .006) + rip * .6;
+          vec2 uv = (vUv - .5) / uZoom + .5 - n * edge * edge * (.07 + uLiq * .04) + flow + rip, ca = n * edge * (.008 + uLiq * .006) + rip * .6;   // uZoom : l'image part zoomée puis se recale, comme la vidéo
           col = vec3(texture2D(uTex, uv + ca).r, texture2D(uTex, uv).g, texture2D(uTex, uv - ca).b);
           col *= 1. - .6 * smoothstep(.42, 1., vUv.y);       // plus sombre en bas, pour lire le texte
           // reflets : un liseré clair sur le bord, plus vif du côté de la lumière (en haut à gauche), et une lueur qui glisse
@@ -744,7 +758,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     catch (e) { root.classList.add('no-gl'); return; }
     gl.useProgram(prog);
     root.classList.add('gl');
-    const U = {}; ['uMorph', 'uStart', 'uEnd', 'uProg', 'uDirX', 'uOffY', 'uRotY', 'uRotX', 'uCurve', 'uRip', 'uLiq', 'uSeed', 'uWarp', 'uTwist', 'uRect', 'uRes', 'uBend', 'uVel', 'uApp', 'uTex', 'uMode', 'uSize', 'uRad', 'uTime', 'uA', 'uB', 'uC', 'uTint', 'uMouse', 'uHover', 'uDpr'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+    const U = {}; ['uZoom', 'uMorph', 'uStart', 'uEnd', 'uProg', 'uDirX', 'uOffY', 'uRotY', 'uRotX', 'uCurve', 'uRip', 'uLiq', 'uSeed', 'uWarp', 'uTwist', 'uRect', 'uRes', 'uBend', 'uVel', 'uApp', 'uTex', 'uMode', 'uSize', 'uRad', 'uTime', 'uA', 'uB', 'uC', 'uTint', 'uMouse', 'uHover', 'uDpr'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
     // maillage 32 × 32 : assez fin pour des courbes lisses
     const N = 32, uvs = [], idx = [];
     for (let y = 0; y <= N; y++) for (let x = 0; x <= N; x++) uvs.push(x / N, y / N);
@@ -764,7 +778,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     const blank = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, blank); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([200, 200, 198, 255]));
 
     // les présentations
-    const people = [...document.querySelectorAll('.pp')].map(el => ({ el, over: el.querySelector('.pp-over'), intro: el.querySelector('.pp-intro'),
+    const people = [...document.querySelectorAll('.pp')].map(el => ({ el, over: el.querySelector('.pp-over'), big: el.querySelector('.pp-big'), bs: [...el.querySelectorAll('.pp-big span')], bo: -1, intro: el.querySelector('.pp-intro'),
       a: hex(el.dataset.a), b: hex(el.dataset.b), c: hex(el.dataset.c), y: 0, h: 1, end: null, oo: -1, io: -1, right: el.classList.contains('right'),
       warp: [1, 0, 0, 0, 0], seed: Math.random() * 6.283, sp: -1, sv: 0, tg: 0 }));
     // les projets
@@ -796,6 +810,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         P.start = narrow ? { x: 20, y: vh * .5, w: vw * .62 } : { x: vw * .05, y: vh * .38, w: vw * .3 }; P.start.h = P.start.w * .62;
         if (P.right) P.start.x = vw - P.start.x - P.start.w;   // ce panneau-là part de la droite
         Object.assign(P.over.style, { left: P.end.x + 'px', top: P.end.y + 'px', width: P.end.w + 'px', height: P.end.h + 'px' });
+        Object.assign(P.big.style, { left: P.end.x + 'px', top: P.end.y + 'px', width: P.end.w + 'px', height: P.end.h + 'px' });
         // la petite image où se calcule la matière : ~512 px de large, selon la forme finale du panneau
         const fw = COARSE ? 320 : 512, fh = Math.max(160, Math.min(1024, Math.round(fw * P.end.h / P.end.w)));
         if (!P.fb) { P.fb = gl.createFramebuffer(); P.ftex = gl.createTexture(); }
@@ -815,7 +830,7 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
     function plane(r, o) {
       gl.uniform4f(U.uRect, r.x, r.y, r.w, r.h); gl.uniform2f(U.uSize, r.w, r.h); gl.uniform1f(U.uRad, o.rad);
       const W = o.warp || NOWARP; gl.uniform4f(U.uWarp, W[0], W[1], W[2], W[3]); gl.uniform1f(U.uTwist, W[4]);
-      gl.uniform1f(U.uBend, o.bend || 0); gl.uniform1f(U.uLiq, o.liq || 0); gl.uniform1f(U.uSeed, o.seed || 0); gl.uniform1f(U.uRip, o.rip || 0); gl.uniform1f(U.uMorph, o.morph ? 1 : 0); if (o.morph) { const a = o.morph; gl.uniform4f(U.uStart, a.s.x, a.s.y, a.s.w, a.s.h); gl.uniform4f(U.uEnd, a.e.x, a.e.y, a.e.w, a.e.h); gl.uniform1f(U.uProg, a.t); gl.uniform1f(U.uDirX, a.dir); gl.uniform1f(U.uOffY, a.off); } gl.uniform1f(U.uRotY, o.ry || 0); gl.uniform1f(U.uRotX, o.rx || 0); gl.uniform1f(U.uCurve, o.curve || 0); gl.uniform1f(U.uVel, o.vel || 0); gl.uniform1f(U.uApp, o.app == null ? 1 : o.app);
+      gl.uniform1f(U.uBend, o.bend || 0); gl.uniform1f(U.uLiq, o.liq || 0); gl.uniform1f(U.uSeed, o.seed || 0); gl.uniform1f(U.uRip, o.rip || 0); gl.uniform1f(U.uZoom, o.zoom || 1); gl.uniform1f(U.uMorph, o.morph ? 1 : 0); if (o.morph) { const a = o.morph; gl.uniform4f(U.uStart, a.s.x, a.s.y, a.s.w, a.s.h); gl.uniform4f(U.uEnd, a.e.x, a.e.y, a.e.w, a.e.h); gl.uniform1f(U.uProg, a.t); gl.uniform1f(U.uDirX, a.dir); gl.uniform1f(U.uOffY, a.off); } gl.uniform1f(U.uRotY, o.ry || 0); gl.uniform1f(U.uRotX, o.rx || 0); gl.uniform1f(U.uCurve, o.curve || 0); gl.uniform1f(U.uVel, o.vel || 0); gl.uniform1f(U.uApp, o.app == null ? 1 : o.app);
       gl.uniform1f(U.uMode, o.mode); gl.uniform1f(U.uTint, o.tint || 0); gl.uniform1f(U.uHover, o.hover || 0); gl.uniform2f(U.uMouse, o.mx || 0, o.my || 0);
       if (o.pal) { gl.uniform3fv(U.uA, o.pal[0]); gl.uniform3fv(U.uB, o.pal[1]); gl.uniform3fv(U.uC, o.pal[2]); }
       gl.bindTexture(gl.TEXTURE_2D, o.tex || blank);
@@ -870,11 +885,14 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
         const stTop = sy < P.y ? P.y - sy : Math.min(0, P.y + P.h - vh - sy);
         const S = P.start, E = P.end;
         const r = { x: lerp(S.x, E.x, e), y: lerp(S.y, E.y, e) + stTop, w: lerp(S.w, E.w, e), h: lerp(S.h, E.h, e) };
-        plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(14, 24, ec), seed: P.seed, tint: 1 - sstep(.3, .95, ec), pal: [P.a, P.b, P.c],
+        plane(r, { mode: 1, warp: P.warp, tex: P.ftex, rad: lerp(14, 24, ec), seed: P.seed, zoom: 1 + .45 * Math.pow(1 - ec, 2), tint: 1 - sstep(.45, 1, ec), pal: [P.a, P.b, P.c],
           morph: { s: S, e: E, t: ec, dir: P.right ? -1 : 1, off: stTop } });
         if (ec > .97 && stTop === 0) cover = true;
         if (r.y < 60 && r.y + r.h > 20) dark = true;
-        const oo = clamp((g - .78) / .17), io = clamp(1 - g * 2.6);
+        // les deux grands mots : ils arrivent pendant que la carte grandit, puis laissent la place aux infos
+        const bo = sstep(.2, .6, ec) * (1 - sstep(.82, .98, g));
+        if (Math.abs(bo - P.bo) > .002) { P.bo = bo; P.big.style.opacity = (bo * .92).toFixed(3); const sh = ((1 - sstep(.2, .7, ec)) * 60).toFixed(1); P.bs[0].style.transform = `translateX(${sh}px)`; P.bs[1].style.transform = `translateX(${-sh}px)`; }
+        const oo = clamp((g - .8) / .17), io = clamp(1 - g * 2.6);
         if (Math.abs(oo - P.oo) > .002) { P.oo = oo; P.over.style.opacity = oo.toFixed(3); P.over.classList.toggle('on', oo > .5); }
         if (Math.abs(io - P.io) > .002) { P.io = io; P.intro.style.opacity = io.toFixed(3); P.intro.style.transform = `translateY(${(-(1 - io) * 40).toFixed(1)}px)`; }
       }
@@ -950,11 +968,30 @@ body.in .cue { animation: fade-in 1s 1.3s ease backwards; }
       const y = scrollY; let to = null;
       if (dir > 0) to = stops.find(v => v > y + 8); else for (let i = stops.length - 1; i >= 0; i--) if (stops[i] < y - 8) { to = stops[i]; break; }
       if (to == null) return;
-      const dist = Math.abs(to - y) / innerHeight, dur = Math.min(3.4, Math.max(1.1, .9 + dist * .55));
       moving = true;
       const done = () => { moving = false; coolUntil = performance.now() + 450; };   // petite pause : l'élan du pavé tactile ne relance pas tout de suite
-      if (window.__lenis) window.__lenis.scrollTo(to, { duration: dur, easing: ease, lock: true, force: true, onComplete: done });
-      else { const y0 = y, t0 = performance.now(); const step = now => { const k = Math.min(1, (now - t0) / (dur * 1000)); scrollTo(0, y0 + (to - y0) * ease(k)); if (k < 1) requestAnimationFrame(step); else done(); }; requestAnimationFrame(step); }
+      // le trajet est découpé : les zones où une carte se déploie sont parcourues lentement (comme la vidéo),
+      // le reste plus vite, et la vitesse se raccorde en douceur d'un morceau à l'autre
+      const vh = innerHeight, lo = Math.min(y, to), hi = Math.max(y, to), knots = [y];
+      const zones = [...document.querySelectorAll('.pp')].map(el => { const z = docBox(el).y; return [z, z + vh * .8]; });
+      zones.flat().filter(v => v > lo + 4 && v < hi - 4).sort((a, c) => dir > 0 ? a - c : c - a).forEach(v => knots.push(v));
+      knots.push(to);
+      const inZone = (a, c) => zones.some(([z0, z1]) => Math.min(a, c) >= z0 - 2 && Math.max(a, c) <= z1 + 2);
+      const segs = []; for (let i = 0; i < knots.length - 1; i++) { const d = Math.abs(knots[i + 1] - knots[i]) / vh;
+        segs.push({ a: knots[i], b: knots[i + 1], T: inZone(knots[i], knots[i + 1]) ? Math.max(1.2, 2.8 * d / .8) : Math.max(.5, .45 + d * .5) }); }
+      if (segs.length === 1) segs[0].T = Math.min(3.4, Math.max(1.1, segs[0].T + .4));
+      const v = []; for (let i = 0; i <= segs.length; i++) { if (i === 0 || i === segs.length) { v.push(0); continue; }
+        const s1 = (segs[i - 1].b - segs[i - 1].a) / segs[i - 1].T, s2 = (segs[i].b - segs[i].a) / segs[i].T; v.push(Math.sign(s1) * Math.min(Math.abs(s1), Math.abs(s2))); }
+      const herm = (sg, v0, v1, u) => { const T = sg.T, u2 = u * u, u3 = u2 * u; return (2 * u3 - 3 * u2 + 1) * sg.a + (u3 - 2 * u2 + u) * T * v0 + (-2 * u3 + 3 * u2) * sg.b + (u3 - u2) * T * v1; };
+      const total = segs.reduce((a, sg) => a + sg.T, 0), t0 = performance.now();
+      const step = now => {
+        let t = (now - t0) / 1000, i = 0; if (t >= total) t = total;
+        while (i < segs.length - 1 && t > segs[i].T) { t -= segs[i].T; i++; }
+        const yy = herm(segs[i], v[i], v[i + 1], Math.min(1, t / segs[i].T));
+        if (window.__lenis) window.__lenis.scrollTo(yy, { immediate: true, force: true }); else scrollTo(0, yy);
+        if ((now - t0) / 1000 < total) requestAnimationFrame(step); else done();
+      };
+      requestAnimationFrame(step);
     }
     const menuOpen = () => document.getElementById('nav').dataset.open === 'true';
     const busy = () => moving || performance.now() < coolUntil;
